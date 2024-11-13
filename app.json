@@ -29,7 +29,11 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      "@rnmapbox/maps",
+        {
+          "RNMapboxMapsDownloadToken": ""
+        }
     ],
     "experiments": {
       "typedRoutes": true
