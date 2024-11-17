@@ -1,3 +1,4 @@
 {
+  "newArchEnabled": true,
   "extends": "./app.config.js"
 }
