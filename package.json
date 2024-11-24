@@ -17,7 +17,7 @@
   "dependencies": {
     "@expo/config": "^10.0.3",
     "@expo/vector-icons": "^14.0.2",
-    "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-navigation/native": "^7.0.0",
     "@rnmapbox/maps": "^10.1.33",
     "@supabase/supabase-js": "^2.46.1",

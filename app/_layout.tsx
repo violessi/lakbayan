@@ -1,6 +1,8 @@
 import { Stack } from "expo-router";
 import { PaperProvider } from "react-native-paper";
 
+import "../utils/global.css";
+
 export default function RootLayout() {
   return (
     <PaperProvider>
