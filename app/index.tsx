@@ -1,5 +1,5 @@
 import { Redirect } from "expo-router";
 
-export default function HomeScreen() {
-  return <Redirect href="/(auth)/onboarding"></Redirect>;
+export default function App() {
+  return <Redirect href="/(auth)/onboarding" />;
 }

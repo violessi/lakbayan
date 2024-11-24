@@ -1,9 +1,0 @@
-import { Text, SafeAreaView } from "react-native";
-
-export default function SignUp() {
-  return (
-    <SafeAreaView className="flex-1 items-center justify-center">
-      <Text className="text-pink-500">Sign up!</Text>
-    </SafeAreaView>
-  );
-}

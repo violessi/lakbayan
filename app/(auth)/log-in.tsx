@@ -24,8 +24,11 @@ export default function LogIn() {
       password: password,
     });
 
-    if (error) Alert.alert(error.message);
-    router.replace("/(tabs)");
+    if (error) {
+      Alert.alert(error.message);
+    } else {
+      router.replace("/(tabs)");
+    }
     setLoading(false);
   }
 
@@ -39,9 +42,13 @@ export default function LogIn() {
       password: password,
     });
 
-    if (error) Alert.alert(error.message);
-    if (!session)
-      Alert.alert("Please check your inbox for email verification!");
+    if (error) {
+      Alert.alert(error.message);
+    } else {
+      Alert.alert("Success! Please log in.");
+    }
+    // if (!session)
+    //   Alert.alert("Please check your inbox for email verification!");
     setLoading(false);
   }
 
@@ -66,7 +73,7 @@ export default function LogIn() {
       </View>
       <View className="flex flex-col w-full">
         <Button disabled={loading} onPress={() => signInWithEmail()}>
-          Sign in
+          Log in
         </Button>
         <Button disabled={loading} onPress={() => signUpWithEmail()}>
           Sign up

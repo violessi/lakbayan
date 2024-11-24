@@ -10,13 +10,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="Contribute"
+        name="contribute"
         options={{
           title: "contribute",
         }}
       />
       <Tabs.Screen
-        name="Routes"
+        name="routes"
         options={{
           title: "routes",
         }}
