@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Alert, View, AppState, SafeAreaView, Text } from "react-native";
+import { router } from "expo-router";
+import { Alert, View, AppState, SafeAreaView } from "react-native";
 import { supabase } from "../../utils/supabase";
 import { Button, TextInput } from "react-native-paper";
 
@@ -24,6 +25,7 @@ export default function LogIn() {
     });
 
     if (error) Alert.alert(error.message);
+    router.replace("/(tabs)");
     setLoading(false);
   }
 
