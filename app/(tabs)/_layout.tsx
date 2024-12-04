@@ -12,13 +12,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="contribute"
         options={{
-          title: "contribute",
+          title: "Contribute",
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
-          title: "account",
+          title: "Account",
         }}
       />
     </Tabs>
