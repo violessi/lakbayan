@@ -16,9 +16,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="routes"
+        name="account"
         options={{
-          title: "routes",
+          title: "account",
         }}
       />
     </Tabs>
