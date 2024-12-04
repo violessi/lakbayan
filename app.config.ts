@@ -10,20 +10,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: "lakbayan",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/images/icon.png",
   scheme: "myapp",
   userInterfaceStyle: "automatic",
   splash: {
-    image: "./assets/images/splash.png",
     resizeMode: "contain",
     backgroundColor: "#ffffff",
   },
   ios: {
     supportsTablet: true,
+    bundleIdentifier: "com.lakbayan",
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: "./assets/images/adaptive-icon.png",
       backgroundColor: "#ffffff",
     },
     package: "com.lakbayan",
@@ -31,7 +29,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   web: {
     bundler: "metro",
     output: "single",
-    favicon: "./assets/images/favicon.png",
   },
   plugins: [
     "expo-router",
