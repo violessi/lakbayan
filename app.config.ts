@@ -40,6 +40,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         RNMapboxMapsVersion: "11.0.0",
       },
     ],
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission: "Show current location on map.",
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
