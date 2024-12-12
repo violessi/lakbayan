@@ -1,10 +1,20 @@
 import React, { useState } from "react";
-import { SafeAreaView, View } from "react-native";
+import { SafeAreaView, View, Alert } from "react-native";
+
 import LocationSearchBar from "@/components/LocationSearchBar";
 import Header from "@/components/ui/Header";
 import TodaInformation from "@/components/contribute/TodaInformation";
 
-import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
+import pin from "@/assets/pin-purple.png";
+
+import Mapbox, {
+  MapView,
+  Camera,
+  ShapeSource,
+  SymbolLayer,
+  Images,
+} from "@rnmapbox/maps";
+import { featureCollection, point } from "@turf/helpers";
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
@@ -40,10 +50,27 @@ export default function TodaStops() {
         onPress={handleMapPress}
       >
         <Camera
-          followZoomLevel={16}
+          followZoomLevel={15}
           centerCoordinate={coordinates || undefined}
           followUserLocation={!coordinates}
         />
+
+        {coordinates && (
+          <ShapeSource
+            id="todas"
+            shape={featureCollection([point(coordinates)])}
+          >
+            <SymbolLayer
+              id="toda-icons"
+              style={{
+                iconImage: "pin",
+                iconSize: 0.1,
+              }}
+            />
+          </ShapeSource>
+        )}
+
+        <Images images={{ pin }} />
       </MapView>
 
       <TodaInformation coordinates={coordinates} />
