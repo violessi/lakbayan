@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { useTheme } from "@react-navigation/native";
 
 import { SessionProvider } from "../context/SessionContext";
 
@@ -6,6 +7,9 @@ import { PaperProvider } from "react-native-paper";
 import "../utils/global.css";
 
 export default function RootLayout() {
+  const { colors } = useTheme();
+  colors.background = "transparent";
+
   return (
     <SessionProvider>
       <PaperProvider>
