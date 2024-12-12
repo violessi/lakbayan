@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { useTheme } from "@react-navigation/native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { SessionProvider } from "../context/SessionContext";
 
@@ -12,14 +13,19 @@ export default function RootLayout() {
 
   return (
     <SessionProvider>
-      <PaperProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(contribute)" options={{ headerShown: false }} />
-        </Stack>
-      </PaperProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <PaperProvider>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="(contribute)"
+              options={{ headerShown: false }}
+            />
+          </Stack>
+        </PaperProvider>
+      </GestureHandlerRootView>
     </SessionProvider>
   );
 }

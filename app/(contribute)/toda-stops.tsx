@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-
 import { SafeAreaView, View } from "react-native";
-import LocationSearchBar from "../../components/LocationSearchBar";
-import Header from "../../components/ui/Header";
+import LocationSearchBar from "@/components/LocationSearchBar";
+import Header from "@/components/ui/Header";
+import TodaInformation from "@/components/contribute/TodaInformation";
 
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
-import { MAPBOX_ACCESS_TOKEN } from "../../utils/mapbox-config";
+import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TodaStops() {
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
 
-  const handleMapPress = (event) => {
+  const handleMapPress = (event: any) => {
     const { geometry } = event;
     const { coordinates } = geometry;
     setCoordinates(coordinates);
@@ -45,6 +45,8 @@ export default function TodaStops() {
           followUserLocation={!coordinates}
         />
       </MapView>
+
+      <TodaInformation coordinates={coordinates} />
     </SafeAreaView>
   );
 }
