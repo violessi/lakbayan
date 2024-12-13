@@ -37,19 +37,11 @@ export default function TodaStops() {
   ) => {
     setStartLocation(location);
     setStartCoordinates(coordinates);
-    // Alert.alert(
-    //   "Start Location Coordinates",
-    //   `Location: ${location}\nLatitude: ${coordinates[1]}\nLongitude: ${coordinates[0]}`
-    // );
   };
 
   const handleEndChange = (location: string, coordinates: [number, number]) => {
     setEndLocation(location);
     setEndCoordinates(coordinates);
-    // Alert.alert(
-    //   "End Location Coordinates",
-    //   `Location: ${location}\nLatitude: ${coordinates[1]}\nLongitude: ${coordinates[0]}`
-    // );
   };
 
   const cameraRef = useRef<Camera>(null);
@@ -68,12 +60,12 @@ export default function TodaStops() {
   useEffect(() => {
     if (startCoordinates && endCoordinates) {
       router.push({
-        pathname: "/(contribute)/route-preview",
+        pathname: "/(contribute)/trip-review",
         params: {
-          startLocation,
-          startCoordinates: JSON.stringify(startCoordinates), // Serialize arrays
-          endLocation,
-          endCoordinates: JSON.stringify(endCoordinates), // Serialize arrays
+          startLocationParams: startLocation,
+          startCoordinatesParams: JSON.stringify(startCoordinates),
+          endLocationParams: endLocation,
+          endCoordinatesParams: JSON.stringify(endCoordinates),
         },
       });
     }

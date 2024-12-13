@@ -12,11 +12,15 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 interface StartEndSearchProps {
   onStartChange: (location: string, coordinates: [number, number]) => void;
   onEndChange: (location: string, coordinates: [number, number]) => void;
+  defaultStart?: string | null;
+  isStartActive?: boolean;
 }
 
 export default function StartEndSearch({
   onStartChange,
   onEndChange,
+  defaultStart = null,
+  isStartActive = true,
 }: StartEndSearchProps) {
   const [startSearchQuery, setStartSearchQuery] = useState("");
   const [endSearchQuery, setEndSearchQuery] = useState("");
@@ -66,20 +70,23 @@ export default function StartEndSearch({
     <View className="absolute top-0 left-0 z-40 m-5flex flex-col bg-white rounded-[8]">
       <View className="absolute top-0 left-0 z-50 m-5 flex-row items-center bg-white rounded-[8]">
         <TextInput
-          placeholder="Starting location"
+          placeholder={defaultStart || "Starting location"}
           value={startSearchQuery}
           onChangeText={(text) => {
             setStartSearchQuery(text);
             handleFetchSuggestions(text, "start");
           }}
           dense={true}
+          editable={isStartActive}
           style={{ backgroundColor: "none", fontSize: 12, flex: 1 }}
         />
-        <IconButton
-          icon="close"
-          size={20}
-          onPress={() => handleClearAll("start")}
-        />
+        {isStartActive && (
+          <IconButton
+            icon="close"
+            size={20}
+            onPress={() => handleClearAll("start")}
+          />
+        )}
       </View>
 
       <View className="absolute top-16 left-0 z-50 m-5 flex-row items-center bg-white rounded-[8]">
