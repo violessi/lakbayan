@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { View, FlatList, Keyboard } from "react-native";
 import { TextInput, List, IconButton } from "react-native-paper";
 
+import { fetchSuggestions } from "@/services/mapbox-service";
+
 import Mapbox from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "../utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -12,33 +14,24 @@ interface LocationSearchBarProps {
   onClear: () => void;
 }
 
+interface Suggestion {
+  id: string;
+  place_name: string;
+  geometry: {
+    coordinates: [number, number];
+  };
+}
+
 export default function LocationSearchBar({
   onSuggestionSelect,
   onClear,
 }: LocationSearchBarProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
-  const fetchSuggestions = async (query: any) => {
-    if (!query.trim()) {
-      setSuggestions([]);
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-          query
-        )}.json?access_token=${MAPBOX_ACCESS_TOKEN}`
-      );
-      const data = await response.json();
-
-      if (data.features) {
-        setSuggestions(data.features);
-      }
-    } catch (error) {
-      console.error("Error fetching suggestions:", error);
-    }
+  const handleFetchSuggestions = async (text: string) => {
+    const response = await fetchSuggestions(text);
+    setSuggestions(response);
   };
 
   const handleClearAll = () => {
@@ -64,7 +57,7 @@ export default function LocationSearchBar({
           value={searchQuery}
           onChangeText={(text) => {
             setSearchQuery(text);
-            fetchSuggestions(text);
+            handleFetchSuggestions(text);
           }}
           dense={true}
           underlineStyle={{

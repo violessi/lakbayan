@@ -1,10 +1,9 @@
-import React, { useState } from "react";
-import { SafeAreaView, View, Alert } from "react-native";
+import React, { useRef, useState } from "react";
+import { SafeAreaView, View } from "react-native";
+import LocationSearchBar from "../../components/LocationSearchBar";
+import Header from "../../components/ui/Header";
 
-import LocationSearchBar from "@/components/LocationSearchBar";
-import Header from "@/components/ui/Header";
 import TodaInformation from "@/components/contribute/TodaInformation";
-
 import pin from "@/assets/pin-purple.png";
 
 import Mapbox, {
@@ -20,6 +19,8 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TodaStops() {
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(14);
+  const cameraRef = useRef<Camera>(null);
 
   const handleMapPress = (event: any) => {
     const { geometry } = event;
@@ -28,7 +29,13 @@ export default function TodaStops() {
   };
 
   const handleSuggestionSelect = (longitude: number, latitude: number) => {
-    setCoordinates([longitude, latitude]);
+    const newCoordinates: [number, number] = [longitude, latitude];
+    setCoordinates(newCoordinates);
+  };
+
+  const handleZoomChange = (event: any) => {
+    const { zoom } = event.properties;
+    setZoomLevel(zoom);
   };
 
   return (
@@ -38,9 +45,7 @@ export default function TodaStops() {
       <View>
         <LocationSearchBar
           onSuggestionSelect={handleSuggestionSelect}
-          onClear={() => {
-            setCoordinates(null);
-          }}
+          onClear={() => setCoordinates(null)}
         />
       </View>
 
@@ -48,11 +53,14 @@ export default function TodaStops() {
         style={{ flex: 1 }}
         styleURL="mapbox://styles/mapbox/streets-v12"
         onPress={handleMapPress}
+        onRegionDidChange={handleZoomChange}
+        projection="mercator"
       >
         <Camera
-          followZoomLevel={15}
-          centerCoordinate={coordinates || undefined}
-          followUserLocation={!coordinates}
+          ref={cameraRef}
+          centerCoordinate={coordinates || [121.0415, 14.6568]}
+          zoomLevel={zoomLevel}
+          animationMode="moveTo"
         />
 
         {coordinates && (
