@@ -19,7 +19,7 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TodaStops() {
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
-  const [zoomLevel, setZoomLevel] = useState(14);
+  const [zoomLevel, setZoomLevel] = useState(12);
   const cameraRef = useRef<Camera>(null);
 
   const handleMapPress = (event: any) => {
@@ -58,9 +58,9 @@ export default function TodaStops() {
       >
         <Camera
           ref={cameraRef}
-          centerCoordinate={coordinates || [121.0415, 14.6568]}
+          centerCoordinate={coordinates || [121.05, 14.63]}
           zoomLevel={zoomLevel}
-          animationMode="moveTo"
+          animationMode="easeTo"
         />
 
         {coordinates && (

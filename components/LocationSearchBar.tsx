@@ -5,6 +5,8 @@ import { TextInput, List, IconButton } from "react-native-paper";
 
 import { fetchSuggestions } from "@/services/mapbox-service";
 
+import { Suggestion } from "@/types/location-types";
+
 import Mapbox from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "../utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -12,14 +14,6 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 interface LocationSearchBarProps {
   onSuggestionSelect: (longitude: number, latitude: number) => void;
   onClear: () => void;
-}
-
-interface Suggestion {
-  id: string;
-  place_name: string;
-  geometry: {
-    coordinates: [number, number];
-  };
 }
 
 export default function LocationSearchBar({
