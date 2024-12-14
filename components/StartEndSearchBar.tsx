@@ -14,6 +14,7 @@ interface StartEndSearchProps {
   onEndChange: (location: string, coordinates: [number, number]) => void;
   defaultStart?: string | null;
   isStartActive?: boolean;
+  defaultEnd?: string | null;
 }
 
 export default function StartEndSearch({
@@ -21,6 +22,7 @@ export default function StartEndSearch({
   onEndChange,
   defaultStart = null,
   isStartActive = true,
+  defaultEnd = null,
 }: StartEndSearchProps) {
   const [startSearchQuery, setStartSearchQuery] = useState("");
   const [endSearchQuery, setEndSearchQuery] = useState("");
@@ -82,7 +84,7 @@ export default function StartEndSearch({
 
       <View className="absolute top-16 left-0 z-50 m-5 flex-row items-center bg-white rounded-[8]">
         <TextInput
-          placeholder="Destination"
+          placeholder={defaultEnd || "Destination"}
           value={endSearchQuery}
           onChangeText={(text) => {
             setEndSearchQuery(text);

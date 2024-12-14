@@ -1,44 +1,36 @@
 import React, { useRef } from "react";
-import { useLocalSearchParams } from "expo-router";
 import { router } from "expo-router";
+import { useTrip } from "@/context/TripContext";
 
-import { SafeAreaView, View } from "react-native";
+import { SafeAreaView, View, Alert } from "react-native";
 import Header from "@/components/ui/Header";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import TripSummary from "@/components/contribute/TripSummary";
+import DirectionsLine from "@/components/ui/DirectionsLine";
 
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
-interface Coordinates {
-  lat: number;
-  long: number;
-}
+Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
-
-  const { startLocationParams, startCoordinatesParams, endLocationParams, endCoordinatesParams } =
-    useLocalSearchParams();
-
-  const startLocation = startLocationParams as string;
-  const endLocation = endLocationParams as string;
-
-  const startCoordinates: Coordinates = JSON.parse(startCoordinatesParams as string);
-  const endCoordinates: Coordinates = JSON.parse(endCoordinatesParams as string);
+  const { trip } = useTrip();
+  const routeCoordinates = trip.routes?.map((route) => route.directions.routes[0].geometry.coordinates) || [];
 
   const handleNavigateToRouteInput = () => {
-    router.push({
-      pathname: "/(contribute)/route-select-info",
-      params: {
-        startLocationParams: startLocation,
-        startCoordinatesParams: JSON.stringify(startCoordinates),
-        endLocationParams: endLocation,
-        endCoordinatesParams: JSON.stringify(endCoordinates),
-      },
-    });
+    console.log("Navigate to route select info");
+    router.push("/(contribute)/route-select-info");
+  };
+
+  const isSameEndLocation =
+    trip.routes.length > 0 && trip.endLocation === trip.routes[trip.routes.length - 1].endLocation;
+
+  const handleSubmitTrip = () => {
+    console.log("Submitting trip");
+    Alert.alert("Trip Submitted", "Thank you for contributing to the community!");
+    router.replace("/(tabs)");
   };
 
   return (
@@ -47,11 +39,20 @@ export default function TripReview() {
 
       <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12" projection="mercator">
         <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} zoomLevel={14} animationMode="easeTo" />
+
+        {routeCoordinates.map((coordinates, index) => (
+          <DirectionsLine key={index} coordinates={coordinates} />
+        ))}
       </MapView>
+
       <View className="z-50">
-        <PrimaryButton label="Add Transfers" onPress={handleNavigateToRouteInput} />
+        <PrimaryButton
+          label={isSameEndLocation ? "Submit" : "Add Transfers"}
+          onPress={isSameEndLocation ? handleSubmitTrip : handleNavigateToRouteInput}
+        />
       </View>
-      <TripSummary startLocation={startLocation} endLocation={endLocation} />
+
+      <TripSummary startLocation={trip.startLocation} endLocation={trip.endLocation} trip={trip} />
     </SafeAreaView>
   );
 }

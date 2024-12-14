@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
-import { SafeAreaView, View, Alert } from "react-native";
+import { SafeAreaView, View } from "react-native";
 import { router } from "expo-router";
+import { useTrip } from "@/context/TripContext";
 
 import StartEndSearchBar from "../../components/StartEndSearchBar";
 import Header from "../../components/ui/Header";
@@ -12,23 +13,17 @@ import { featureCollection, point } from "@turf/helpers";
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
-export default function TodaStops() {
+export default function CustomTrip() {
+  const { trip, setStartEndLocations } = useTrip();
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
   const [zoomLevel, setZoomLevel] = useState(12);
 
-  const [startLocation, setStartLocation] = useState<string | null>(null);
-  const [startCoordinates, setStartCoordinates] = useState<[number, number] | null>(null);
-  const [endLocation, setEndLocation] = useState<string | null>(null);
-  const [endCoordinates, setEndCoordinates] = useState<[number, number] | null>(null);
-
   const handleStartChange = (location: string, coordinates: [number, number]) => {
-    setStartLocation(location);
-    setStartCoordinates(coordinates);
+    setStartEndLocations(location, coordinates, trip.endLocation, trip.endCoordinates || [0, 0]);
   };
 
   const handleEndChange = (location: string, coordinates: [number, number]) => {
-    setEndLocation(location);
-    setEndCoordinates(coordinates);
+    setStartEndLocations(trip.startLocation, trip.startCoordinates || [0, 0], location, coordinates);
   };
 
   const cameraRef = useRef<Camera>(null);
@@ -45,18 +40,10 @@ export default function TodaStops() {
   };
 
   useEffect(() => {
-    if (startCoordinates && endCoordinates) {
-      router.push({
-        pathname: "/(contribute)/trip-review",
-        params: {
-          startLocationParams: startLocation,
-          startCoordinatesParams: JSON.stringify(startCoordinates),
-          endLocationParams: endLocation,
-          endCoordinatesParams: JSON.stringify(endCoordinates),
-        },
-      });
+    if (trip.startLocation !== "" && trip.endLocation !== "") {
+      router.push("/(contribute)/trip-review");
     }
-  }, [startLocation, startCoordinates, endLocation, endCoordinates]);
+  }, [trip]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

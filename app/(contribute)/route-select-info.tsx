@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { router } from "expo-router";
+import { useTrip } from "@/context/TripContext";
 
-import { SafeAreaView, View, Alert } from "react-native";
+import { SafeAreaView, View } from "react-native";
 import Header from "@/components/ui/Header";
 import StartEndSearchBar from "@/components/StartEndSearchBar";
 import TransportationModeSelection from "@/components/contribute/TransportationModeSelection";
@@ -12,24 +13,21 @@ import { Coordinates } from "@/types/location-types";
 
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
+import { Button } from "react-native-paper";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteSelectInfo() {
+  const { trip } = useTrip();
   const cameraRef = useRef<Camera>(null);
   const [transportationMode, setTransportationMode] = useState<TransportationMode | null>(null);
 
-  const { startLocationParams, startCoordinatesParams, endLocationParams, endCoordinatesParams } =
-    useLocalSearchParams();
+  let startRouteLocation = trip.startLocation as string;
+  let startRouteCoordinates = trip.startCoordinates as Coordinates;
 
-  const startRouteLocation = startLocationParams as string;
-  const startRouteCoordinates: Coordinates = useMemo(() => {
-    return JSON.parse(startCoordinatesParams as string);
-  }, [startCoordinatesParams]);
-
-  const endLocation = endLocationParams as string;
-  const endCoordinates: Coordinates = useMemo(() => {
-    return JSON.parse(endCoordinatesParams as string);
-  }, [endCoordinatesParams]);
+  if (trip.routes.length > 0) {
+    startRouteLocation = trip.routes[trip.routes.length - 1].endLocation;
+    startRouteCoordinates = trip.routes[trip.routes.length - 1].endCoordinates;
+  }
 
   const [endRouteLocation, setEndRouteLocation] = useState<string | null>(null);
   const [endRouteCoordinates, setEndRouteCoordinates] = useState<[number, number] | null>(null);
@@ -39,12 +37,23 @@ export default function RouteSelectInfo() {
     setEndRouteCoordinates(coordinates);
   };
 
+  const handleLastRoute = () => {
+    setEndRouteLocation(trip.endLocation);
+    setEndRouteCoordinates(trip.endCoordinates);
+  };
+
   const handleTransportationModeChange = (mode: TransportationMode) => {
     setTransportationMode(mode);
   };
 
   useEffect(() => {
+    setEndRouteLocation(null);
+    setEndRouteCoordinates(null);
+  }, []);
+
+  useEffect(() => {
     if (startRouteLocation && startRouteCoordinates && endRouteLocation && endRouteCoordinates && transportationMode) {
+      console.log("Navigate to route input");
       router.push({
         pathname: "/route-input",
         params: {
@@ -63,12 +72,23 @@ export default function RouteSelectInfo() {
       <Header title="Route Input" />
 
       <View>
-        <StartEndSearchBar onEndChange={handleEndRouteChange} defaultStart={startRouteLocation} isStartActive={false} />
+        <StartEndSearchBar
+          onEndChange={handleEndRouteChange}
+          defaultStart={startRouteLocation}
+          isStartActive={false}
+          defaultEnd={endRouteLocation}
+        />
       </View>
 
       <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12" projection="mercator">
         <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} zoomLevel={14} animationMode="easeTo" />
       </MapView>
+
+      <View className="absolute bottom-0 mb-80 w-100">
+        <Button mode="contained" onPress={handleLastRoute}>
+          Final Location
+        </Button>
+      </View>
 
       <TransportationModeSelection onTransportationModeChange={handleTransportationModeChange} />
     </SafeAreaView>
