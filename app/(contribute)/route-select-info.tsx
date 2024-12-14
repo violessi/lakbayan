@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { router } from "expo-router";
+import { useTrip } from "@/context/TripContext";
 
-import { SafeAreaView, View, Alert } from "react-native";
+import { SafeAreaView, View } from "react-native";
 import Header from "@/components/ui/Header";
 import StartEndSearchBar from "@/components/StartEndSearchBar";
 import TransportationModeSelection from "@/components/contribute/TransportationModeSelection";
@@ -15,21 +16,12 @@ import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteSelectInfo() {
+  const { trip } = useTrip();
   const cameraRef = useRef<Camera>(null);
   const [transportationMode, setTransportationMode] = useState<TransportationMode | null>(null);
 
-  const { startLocationParams, startCoordinatesParams, endLocationParams, endCoordinatesParams } =
-    useLocalSearchParams();
-
-  const startRouteLocation = startLocationParams as string;
-  const startRouteCoordinates: Coordinates = useMemo(() => {
-    return JSON.parse(startCoordinatesParams as string);
-  }, [startCoordinatesParams]);
-
-  const endLocation = endLocationParams as string;
-  const endCoordinates: Coordinates = useMemo(() => {
-    return JSON.parse(endCoordinatesParams as string);
-  }, [endCoordinatesParams]);
+  const startRouteLocation = trip.startLocation as string;
+  const startRouteCoordinates = trip.startCoordinates as Coordinates;
 
   const [endRouteLocation, setEndRouteLocation] = useState<string | null>(null);
   const [endRouteCoordinates, setEndRouteCoordinates] = useState<[number, number] | null>(null);

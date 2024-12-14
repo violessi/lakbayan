@@ -1,14 +1,17 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { Text, View, FlatList } from "react-native";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+
+import { Trip } from "@/types/route-types";
 
 interface TripSummaryProps {
   startLocation: string;
   endLocation: string;
+  trip: Trip;
 }
 
-export default function TripSummary({ startLocation, endLocation }: TripSummaryProps) {
+export default function TripSummary({ startLocation, endLocation, trip }: TripSummaryProps) {
   const snapPoints = ["30%", "90%"];
 
   return (
@@ -20,7 +23,23 @@ export default function TripSummary({ startLocation, endLocation }: TripSummaryP
           <Text className="text-lg font-bold">{endLocation}</Text>
         </View>
         <View className="flex flex-row justify-center">
-          <Text className="text-secondary">No transfers added yet.</Text>
+          {trip.routes.length === 0 ? (
+            <Text className="text-secondary">No transfers added yet.</Text>
+          ) : (
+            <View>
+              <Text>Trip Review</Text>
+              <FlatList
+                data={trip.routes}
+                renderItem={({ item }) => (
+                  <View>
+                    <Text>{item.routeName}</Text>
+                    <Text>{item.landmark}</Text>
+                  </View>
+                )}
+                keyExtractor={(item) => item.id}
+              />
+            </View>
+          )}
         </View>
       </BottomSheetView>
     </BottomSheet>

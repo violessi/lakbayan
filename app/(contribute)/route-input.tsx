@@ -1,7 +1,9 @@
 import React, { useRef, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useTrip } from "@/context/TripContext";
+import { useLocalSearchParams, router } from "expo-router";
 import { SafeAreaView, View } from "react-native";
 import { Button } from "react-native-paper";
+import uuid from "react-native-uuid";
 
 import Header from "@/components/ui/Header";
 import TripTitle from "@/components/contribute/TripTitle";
@@ -10,6 +12,7 @@ import LocationMarker from "@/components/ui/LocationMarker";
 
 import { getDirections } from "@/services/mapbox-service";
 import { Coordinates, MapboxDirectionsResponse } from "@/types/location-types";
+import { Route } from "@/types/route-types";
 
 import Mapbox, { MapView, Camera, ShapeSource, LineLayer } from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
@@ -24,6 +27,9 @@ export default function RouteInput() {
 
   const [isAddPointsMode, setIsAddPointsMode] = useState(false);
   const [loadingDirections, setLoadingDirections] = useState(false);
+
+  const [routeName, setRouteName] = useState("");
+  const [landmark, setLandmark] = useState("");
 
   const {
     startRouteLocationParams,
@@ -82,6 +88,32 @@ export default function RouteInput() {
     if (isAddPointsMode) {
       await handleGetDirections();
     }
+  };
+
+  const handleRouteNameChange = (routeName: string) => {
+    setRouteName(routeName);
+  };
+
+  const handleLandmarkChange = (landmark: string) => {
+    setLandmark(landmark);
+  };
+
+  const { addRoute } = useTrip();
+
+  const handleSubmit = () => {
+    const newRoute: Route = {
+      id: uuid.v4(),
+      routeName,
+      landmark,
+      startLocation: startRouteLocation,
+      startCoordinates: startRouteCoordinates,
+      endLocation: endRouteLocation,
+      endCoordinates: endRouteCoordinates,
+      directions: directions as MapboxDirectionsResponse,
+    };
+
+    addRoute(newRoute);
+    console.log("Added Route:", newRoute);
   };
 
   return (
@@ -171,7 +203,13 @@ export default function RouteInput() {
         </View>
       </View>
 
-      <RouteInformation directions={directions} />
+      <RouteInformation
+        onRouteNameChange={handleRouteNameChange}
+        onLandmarkChange={handleLandmarkChange}
+        routeName={routeName}
+        landmark={landmark}
+        onSubmit={handleSubmit}
+      />
     </SafeAreaView>
   );
 }
