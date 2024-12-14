@@ -2,8 +2,11 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView, View, Text } from "react-native";
 import { Button } from "react-native-paper";
+
 import Header from "@/components/ui/Header";
+import TripTitle from "@/components/contribute/TripTitle";
 import RouteInformation from "@/components/contribute/RouteInformation";
+import LocationMarker from "@/components/ui/LocationMarker";
 
 import { getDirections } from "@/services/mapbox-service";
 import { Coordinates } from "@/types/location-types";
@@ -23,7 +26,9 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 export default function RouteInput() {
   const cameraRef = useRef<Camera>(null);
   const [directions, setDirections] = useState<any | null>(null);
-  const directionCoordinates = directions?.routes?.[0]?.geometry.coordinates;
+  const [zoomLevel, setZoomLevel] = useState(12);
+  const directionCoordinates: Coordinates[] =
+    directions?.routes?.[0]?.geometry.coordinates || [];
 
   const {
     startRouteLocationParams,
@@ -45,22 +50,6 @@ export default function RouteInput() {
 
   const transportationMode = transportationModeParams as string;
 
-  const startPoint = point(startRouteCoordinates);
-  const endPoint = point(endRouteCoordinates);
-
-  useEffect(() => {
-    if (cameraRef.current) {
-      cameraRef.current.setCamera({
-        centerCoordinate: [
-          (startRouteCoordinates[0] + endRouteCoordinates[0]) / 2,
-          (startRouteCoordinates[1] + endRouteCoordinates[1]) / 2,
-        ],
-        zoomLevel: 12,
-        animationDuration: 1000,
-      });
-    }
-  }, [startRouteCoordinates, endRouteCoordinates]);
-
   const handleGetDirections = useCallback(async () => {
     try {
       const newDirections = await getDirections(
@@ -77,22 +66,32 @@ export default function RouteInput() {
     handleGetDirections();
   }, [handleGetDirections]);
 
+  const handleZoomChange = (event: any) => {
+    const { zoom } = event.properties;
+    setZoomLevel(zoom);
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Route Input" />
-      <View>
-        <Text>
-          {startRouteLocation} to {endRouteLocation} via {transportationMode}
-        </Text>
+      <View className="flex justify-center items-center">
+        <TripTitle
+          startLocation={startRouteLocation}
+          endLocation={endRouteLocation}
+          transportationMode={transportationMode}
+        />
       </View>
-      <Button mode="contained" onPress={handleGetDirections}>
-        Get Directions
-      </Button>
+      {/* <View>
+        <Button mode="contained" onPress={handleGetDirections}>
+          Update
+        </Button>
+      </View> */}
 
       <MapView
         style={{ flex: 1 }}
         styleURL="mapbox://styles/mapbox/streets-v12"
         projection="mercator"
+        onRegionDidChange={handleZoomChange}
       >
         <Camera
           ref={cameraRef}
@@ -100,45 +99,18 @@ export default function RouteInput() {
             (startRouteCoordinates[0] + endRouteCoordinates[0]) / 2,
             (startRouteCoordinates[1] + endRouteCoordinates[1]) / 2,
           ]}
-          zoomLevel={12}
+          zoomLevel={zoomLevel}
           animationMode="easeTo"
         />
 
-        <ShapeSource id="start-point" shape={startPoint}>
-          <CircleLayer
-            id="start-circle"
-            style={{
-              circleRadius: 8,
-              circleColor: "red",
-            }}
-          />
-          <SymbolLayer
-            id="start-label"
-            style={{
-              textField: startRouteLocation.split(",")[0],
-              textSize: 11,
-              textOffset: [0, 1.5],
-            }}
-          />
-        </ShapeSource>
-
-        <ShapeSource id="end-point" shape={endPoint}>
-          <CircleLayer
-            id="end-circle"
-            style={{
-              circleRadius: 8,
-              circleColor: "red",
-            }}
-          />
-          <SymbolLayer
-            id="end-label"
-            style={{
-              textField: endRouteLocation.split(",")[0],
-              textSize: 11,
-              textOffset: [0, 1.5],
-            }}
-          />
-        </ShapeSource>
+        <LocationMarker
+          coordinates={startRouteCoordinates}
+          label={startRouteLocation}
+        />
+        <LocationMarker
+          coordinates={endRouteCoordinates}
+          label={endRouteLocation}
+        />
 
         {directionCoordinates && (
           <ShapeSource
