@@ -26,15 +26,19 @@ export async function fetchSuggestions(query: string): Promise<any[]> {
   }
 }
 
-export async function getDirections(start: Coordinates, end: Coordinates) {
+export async function getDirections(start: Coordinates, waypoints: Coordinates[], end: Coordinates) {
   const mode = "walking";
-  const startCoordinates = `${start[0]},${start[1]}`;
-  const endCoordinates = `${end[0]},${end[1]}`;
+
+  const coordinates = [
+    `${start[0]},${start[1]}`,
+    ...waypoints.map((point) => `${point[0]},${point[1]}`),
+    `${end[0]},${end[1]}`,
+  ].join(";");
+
   const response = await fetch(
-    `${BASE_URL}/directions/v5/mapbox/${mode}/${encodeURIComponent(startCoordinates)};${encodeURIComponent(
-      endCoordinates,
-    )}?alternatives=true&geometries=geojson&language=en&overview=full&steps=true&access_token=${MAPBOX_ACCESS_TOKEN}`,
+    `${BASE_URL}/directions/v5/mapbox/${mode}/${encodeURIComponent(coordinates)}?alternatives=true&geometries=geojson&language=en&overview=full&steps=true&access_token=${MAPBOX_ACCESS_TOKEN}`,
   );
+
   const directions = await response.json();
   console.log(directions);
   return directions;

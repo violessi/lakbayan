@@ -8,16 +8,18 @@ import { ShapeSource, CircleLayer, SymbolLayer } from "@rnmapbox/maps";
 interface LocationMarkerProps {
   coordinates: Coordinates;
   label: string;
+  color: string;
+  radius: number;
 }
 
-export default function LocationMarker({ coordinates, label }: LocationMarkerProps) {
+export default function LocationMarker({ coordinates, label, color, radius }: LocationMarkerProps) {
   return (
     <ShapeSource id={label} shape={point(coordinates)}>
       <CircleLayer
         id={`${label}-circle`}
         style={{
-          circleRadius: 8,
-          circleColor: "red",
+          circleRadius: radius,
+          circleColor: color,
         }}
       />
       <SymbolLayer
