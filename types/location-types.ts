@@ -5,3 +5,8 @@ export interface Suggestion {
     coordinates: [number, number];
   };
 }
+
+export interface Coordinates {
+  lat: number;
+  long: number;
+}

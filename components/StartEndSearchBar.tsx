@@ -10,7 +10,7 @@ import { MAPBOX_ACCESS_TOKEN } from "../utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 interface StartEndSearchProps {
-  onStartChange: (location: string, coordinates: [number, number]) => void;
+  onStartChange?: (location: string, coordinates: [number, number]) => void;
   onEndChange: (location: string, coordinates: [number, number]) => void;
   defaultStart?: string | null;
   isStartActive?: boolean;
@@ -29,7 +29,7 @@ export default function StartEndSearch({
 
   const handleFetchSuggestions = async (
     text: string,
-    type: "start" | "end"
+    type: "start" | "end",
   ) => {
     const response = await fetchSuggestions(text);
     if (type === "start") {
@@ -54,7 +54,7 @@ export default function StartEndSearch({
 
   const handleSuggestionPress = (feature: any, type: "start" | "end") => {
     const [longitude, latitude] = feature.geometry.coordinates;
-    if (type === "start") {
+    if (type === "start" && onStartChange) {
       setStartSearchQuery(feature.place_name);
       setStartSuggestions([]);
       onStartChange(feature.place_name, [longitude, latitude]);

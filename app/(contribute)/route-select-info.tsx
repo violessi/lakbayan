@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { router } from "expo-router";
 
@@ -8,15 +8,11 @@ import StartEndSearchBar from "@/components/StartEndSearchBar";
 import TransportationModeSelection from "@/components/contribute/TransportationModeSelection";
 
 import { TransportationMode } from "@/types/route-types";
+import { Coordinates } from "@/types/location-types";
 
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
-
-interface Coordinates {
-  lat: number;
-  long: number;
-}
 
 export default function RouteSelectInfo() {
   const cameraRef = useRef<Camera>(null);
@@ -30,40 +26,32 @@ export default function RouteSelectInfo() {
     endCoordinatesParams,
   } = useLocalSearchParams();
 
-  const startLocation = startLocationParams as string;
+  const startRouteLocation = startLocationParams as string;
+  const startRouteCoordinates: Coordinates = useMemo(() => {
+    const parsedCoords = JSON.parse(startCoordinatesParams as string);
+    return {
+      lat: parsedCoords[0],
+      long: parsedCoords[1],
+    };
+  }, [startCoordinatesParams]);
+
   const endLocation = endLocationParams as string;
+  const endCoordinates: Coordinates = useMemo(() => {
+    const parsedCoords = JSON.parse(endCoordinatesParams as string);
+    return {
+      lat: parsedCoords[0],
+      long: parsedCoords[1],
+    };
+  }, [endCoordinatesParams]);
 
-  const startCoordinates: Coordinates = {
-    lat: JSON.parse(startCoordinatesParams as string)[0],
-    long: JSON.parse(startCoordinatesParams as string)[1],
-  };
-  const endCoordinates = {
-    lat: JSON.parse(endCoordinatesParams as string)[0],
-    long: JSON.parse(endCoordinatesParams as string)[1],
-  };
-
-  const [startRouteLocation, setStartRouteLocation] = useState<string | null>(
-    null
-  );
-  const [startRouteCoordinates, setStartRouteCoordinates] = useState<
-    [number, number] | null
-  >(null);
   const [endRouteLocation, setEndRouteLocation] = useState<string | null>(null);
   const [endRouteCoordinates, setEndRouteCoordinates] = useState<
     [number, number] | null
   >(null);
 
-  const handleStartRouteChange = (
-    location: string,
-    coordinates: [number, number]
-  ) => {
-    setStartRouteLocation(location);
-    setStartRouteCoordinates(coordinates);
-  };
-
   const handleEndRouteChange = (
     location: string,
-    coordinates: [number, number]
+    coordinates: [number, number],
   ) => {
     setEndRouteLocation(location);
     setEndRouteCoordinates(coordinates);
@@ -71,8 +59,34 @@ export default function RouteSelectInfo() {
 
   const handleTransportationModeChange = (mode: TransportationMode) => {
     setTransportationMode(mode);
-    Alert.alert("Transportation Mode", `Selected: ${mode}`);
   };
+
+  useEffect(() => {
+    if (
+      startRouteLocation &&
+      startRouteCoordinates &&
+      endRouteLocation &&
+      endRouteCoordinates &&
+      transportationMode
+    ) {
+      router.push({
+        pathname: "/route-input",
+        params: {
+          startRouteLocationParams: startRouteLocation,
+          startRouteCoordinatesParams: JSON.stringify(startRouteCoordinates),
+          endRouteLocationParams: endRouteLocation,
+          endRouteCoordinatesParams: JSON.stringify(endRouteCoordinates),
+          transportationModeParams: transportationMode,
+        },
+      });
+    }
+  }, [
+    startRouteLocation,
+    startRouteCoordinates,
+    endRouteLocation,
+    endRouteCoordinates,
+    transportationMode,
+  ]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -80,9 +94,8 @@ export default function RouteSelectInfo() {
 
       <View>
         <StartEndSearchBar
-          onStartChange={handleStartRouteChange}
           onEndChange={handleEndRouteChange}
-          defaultStart={startLocation}
+          defaultStart={startRouteLocation}
           isStartActive={false}
         />
       </View>
