@@ -87,11 +87,7 @@ export default function Account() {
         <TextInput label="Email" value={session?.user?.email} disabled />
       </View>
       <View>
-        <TextInput
-          label="Username"
-          value={username || ""}
-          onChangeText={(text) => setUsername(text)}
-        />
+        <TextInput label="Username" value={username || ""} onChangeText={(text) => setUsername(text)} />
       </View>
 
       <View>

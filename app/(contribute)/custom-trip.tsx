@@ -7,13 +7,7 @@ import Header from "../../components/ui/Header";
 
 import pin from "@/assets/pin-purple.png";
 
-import Mapbox, {
-  MapView,
-  Camera,
-  ShapeSource,
-  SymbolLayer,
-  Images,
-} from "@rnmapbox/maps";
+import Mapbox, { MapView, Camera, ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
 import { featureCollection, point } from "@turf/helpers";
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -23,18 +17,11 @@ export default function TodaStops() {
   const [zoomLevel, setZoomLevel] = useState(12);
 
   const [startLocation, setStartLocation] = useState<string | null>(null);
-  const [startCoordinates, setStartCoordinates] = useState<
-    [number, number] | null
-  >(null);
+  const [startCoordinates, setStartCoordinates] = useState<[number, number] | null>(null);
   const [endLocation, setEndLocation] = useState<string | null>(null);
-  const [endCoordinates, setEndCoordinates] = useState<[number, number] | null>(
-    null,
-  );
+  const [endCoordinates, setEndCoordinates] = useState<[number, number] | null>(null);
 
-  const handleStartChange = (
-    location: string,
-    coordinates: [number, number],
-  ) => {
+  const handleStartChange = (location: string, coordinates: [number, number]) => {
     setStartLocation(location);
     setStartCoordinates(coordinates);
   };
@@ -76,10 +63,7 @@ export default function TodaStops() {
       <Header title="Custom Trips" />
 
       <View>
-        <StartEndSearchBar
-          onStartChange={handleStartChange}
-          onEndChange={handleEndChange}
-        />
+        <StartEndSearchBar onStartChange={handleStartChange} onEndChange={handleEndChange} />
       </View>
 
       <MapView
@@ -97,10 +81,7 @@ export default function TodaStops() {
         />
 
         {coordinates && (
-          <ShapeSource
-            id="todas"
-            shape={featureCollection([point(coordinates)])}
-          >
+          <ShapeSource id="todas" shape={featureCollection([point(coordinates)])}>
             <SymbolLayer
               id="toda-icons"
               style={{

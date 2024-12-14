@@ -23,16 +23,8 @@ export default function RouteInformation() {
     <BottomSheet snapPoints={snapPoints} index={0}>
       <BottomSheetView className="flex flex-col px-5 gap-2">
         <Text className="text-xl font-bold">Route information</Text>
-        <OutlinedTextInput
-          label="Route name"
-          value={color}
-          onChangeText={setColor}
-        />
-        <OutlinedTextInput
-          label="Landmark Information"
-          value={landmark}
-          onChangeText={setLandmark}
-        />
+        <OutlinedTextInput label="Route name" value={color} onChangeText={setColor} />
+        <OutlinedTextInput label="Landmark Information" value={landmark} onChangeText={setLandmark} />
         <PrimaryButton label="Add" onPress={handleSubmit} />
       </BottomSheetView>
     </BottomSheet>

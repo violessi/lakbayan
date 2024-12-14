@@ -10,10 +10,7 @@ interface LocationMarkerProps {
   label: string;
 }
 
-export default function LocationMarker({
-  coordinates,
-  label,
-}: LocationMarkerProps) {
+export default function LocationMarker({ coordinates, label }: LocationMarkerProps) {
   return (
     <ShapeSource id={label} shape={point(coordinates)}>
       <CircleLayer

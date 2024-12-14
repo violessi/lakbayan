@@ -9,9 +9,7 @@ interface SessionContextType {
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
-export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
@@ -20,23 +18,17 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({
       setSession(session);
     });
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        console.log("Auth state changed, new session:", session);
-        setSession(session);
-      }
-    );
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed, new session:", session);
+      setSession(session);
+    });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, []);
 
-  return (
-    <SessionContext.Provider value={{ session }}>
-      {children}
-    </SessionContext.Provider>
-  );
+  return <SessionContext.Provider value={{ session }}>{children}</SessionContext.Provider>;
 };
 
 export const useSession = () => {

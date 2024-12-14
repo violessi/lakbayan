@@ -20,22 +20,14 @@ interface Coordinates {
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
 
-  const {
-    startLocationParams,
-    startCoordinatesParams,
-    endLocationParams,
-    endCoordinatesParams,
-  } = useLocalSearchParams();
+  const { startLocationParams, startCoordinatesParams, endLocationParams, endCoordinatesParams } =
+    useLocalSearchParams();
 
   const startLocation = startLocationParams as string;
   const endLocation = endLocationParams as string;
 
-  const startCoordinates: Coordinates = JSON.parse(
-    startCoordinatesParams as string,
-  );
-  const endCoordinates: Coordinates = JSON.parse(
-    endCoordinatesParams as string,
-  );
+  const startCoordinates: Coordinates = JSON.parse(startCoordinatesParams as string);
+  const endCoordinates: Coordinates = JSON.parse(endCoordinatesParams as string);
 
   const handleNavigateToRouteInput = () => {
     router.push({
@@ -53,23 +45,11 @@ export default function TripReview() {
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Trip Review" />
 
-      <MapView
-        style={{ flex: 1 }}
-        styleURL="mapbox://styles/mapbox/streets-v12"
-        projection="mercator"
-      >
-        <Camera
-          ref={cameraRef}
-          centerCoordinate={[121.05, 14.63]}
-          zoomLevel={14}
-          animationMode="easeTo"
-        />
+      <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12" projection="mercator">
+        <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} zoomLevel={14} animationMode="easeTo" />
       </MapView>
       <View className="z-50">
-        <PrimaryButton
-          label="Add Transfers"
-          onPress={handleNavigateToRouteInput}
-        />
+        <PrimaryButton label="Add Transfers" onPress={handleNavigateToRouteInput} />
       </View>
       <TripSummary startLocation={startLocation} endLocation={endLocation} />
     </SafeAreaView>

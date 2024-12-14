@@ -10,9 +10,7 @@ interface TransportationModeSelectionProps {
   onTransportationModeChange: (mode: string) => void;
 }
 
-export default function TransportationModeSelection({
-  onTransportationModeChange,
-}: TransportationModeSelectionProps) {
+export default function TransportationModeSelection({ onTransportationModeChange }: TransportationModeSelectionProps) {
   const snapPoints = ["30%", "90%"];
   const [selectedMode, setSelectedMode] = useState<string>("");
 

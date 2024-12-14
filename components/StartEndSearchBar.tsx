@@ -27,10 +27,7 @@ export default function StartEndSearch({
   const [startSuggestions, setStartSuggestions] = useState<Suggestion[]>([]);
   const [endSuggestions, setEndSuggestions] = useState<Suggestion[]>([]);
 
-  const handleFetchSuggestions = async (
-    text: string,
-    type: "start" | "end",
-  ) => {
+  const handleFetchSuggestions = async (text: string, type: "start" | "end") => {
     const response = await fetchSuggestions(text);
     if (type === "start") {
       setStartSuggestions(response);
@@ -80,13 +77,7 @@ export default function StartEndSearch({
           editable={isStartActive}
           style={{ backgroundColor: "none", fontSize: 12, flex: 1 }}
         />
-        {isStartActive && (
-          <IconButton
-            icon="close"
-            size={20}
-            onPress={() => handleClearAll("start")}
-          />
-        )}
+        {isStartActive && <IconButton icon="close" size={20} onPress={() => handleClearAll("start")} />}
       </View>
 
       <View className="absolute top-16 left-0 z-50 m-5 flex-row items-center bg-white rounded-[8]">
@@ -103,11 +94,7 @@ export default function StartEndSearch({
           }}
           style={{ backgroundColor: "none", fontSize: 12, flex: 1 }}
         />
-        <IconButton
-          icon="close"
-          size={20}
-          onPress={() => handleClearAll("end")}
-        />
+        <IconButton icon="close" size={20} onPress={() => handleClearAll("end")} />
       </View>
       <View className="absolute max-h-500 top-36 left-0 z-40 mx-5 items-center bg-white rounded-[8]">
         <View>

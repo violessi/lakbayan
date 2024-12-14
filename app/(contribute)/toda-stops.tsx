@@ -6,13 +6,7 @@ import Header from "../../components/ui/Header";
 import TodaInformation from "@/components/contribute/TodaInformation";
 import pin from "@/assets/pin-purple.png";
 
-import Mapbox, {
-  MapView,
-  Camera,
-  ShapeSource,
-  SymbolLayer,
-  Images,
-} from "@rnmapbox/maps";
+import Mapbox, { MapView, Camera, ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
 import { featureCollection, point } from "@turf/helpers";
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -43,10 +37,7 @@ export default function TodaStops() {
       <Header title="Pin Toda Stops" />
 
       <View>
-        <LocationSearchBar
-          onSuggestionSelect={handleSuggestionSelect}
-          onClear={() => setCoordinates(null)}
-        />
+        <LocationSearchBar onSuggestionSelect={handleSuggestionSelect} onClear={() => setCoordinates(null)} />
       </View>
 
       <MapView
@@ -64,10 +55,7 @@ export default function TodaStops() {
         />
 
         {coordinates && (
-          <ShapeSource
-            id="todas"
-            shape={featureCollection([point(coordinates)])}
-          >
+          <ShapeSource id="todas" shape={featureCollection([point(coordinates)])}>
             <SymbolLayer
               id="toda-icons"
               style={{

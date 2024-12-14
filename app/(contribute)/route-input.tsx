@@ -11,14 +11,7 @@ import LocationMarker from "@/components/ui/LocationMarker";
 import { getDirections } from "@/services/mapbox-service";
 import { Coordinates } from "@/types/location-types";
 
-import Mapbox, {
-  MapView,
-  Camera,
-  ShapeSource,
-  CircleLayer,
-  SymbolLayer,
-  LineLayer,
-} from "@rnmapbox/maps";
+import Mapbox, { MapView, Camera, ShapeSource, CircleLayer, SymbolLayer, LineLayer } from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
 import { point } from "@turf/helpers";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -27,8 +20,7 @@ export default function RouteInput() {
   const cameraRef = useRef<Camera>(null);
   const [directions, setDirections] = useState<any | null>(null);
   const [zoomLevel, setZoomLevel] = useState(12);
-  const directionCoordinates: Coordinates[] =
-    directions?.routes?.[0]?.geometry.coordinates || [];
+  const directionCoordinates: Coordinates[] = directions?.routes?.[0]?.geometry.coordinates || [];
 
   const {
     startRouteLocationParams,
@@ -41,21 +33,14 @@ export default function RouteInput() {
   const startRouteLocation = startRouteLocationParams as string;
   const endRouteLocation = endRouteLocationParams as string;
 
-  const startRouteCoordinates: Coordinates = JSON.parse(
-    startRouteCoordinatesParams as string,
-  );
-  const endRouteCoordinates: Coordinates = JSON.parse(
-    endRouteCoordinatesParams as string,
-  );
+  const startRouteCoordinates: Coordinates = JSON.parse(startRouteCoordinatesParams as string);
+  const endRouteCoordinates: Coordinates = JSON.parse(endRouteCoordinatesParams as string);
 
   const transportationMode = transportationModeParams as string;
 
   const handleGetDirections = useCallback(async () => {
     try {
-      const newDirections = await getDirections(
-        startRouteCoordinates,
-        endRouteCoordinates,
-      );
+      const newDirections = await getDirections(startRouteCoordinates, endRouteCoordinates);
       setDirections(newDirections);
     } catch (error) {
       console.error("Error fetching directions:", error);
@@ -103,14 +88,8 @@ export default function RouteInput() {
           animationMode="easeTo"
         />
 
-        <LocationMarker
-          coordinates={startRouteCoordinates}
-          label={startRouteLocation}
-        />
-        <LocationMarker
-          coordinates={endRouteCoordinates}
-          label={endRouteLocation}
-        />
+        <LocationMarker coordinates={startRouteCoordinates} label={startRouteLocation} />
+        <LocationMarker coordinates={endRouteCoordinates} label={endRouteLocation} />
 
         {directionCoordinates && (
           <ShapeSource
@@ -129,10 +108,7 @@ export default function RouteInput() {
               ],
             }}
           >
-            <LineLayer
-              id="directions-line"
-              style={{ lineColor: "red", lineWidth: 3 }}
-            />
+            <LineLayer id="directions-line" style={{ lineColor: "red", lineWidth: 3 }} />
           </ShapeSource>
         )}
       </MapView>

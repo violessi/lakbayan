@@ -16,10 +16,7 @@ interface LocationSearchBarProps {
   onClear: () => void;
 }
 
-export default function LocationSearchBar({
-  onSuggestionSelect,
-  onClear,
-}: LocationSearchBarProps) {
+export default function LocationSearchBar({ onSuggestionSelect, onClear }: LocationSearchBarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 

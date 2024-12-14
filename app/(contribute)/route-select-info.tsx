@@ -16,15 +16,10 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteSelectInfo() {
   const cameraRef = useRef<Camera>(null);
-  const [transportationMode, setTransportationMode] =
-    useState<TransportationMode | null>(null);
+  const [transportationMode, setTransportationMode] = useState<TransportationMode | null>(null);
 
-  const {
-    startLocationParams,
-    startCoordinatesParams,
-    endLocationParams,
-    endCoordinatesParams,
-  } = useLocalSearchParams();
+  const { startLocationParams, startCoordinatesParams, endLocationParams, endCoordinatesParams } =
+    useLocalSearchParams();
 
   const startRouteLocation = startLocationParams as string;
   const startRouteCoordinates: Coordinates = useMemo(() => {
@@ -37,14 +32,9 @@ export default function RouteSelectInfo() {
   }, [endCoordinatesParams]);
 
   const [endRouteLocation, setEndRouteLocation] = useState<string | null>(null);
-  const [endRouteCoordinates, setEndRouteCoordinates] = useState<
-    [number, number] | null
-  >(null);
+  const [endRouteCoordinates, setEndRouteCoordinates] = useState<[number, number] | null>(null);
 
-  const handleEndRouteChange = (
-    location: string,
-    coordinates: [number, number],
-  ) => {
+  const handleEndRouteChange = (location: string, coordinates: [number, number]) => {
     setEndRouteLocation(location);
     setEndRouteCoordinates(coordinates);
   };
@@ -54,13 +44,7 @@ export default function RouteSelectInfo() {
   };
 
   useEffect(() => {
-    if (
-      startRouteLocation &&
-      startRouteCoordinates &&
-      endRouteLocation &&
-      endRouteCoordinates &&
-      transportationMode
-    ) {
+    if (startRouteLocation && startRouteCoordinates && endRouteLocation && endRouteCoordinates && transportationMode) {
       router.push({
         pathname: "/route-input",
         params: {
@@ -72,42 +56,21 @@ export default function RouteSelectInfo() {
         },
       });
     }
-  }, [
-    startRouteLocation,
-    startRouteCoordinates,
-    endRouteLocation,
-    endRouteCoordinates,
-    transportationMode,
-  ]);
+  }, [startRouteLocation, startRouteCoordinates, endRouteLocation, endRouteCoordinates, transportationMode]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Route Input" />
 
       <View>
-        <StartEndSearchBar
-          onEndChange={handleEndRouteChange}
-          defaultStart={startRouteLocation}
-          isStartActive={false}
-        />
+        <StartEndSearchBar onEndChange={handleEndRouteChange} defaultStart={startRouteLocation} isStartActive={false} />
       </View>
 
-      <MapView
-        style={{ flex: 1 }}
-        styleURL="mapbox://styles/mapbox/streets-v12"
-        projection="mercator"
-      >
-        <Camera
-          ref={cameraRef}
-          centerCoordinate={[121.05, 14.63]}
-          zoomLevel={14}
-          animationMode="easeTo"
-        />
+      <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12" projection="mercator">
+        <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} zoomLevel={14} animationMode="easeTo" />
       </MapView>
 
-      <TransportationModeSelection
-        onTransportationModeChange={handleTransportationModeChange}
-      />
+      <TransportationModeSelection onTransportationModeChange={handleTransportationModeChange} />
     </SafeAreaView>
   );
 }

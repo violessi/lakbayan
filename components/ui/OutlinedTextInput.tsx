@@ -8,11 +8,7 @@ interface OutlinedTextInputProps {
   onChangeText: (text: string) => void;
 }
 
-export default function OutlinedTextInput({
-  label,
-  value,
-  onChangeText,
-}: OutlinedTextInputProps) {
+export default function OutlinedTextInput({ label, value, onChangeText }: OutlinedTextInputProps) {
   return (
     <TextInput
       mode="outlined"

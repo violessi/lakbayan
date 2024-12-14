@@ -8,10 +8,7 @@ interface TripSummaryProps {
   endLocation: string;
 }
 
-export default function TripSummary({
-  startLocation,
-  endLocation,
-}: TripSummaryProps) {
+export default function TripSummary({ startLocation, endLocation }: TripSummaryProps) {
   const snapPoints = ["30%", "90%"];
 
   return (

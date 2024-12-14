@@ -8,8 +8,7 @@ export default function Contribute() {
       <View className="h-32 bg-primary px-5 py-5">
         <Text className="text-white text-lg font-bold">Contribute a route</Text>
         <Text className="text-white text-sm">
-          Lakbayan depends on community contributions to ensure up-to-date and
-          complete route information!
+          Lakbayan depends on community contributions to ensure up-to-date and complete route information!
         </Text>
       </View>
       <View className="flex-1 p-4">

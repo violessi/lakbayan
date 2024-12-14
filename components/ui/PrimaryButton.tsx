@@ -9,13 +9,7 @@ interface PrimaryButtonProps {
 
 export default function PrimaryButton({ label, onPress }: PrimaryButtonProps) {
   return (
-    <Button
-      mode="contained"
-      buttonColor="#7F55D9"
-      textColor="white"
-      className="mt-4"
-      onPress={onPress}
-    >
+    <Button mode="contained" buttonColor="#7F55D9" textColor="white" className="mt-4" onPress={onPress}>
       {label}
     </Button>
   );

@@ -55,25 +55,13 @@ export default function TodaStops({ coordinates }: TodaStopsProps) {
         <Text className="text-xl font-bold">More information</Text>
         <View className="flex flex-row gap-4">
           <View className="flex-[3]">
-            <OutlinedTextInput
-              label="Name of TODAs"
-              value={todaName}
-              onChangeText={setTodaName}
-            />
+            <OutlinedTextInput label="Name of TODAs" value={todaName} onChangeText={setTodaName} />
           </View>
           <View className="flex-[1]">
-            <OutlinedTextInput
-              label="Color"
-              value={color}
-              onChangeText={setColor}
-            />
+            <OutlinedTextInput label="Color" value={color} onChangeText={setColor} />
           </View>
         </View>
-        <OutlinedTextInput
-          label="Landmark Information"
-          value={landmark}
-          onChangeText={setLandmark}
-        />
+        <OutlinedTextInput label="Landmark Information" value={landmark} onChangeText={setLandmark} />
         <PrimaryButton label="Submit" onPress={handleSubmit} />
       </BottomSheetView>
     </BottomSheet>

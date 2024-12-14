@@ -11,10 +11,7 @@ export default function Index() {
       <View className="h-20 bg-primary px-5 py-5">
         <Text className="text-white text-lg font-bold">Hi, user!</Text>
       </View>
-      <MapView
-        style={{ flex: 1 }}
-        styleURL="mapbox://styles/mapbox/streets-v12"
-      >
+      <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12">
         <Camera followZoomLevel={13} followUserLocation />
         <LocationPuck />
       </MapView>
