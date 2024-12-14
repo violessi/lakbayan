@@ -39,6 +39,7 @@ export async function getDirections(start: Coordinates, end: Coordinates) {
       endCoordinates,
     )}?alternatives=true&geometries=geojson&language=en&overview=full&steps=true&access_token=${MAPBOX_ACCESS_TOKEN}`,
   );
-  const json = await response.json();
-  console.log(json);
+  const directions = await response.json();
+  console.log(directions);
+  return directions;
 }
