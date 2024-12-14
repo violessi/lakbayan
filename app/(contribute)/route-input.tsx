@@ -9,6 +9,7 @@ import Header from "@/components/ui/Header";
 import TripTitle from "@/components/contribute/TripTitle";
 import RouteInformation from "@/components/contribute/RouteInformation";
 import LocationMarker from "@/components/ui/LocationMarker";
+import DirectionsLine from "@/components/ui/DirectionsLine";
 
 import { getDirections } from "@/services/mapbox-service";
 import { Coordinates, MapboxDirectionsResponse } from "@/types/location-types";
@@ -101,6 +102,11 @@ export default function RouteInput() {
   const { addRoute } = useTrip();
 
   const handleSubmit = () => {
+    if (!directions) {
+      console.log("Error: Directions are required.");
+      return;
+    }
+
     const newRoute: Route = {
       id: uuid.v4(),
       routeName,
@@ -109,11 +115,12 @@ export default function RouteInput() {
       startCoordinates: startRouteCoordinates,
       endLocation: endRouteLocation,
       endCoordinates: endRouteCoordinates,
-      directions: directions as MapboxDirectionsResponse,
+      directions: directions,
     };
 
     addRoute(newRoute);
     console.log("Added Route:", newRoute);
+    router.dismissAll();
   };
 
   return (
@@ -158,24 +165,7 @@ export default function RouteInput() {
         ))}
 
         {!loadingDirections && directionCoordinates && !isAddPointsMode && (
-          <ShapeSource
-            id="directions"
-            shape={{
-              type: "FeatureCollection",
-              features: [
-                {
-                  type: "Feature",
-                  geometry: {
-                    type: "LineString",
-                    coordinates: directionCoordinates,
-                  },
-                  properties: {},
-                },
-              ],
-            }}
-          >
-            <LineLayer id="directions-line" style={{ lineColor: "red", lineWidth: 3 }} />
-          </ShapeSource>
+          <DirectionsLine coordinates={directionCoordinates} />
         )}
       </MapView>
 
