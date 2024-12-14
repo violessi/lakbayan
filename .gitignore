@@ -35,5 +35,13 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-app-example
+# env
 .env
+
+# build
+android/
+ios/
+
+# misc
+.vscode/
+app-example
