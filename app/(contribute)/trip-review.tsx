@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { router } from "expo-router";
 
@@ -10,6 +10,7 @@ import TripSummary from "@/components/contribute/TripSummary";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
+import { Route } from "@/types/route-types";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 interface Coordinates {

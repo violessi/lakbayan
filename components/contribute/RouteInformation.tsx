@@ -1,29 +1,34 @@
 import React, { useState } from "react";
-import { Text, View, Alert, Keyboard } from "react-native";
+import { Text, Alert, Keyboard } from "react-native";
 
 import OutlinedTextInput from "@/components/ui/OutlinedTextInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { MapboxDirectionsResponse } from "@/types/location-types";
 
 interface RouteInformationProps {
-  coordinates: [number, number] | null;
+  directions: MapboxDirectionsResponse | null;
 }
 
-export default function RouteInformation() {
-  const [todaName, setTodaName] = useState("");
-  const [color, setColor] = useState("");
+export default function RouteInformation({ directions }: RouteInformationProps) {
+  const [routeName, setRouteName] = useState("");
   const [landmark, setLandmark] = useState("");
 
   const handleSubmit = async () => {
-    Alert.alert("No pins set!", "Please select a location on the map.");
+    if (!routeName || !landmark) {
+      Alert.alert("Missing Information", "Please fill in all fields.");
+      return;
+    }
+    Keyboard.dismiss();
   };
+
   const snapPoints = [300];
 
   return (
     <BottomSheet snapPoints={snapPoints} index={0}>
       <BottomSheetView className="flex flex-col px-5 gap-2">
-        <Text className="text-xl font-bold">Route information</Text>
-        <OutlinedTextInput label="Route name" value={color} onChangeText={setColor} />
+        <Text className="text-xl font-bold">Route Information</Text>
+        <OutlinedTextInput label="Route Name" value={routeName} onChangeText={setRouteName} />
         <OutlinedTextInput label="Landmark Information" value={landmark} onChangeText={setLandmark} />
         <PrimaryButton label="Add" onPress={handleSubmit} />
       </BottomSheetView>

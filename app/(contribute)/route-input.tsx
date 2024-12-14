@@ -9,7 +9,7 @@ import RouteInformation from "@/components/contribute/RouteInformation";
 import LocationMarker from "@/components/ui/LocationMarker";
 
 import { getDirections } from "@/services/mapbox-service";
-import { Coordinates } from "@/types/location-types";
+import { Coordinates, MapboxDirectionsResponse } from "@/types/location-types";
 
 import Mapbox, { MapView, Camera, ShapeSource, LineLayer } from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
@@ -19,8 +19,9 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 export default function RouteInput() {
   const cameraRef = useRef<Camera>(null);
   const [zoomLevel, setZoomLevel] = useState(12);
-  const [directions, setDirections] = useState<any | null>(null);
+  const [directions, setDirections] = useState<MapboxDirectionsResponse | null>(null);
   const [waypoints, setWaypoints] = useState<Coordinates[]>([]);
+
   const [isAddPointsMode, setIsAddPointsMode] = useState(false);
   const [loadingDirections, setLoadingDirections] = useState(false);
 
@@ -45,7 +46,12 @@ export default function RouteInput() {
   const handleGetDirections = async () => {
     setLoadingDirections(true);
     try {
-      const newDirections = await getDirections(startRouteCoordinates, waypoints, endRouteCoordinates);
+      const newDirections = await getDirections(
+        startRouteCoordinates,
+        waypoints,
+        endRouteCoordinates,
+        transportationMode,
+      );
       setDirections(newDirections);
     } catch (error) {
       console.error("Error fetching directions:", error);
@@ -165,7 +171,7 @@ export default function RouteInput() {
         </View>
       </View>
 
-      <RouteInformation />
+      <RouteInformation directions={directions} />
     </SafeAreaView>
   );
 }

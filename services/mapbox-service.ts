@@ -1,4 +1,4 @@
-import { Coordinates } from "@/types/location-types";
+import { Coordinates, MapboxDirectionsResponse } from "@/types/location-types";
 
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
 
@@ -26,8 +26,16 @@ export async function fetchSuggestions(query: string): Promise<any[]> {
   }
 }
 
-export async function getDirections(start: Coordinates, waypoints: Coordinates[], end: Coordinates) {
-  const mode = "walking";
+export async function getDirections(
+  start: Coordinates,
+  waypoints: Coordinates[],
+  end: Coordinates,
+  transportationMode: string,
+): Promise<MapboxDirectionsResponse> {
+  let mode = "driving";
+  if (transportationMode === "Walk") {
+    mode = "walking";
+  }
 
   const coordinates = [
     `${start[0]},${start[1]}`,
@@ -35,11 +43,14 @@ export async function getDirections(start: Coordinates, waypoints: Coordinates[]
     `${end[0]},${end[1]}`,
   ].join(";");
 
+  console.log(
+    `${BASE_URL}/directions/v5/mapbox/${mode}/${encodeURIComponent(coordinates)}?alternatives=true&geometries=geojson&language=en&overview=full&steps=true&access_token=${MAPBOX_ACCESS_TOKEN}`,
+  );
   const response = await fetch(
     `${BASE_URL}/directions/v5/mapbox/${mode}/${encodeURIComponent(coordinates)}?alternatives=true&geometries=geojson&language=en&overview=full&steps=true&access_token=${MAPBOX_ACCESS_TOKEN}`,
   );
 
-  const directions = await response.json();
-  console.log(directions);
+  const responseJSON = await response.json();
+  const directions: MapboxDirectionsResponse = { routes: responseJSON.routes, waypoints: responseJSON.waypoints };
   return directions;
 }
