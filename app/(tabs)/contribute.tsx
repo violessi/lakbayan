@@ -22,6 +22,11 @@ export default function Contribute() {
           description="Let others know where tricycles are stationed!"
           link="/(contribute)/toda-stops"
         />
+        <Option
+          title="Jeepney Routes"
+          description="Help others know the routes of jeepneys in your area!"
+          link="/(contribute)/jeepney-routes"
+        />
       </View>
     </SafeAreaView>
   );
