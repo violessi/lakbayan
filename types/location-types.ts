@@ -6,7 +6,4 @@ export interface Suggestion {
   };
 }
 
-export interface Coordinates {
-  lat: number;
-  long: number;
-}
+export type Coordinates = [number, number];

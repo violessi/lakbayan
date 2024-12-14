@@ -1,12 +1,14 @@
 import React, { useRef } from "react";
 import { useLocalSearchParams } from "expo-router";
 
-import { SafeAreaView, View, Text } from "react-native";
+import { SafeAreaView, View, Text, Button } from "react-native";
 import Header from "@/components/ui/Header";
 import RouteInformation from "@/components/contribute/RouteInformation";
 
-import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
+import { getDirections } from "@/services/mapbox-service";
+import { Coordinates } from "@/types/location-types";
 
+import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "@/utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
@@ -22,13 +24,20 @@ export default function RouteInput() {
   } = useLocalSearchParams();
 
   const startRouteLocation = startRouteLocationParams as string;
-  const startRouteCoordinates = JSON.parse(
+  const endRouteLocation = endRouteLocationParams as string;
+
+  const startRouteCoordinates: Coordinates = JSON.parse(
     startRouteCoordinatesParams as string,
   );
-  const endRouteLocation = endRouteLocationParams as string;
-  const endRouteCoordinates = JSON.parse(endRouteCoordinatesParams as string);
+  const endRouteCoordinates: Coordinates = JSON.parse(
+    endRouteCoordinatesParams as string,
+  );
+
   const transportationMode = transportationModeParams as string;
 
+  const handleGetDirections = async () => {
+    await getDirections(startRouteCoordinates, endRouteCoordinates);
+  };
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Route Input" />
@@ -37,6 +46,7 @@ export default function RouteInput() {
           {startRouteLocation} to {endRouteLocation} via {transportationMode}
         </Text>
       </View>
+      <Button title="test" onPress={handleGetDirections} />
 
       <MapView
         style={{ flex: 1 }}
@@ -50,7 +60,6 @@ export default function RouteInput() {
           animationMode="easeTo"
         />
       </MapView>
-
       <RouteInformation />
     </SafeAreaView>
   );

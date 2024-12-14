@@ -30,14 +30,12 @@ export default function TripReview() {
   const startLocation = startLocationParams as string;
   const endLocation = endLocationParams as string;
 
-  const startCoordinates: Coordinates = {
-    lat: JSON.parse(startCoordinatesParams as string)[0],
-    long: JSON.parse(startCoordinatesParams as string)[1],
-  };
-  const endCoordinates = {
-    lat: JSON.parse(endCoordinatesParams as string)[0],
-    long: JSON.parse(endCoordinatesParams as string)[1],
-  };
+  const startCoordinates: Coordinates = JSON.parse(
+    startCoordinatesParams as string,
+  );
+  const endCoordinates: Coordinates = JSON.parse(
+    endCoordinatesParams as string,
+  );
 
   const handleNavigateToRouteInput = () => {
     router.push({

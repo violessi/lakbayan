@@ -28,20 +28,12 @@ export default function RouteSelectInfo() {
 
   const startRouteLocation = startLocationParams as string;
   const startRouteCoordinates: Coordinates = useMemo(() => {
-    const parsedCoords = JSON.parse(startCoordinatesParams as string);
-    return {
-      lat: parsedCoords[0],
-      long: parsedCoords[1],
-    };
+    return JSON.parse(startCoordinatesParams as string);
   }, [startCoordinatesParams]);
 
   const endLocation = endLocationParams as string;
   const endCoordinates: Coordinates = useMemo(() => {
-    const parsedCoords = JSON.parse(endCoordinatesParams as string);
-    return {
-      lat: parsedCoords[0],
-      long: parsedCoords[1],
-    };
+    return JSON.parse(endCoordinatesParams as string);
   }, [endCoordinatesParams]);
 
   const [endRouteLocation, setEndRouteLocation] = useState<string | null>(null);

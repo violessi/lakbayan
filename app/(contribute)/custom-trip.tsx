@@ -28,12 +28,12 @@ export default function TodaStops() {
   >(null);
   const [endLocation, setEndLocation] = useState<string | null>(null);
   const [endCoordinates, setEndCoordinates] = useState<[number, number] | null>(
-    null
+    null,
   );
 
   const handleStartChange = (
     location: string,
-    coordinates: [number, number]
+    coordinates: [number, number],
   ) => {
     setStartLocation(location);
     setStartCoordinates(coordinates);
