@@ -42,7 +42,7 @@ export default function TodaStops({ coordinates }: TodaStopsProps) {
       setColor("");
       setLandmark("");
       Keyboard.dismiss();
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert("Error", error.message);
     }
   };

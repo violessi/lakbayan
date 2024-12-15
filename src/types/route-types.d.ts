@@ -4,13 +4,16 @@ import { TRANSPORTATION_MODES } from "@constants/transportation-modes";
 declare global {
   export type TransportationMode = (typeof TRANSPORTATION_MODES)[number];
 
-  export interface JeepneyRoute
+  export interface DotcRoute
     extends FeatureCollection<
       LineString,
       {
         shape_id: string;
-        shape_pt_sequence: number;
-        shape_dist_traveled: number | null;
+        route_id: string;
+        agency_id: string;
+        route_short_name: string | null;
+        route_long_name: string;
+        route_desc: string | null;
       }
     > {}
 
