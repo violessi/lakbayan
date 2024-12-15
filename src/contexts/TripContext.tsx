@@ -1,6 +1,4 @@
 import React, { createContext, useState, ReactNode } from "react";
-import { Trip, Route } from "@type/route-types";
-import { Coordinates } from "@type/location-types";
 
 interface TripContextType {
   trip: Trip;

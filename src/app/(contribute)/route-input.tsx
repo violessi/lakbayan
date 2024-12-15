@@ -12,8 +12,6 @@ import LocationMarker from "@components/ui/LocationMarker";
 import DirectionsLine from "@components/ui/DirectionsLine";
 
 import { getDirections } from "@services/mapbox-service";
-import { Coordinates, MapboxDirectionsResponse } from "@type/location-types";
-import { Route } from "@type/route-types";
 
 import Mapbox, { MapView, Camera, ShapeSource, LineLayer } from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, FlatList, Keyboard, StyleSheet } from "react-native";
 import { TextInput, List, IconButton } from "react-native-paper";
 import { fetchSuggestions } from "@services/mapbox-service";
-import { Suggestion } from "@type/location-types";
 
 import Mapbox from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "../utils/mapbox-config";

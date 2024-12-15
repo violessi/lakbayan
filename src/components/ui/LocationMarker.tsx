@@ -1,7 +1,5 @@
 import React from "react";
 
-import { Coordinates } from "@type/location-types";
-
 import { point } from "@turf/helpers";
 import { ShapeSource, CircleLayer, SymbolLayer } from "@rnmapbox/maps";
 

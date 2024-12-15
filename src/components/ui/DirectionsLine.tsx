@@ -2,8 +2,6 @@ import React from "react";
 
 import { ShapeSource, LineLayer } from "@rnmapbox/maps";
 
-import { Coordinates } from "@type/location-types";
-
 interface DirectionsLineProps {
   coordinates: Coordinates[];
 }

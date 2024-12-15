@@ -4,7 +4,6 @@ import { RadioButton } from "react-native-paper";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { TRANSPORTATION_MODES } from "@constants/transportation-modes";
-import { TransportationMode } from "@type/route-types";
 
 interface TransportationModeSelectionProps {
   onTransportationModeChange: (mode: string) => void;

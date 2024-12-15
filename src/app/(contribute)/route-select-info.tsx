@@ -8,9 +8,6 @@ import Header from "@components/ui/Header";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 import TransportationModeSelection from "@components/contribute/TransportationModeSelection";
 
-import { TransportationMode } from "@type/route-types";
-import { Coordinates } from "@type/location-types";
-
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 import { Button } from "react-native-paper";

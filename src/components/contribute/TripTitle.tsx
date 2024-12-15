@@ -1,8 +1,6 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-import { TransportationMode } from "@type/route-types";
-
 interface TripTitleProps {
   startLocation: string;
   endLocation: string;

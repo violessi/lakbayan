@@ -1,5 +1,3 @@
-import { Coordinates, MapboxDirectionsResponse } from "@type/location-types";
-
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 const BASE_URL = "https://api.mapbox.com";

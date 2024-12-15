@@ -1,7 +1,7 @@
-import { JeepneyRoute } from "@type/route-types";
-import { GtfsShape } from "@type/schema";
 import { groupBy } from "@utils/utils";
 import Papa from "papaparse";
+
+import { GtfsShape } from "types/schema";
 
 const URL = "https://raw.githubusercontent.com/sakayph/gtfs/refs/heads/master/shapes.txt";
 
@@ -39,7 +39,9 @@ const createGeoJson = (groupedData: Record<string, GtfsShape[]>): JeepneyRoute =
 
 // Fetch and process ggtfs jeepney routes data
 export const getJeepRoutes = async (): Promise<JeepneyRoute> => {
+  console.log("Fetching jeepney routes data...");
   const data = await fetchAndParseData(URL);
   const groupedData = groupBy(data, "shape_id");
+  console.log("Fetched jeepney routes data.");
   return createGeoJson(groupedData);
 };

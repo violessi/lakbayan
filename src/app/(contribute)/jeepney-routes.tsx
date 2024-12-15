@@ -5,7 +5,6 @@ import { SafeAreaView } from "react-native";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 import Header from "../../components/ui/Header";
 
-import { type JeepneyRoute } from "@type/route-types";
 import { getJeepRoutes } from "@services/dotc-routes";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);

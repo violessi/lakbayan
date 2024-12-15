@@ -4,8 +4,6 @@ import RouteItem from "@components/contribute/RouteItem";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
-import { Trip } from "@type/route-types";
-
 interface TripSummaryProps {
   startLocation: string;
   endLocation: string;
