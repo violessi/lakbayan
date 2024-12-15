@@ -1,5 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
-import { useLocalSearchParams } from "expo-router";
+import React, { useRef, useState, useEffect } from "react";
 import { router } from "expo-router";
 import { useTrip } from "@/context/TripContext";
 
@@ -46,10 +45,22 @@ export default function RouteSelectInfo() {
     setTransportationMode(mode);
   };
 
+  const handleMapLoaded = () => {
+    if (startRouteCoordinates && trip.endCoordinates && cameraRef.current) {
+      cameraRef.current.fitBounds(startRouteCoordinates, trip.endCoordinates, [150, 150, 250, 150]);
+    }
+  };
+
   useEffect(() => {
     setEndRouteLocation(null);
     setEndRouteCoordinates(null);
   }, []);
+
+  useEffect(() => {
+    if (startRouteCoordinates && endRouteCoordinates && cameraRef.current) {
+      cameraRef.current.fitBounds(startRouteCoordinates, endRouteCoordinates, [150, 150, 250, 150]);
+    }
+  }, [startRouteCoordinates, endRouteCoordinates]);
 
   useEffect(() => {
     if (startRouteLocation && startRouteCoordinates && endRouteLocation && endRouteCoordinates && transportationMode) {
@@ -80,8 +91,13 @@ export default function RouteSelectInfo() {
         />
       </View>
 
-      <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12" projection="mercator">
-        <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} zoomLevel={14} animationMode="easeTo" />
+      <MapView
+        style={{ flex: 1 }}
+        styleURL="mapbox://styles/mapbox/streets-v12"
+        projection="mercator"
+        onDidFinishLoadingMap={handleMapLoaded}
+      >
+        <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} zoomLevel={10} animationMode="easeTo" />
       </MapView>
 
       <View className="absolute bottom-0 mb-80 w-100">

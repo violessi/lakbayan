@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { router } from "expo-router";
 import { useTrip } from "@/context/TripContext";
 
@@ -18,10 +18,18 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
   const { trip } = useTrip();
+
   const routeCoordinates = trip.routes?.map((route) => route.directions.routes[0].geometry.coordinates) || [];
+  const startCoordinates = trip.startCoordinates;
+  const endCoordinates = trip.endCoordinates;
+
+  const handleMapLoaded = () => {
+    if (startCoordinates && endCoordinates && cameraRef.current) {
+      cameraRef.current.fitBounds(startCoordinates, endCoordinates, [150, 150, 250, 150]);
+    }
+  };
 
   const handleNavigateToRouteInput = () => {
-    console.log("Navigate to route select info");
     router.push("/(contribute)/route-select-info");
   };
 
@@ -29,7 +37,6 @@ export default function TripReview() {
     trip.routes.length > 0 && trip.endLocation === trip.routes[trip.routes.length - 1].endLocation;
 
   const handleSubmitTrip = () => {
-    console.log("Submitting trip");
     Alert.alert("Trip Submitted", "Thank you for contributing to the community!");
     router.replace("/(tabs)");
   };
@@ -42,8 +49,13 @@ export default function TripReview() {
         <TripTitle startLocation={trip.startLocation} endLocation={trip.endLocation} />
       </View>
 
-      <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12" projection="mercator">
-        <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} zoomLevel={14} animationMode="easeTo" />
+      <MapView
+        style={{ flex: 1 }}
+        styleURL="mapbox://styles/mapbox/streets-v12"
+        projection="mercator"
+        onDidFinishLoadingMap={handleMapLoaded}
+      >
+        <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} animationMode="easeTo" zoomLevel={10} />
 
         {routeCoordinates.map((coordinates, index) => (
           <DirectionsLine key={index} coordinates={coordinates} />
