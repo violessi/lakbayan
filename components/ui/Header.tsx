@@ -11,7 +11,7 @@ interface HeaderProps {
 
 export default function Header({ title, subtitle }: HeaderProps) {
   return (
-    <View className="h-50 bg-primary px-5 py-5">
+    <View className="h-28 bg-primary px-5 py-5">
       <View className="flex-row items-center p-4">
         <TouchableOpacity onPress={() => router.back()}>
           <Text className="text-blue-500">Backsies</Text>

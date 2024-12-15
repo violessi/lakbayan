@@ -116,6 +116,7 @@ export default function RouteInput() {
       endLocation: endRouteLocation,
       endCoordinates: endRouteCoordinates,
       directions: directions,
+      transportationMode: transportationMode,
     };
 
     addRoute(newRoute);

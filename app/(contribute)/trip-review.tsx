@@ -7,6 +7,7 @@ import Header from "@/components/ui/Header";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import TripSummary from "@/components/contribute/TripSummary";
 import DirectionsLine from "@/components/ui/DirectionsLine";
+import TripTitle from "@/components/contribute/TripTitle";
 
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
@@ -36,6 +37,10 @@ export default function TripReview() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Trip Review" />
+
+      <View className="flex justify-center items-center">
+        <TripTitle startLocation={trip.startLocation} endLocation={trip.endLocation} />
+      </View>
 
       <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12" projection="mercator">
         <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} zoomLevel={14} animationMode="easeTo" />

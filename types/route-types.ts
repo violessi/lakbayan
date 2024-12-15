@@ -25,4 +25,5 @@ export interface Route {
   endLocation: string;
   endCoordinates: Coordinates;
   directions: MapboxDirectionsResponse;
+  transportationMode: TransportationMode;
 }
