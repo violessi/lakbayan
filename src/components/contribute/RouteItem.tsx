@@ -1,18 +1,18 @@
 import React from "react";
-
 import { View } from "react-native";
 import { Text } from "react-native-paper";
 
 interface RouteItemProps {
   route: Route;
+  color: string; // Accept color as a prop
 }
 
-export default function RouteItem({ route }: RouteItemProps) {
+export default function RouteItem({ route, color }: RouteItemProps) {
   const estimatedTime = Math.floor(route.directions.routes[0].duration / 60);
 
   return (
     <View className="rounded-b-3xl overflow-hidden border border-gray-200 shadow-sm bg-white w-full">
-      <View className="bg-red-600 h-1.5" />
+      <View style={{ backgroundColor: color, height: 6 }} />
 
       <View className="py-5 px-12 flex flex-col gap-3">
         <View className="flex-row gap-7 items-start">

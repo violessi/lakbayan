@@ -14,7 +14,7 @@ export default function Header({ title, subtitle }: HeaderProps) {
     <View className="h-28 bg-primary px-5 py-5">
       <View className="flex-row items-center p-4">
         <TouchableOpacity onPress={() => router.back()}>
-          <Text className="text-blue-500">Backsies</Text>
+          <Text className="text-blue-500">Back</Text>
         </TouchableOpacity>
       </View>
       <View>

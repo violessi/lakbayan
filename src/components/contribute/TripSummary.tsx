@@ -13,6 +13,11 @@ interface TripSummaryProps {
 export default function TripSummary({ startLocation, endLocation, trip }: TripSummaryProps) {
   const snapPoints = ["15%", "25%", "72%"];
 
+  {
+    /* FIXME Move colors to constant */
+  }
+  const routeColors = ["#FF5733", "#3357FF", "#F3FF33", "#FF33A6"];
+
   return (
     <BottomSheet snapPoints={snapPoints} index={2}>
       <BottomSheetView className="flex flex-col px-5 gap-8">
@@ -22,7 +27,9 @@ export default function TripSummary({ startLocation, endLocation, trip }: TripSu
           ) : (
             <FlatList
               data={trip.routes}
-              renderItem={({ item }) => <RouteItem route={item} />}
+              renderItem={({ item, index }) => (
+                <RouteItem route={item} color={routeColors[index % routeColors.length]} />
+              )}
               keyExtractor={(item) => item.id}
             />
           )}

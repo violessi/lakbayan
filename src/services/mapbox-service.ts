@@ -52,3 +52,21 @@ export async function getDirections(
   const directions: MapboxDirectionsResponse = { routes: responseJSON.routes, waypoints: responseJSON.waypoints };
   return directions;
 }
+
+export async function reverseGeocode(coordinates: Coordinates) {
+  try {
+    const response = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${MAPBOX_ACCESS_TOKEN}`,
+    );
+    const data = await response.json();
+
+    if (data.features && data.features.length > 0) {
+      return data.features[0].place_name;
+    } else {
+      return "Unnamed Location";
+    }
+  } catch (error) {
+    console.error("Reverse geocoding failed:", error);
+    return "Unnamed Location";
+  }
+}

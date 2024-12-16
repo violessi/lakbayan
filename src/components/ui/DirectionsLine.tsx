@@ -1,12 +1,12 @@
 import React from "react";
-
 import { ShapeSource, LineLayer } from "@rnmapbox/maps";
 
 interface DirectionsLineProps {
   coordinates: Coordinates[];
+  color?: string;
 }
 
-export default function DirectionsLine({ coordinates }: DirectionsLineProps) {
+export default function DirectionsLine({ coordinates, color = "red" }: DirectionsLineProps) {
   const lineId = `directions-line-${JSON.stringify(coordinates)}`;
 
   return (
@@ -19,14 +19,20 @@ export default function DirectionsLine({ coordinates }: DirectionsLineProps) {
             type: "Feature",
             geometry: {
               type: "LineString",
-              coordinates: coordinates,
+              coordinates,
             },
             properties: {},
           },
         ],
       }}
     >
-      <LineLayer id={`directions-layer-${lineId}`} style={{ lineColor: "red", lineWidth: 3 }} />
+      <LineLayer
+        id={`directions-layer-${lineId}`}
+        style={{
+          lineColor: color,
+          lineWidth: 3,
+        }}
+      />
     </ShapeSource>
   );
 }
