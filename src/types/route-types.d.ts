@@ -2,7 +2,7 @@ import type { FeatureCollection, LineString } from "geojson";
 import { TRANSPORTATION_MODES } from "@constants/transportation-modes";
 
 declare global {
-  export type TransportationMode = (typeof TRANSPORTATION_MODES)[number];
+  export type TransportationMode = ["Train", "Bus", "Jeep", "UV", "Tricycle", "Walk"][number];
 
   export interface DotcRoute
     extends FeatureCollection<

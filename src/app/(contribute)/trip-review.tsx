@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { router } from "expo-router";
 import { useTrip } from "@contexts/TripContext";
 
-import { SafeAreaView, View, Alert } from "react-native";
+import { SafeAreaView, View, Alert, Text, Button } from "react-native";
 import Header from "@components/ui/Header";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import TripSummary from "@components/contribute/TripSummary";
@@ -71,7 +71,7 @@ export default function TripReview() {
         ))}
       </MapView>
 
-      <View className="z-50">
+      <View className="z-50 flex px-5 w-100">
         <PrimaryButton
           label={isSameEndLocation ? "Submit" : "Add Transfers"}
           onPress={isSameEndLocation ? handleSubmitTrip : handleNavigateToRouteInput}

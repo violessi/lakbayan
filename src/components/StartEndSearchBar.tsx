@@ -81,7 +81,7 @@ export default function StartEndSearch({
         {isStartActive && <IconButton icon="close" size={20} onPress={() => handleClearAll("start")} />}
       </View>
 
-      <View className="absolute top-16 left-0 z-50 m-5 flex-row items-center bg-white rounded-[8]">
+      <View className="absolute top-16 left-0 z-50 mx-5 my-3 flex-row items-center bg-white rounded-[8]">
         <TextInput
           placeholder={defaultEnd || "Destination"}
           value={endSearchQuery}
