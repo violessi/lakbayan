@@ -10,10 +10,11 @@ import TripTitle from "@components/contribute/TripTitle";
 import RouteInformation from "@components/contribute/RouteInformation";
 import LocationMarker from "@components/ui/LocationMarker";
 import DirectionsLine from "@components/ui/DirectionsLine";
+import PrimaryButton from "@components/ui/PrimaryButton";
 
 import { getDirections } from "@services/mapbox-service";
 
-import Mapbox, { MapView, Camera, ShapeSource, LineLayer } from "@rnmapbox/maps";
+import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -44,7 +45,7 @@ export default function RouteInput() {
   const startRouteCoordinates: Coordinates = JSON.parse(startRouteCoordinatesParams as string);
   const endRouteCoordinates: Coordinates = JSON.parse(endRouteCoordinatesParams as string);
 
-  const transportationMode = transportationModeParams as string;
+  const transportationMode = transportationModeParams as TransportationMode;
 
   const directionCoordinates: Coordinates[] = directions?.routes?.[0]?.geometry.coordinates || [];
 
@@ -168,26 +169,15 @@ export default function RouteInput() {
         )}
       </MapView>
 
-      <View className="absolute bottom-0 mb-72 w-100">
+      <View className="absolute bottom-0 mb-80 w-100">
         <View className="flex flex-row">
           <View className="w-1/2 pl-12 pr-5">
-            <Button mode="contained" onPress={handleToggleMode}>
-              {isAddPointsMode ? "Recalculate Route" : "Edit route"}
-            </Button>
+            <PrimaryButton label={isAddPointsMode ? "Recalculate" : "Edit Route"} onPress={handleToggleMode} />
           </View>
 
           <View className="w-1/2 pr-12 pl-5">
-            {isAddPointsMode && (
-              <Button mode="contained" onPress={clearWaypoints}>
-                Clear Waypoints
-              </Button>
-            )}
-
-            {!isAddPointsMode && (
-              <Button mode="contained" onPress={handleGetDirections}>
-                Calculate Route
-              </Button>
-            )}
+            {isAddPointsMode && <PrimaryButton label="Clear" onPress={clearWaypoints} />}
+            {!isAddPointsMode && <PrimaryButton label="Calculate" onPress={handleGetDirections} />}
           </View>
         </View>
       </View>
