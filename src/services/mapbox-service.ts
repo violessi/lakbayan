@@ -1,6 +1,7 @@
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 const BASE_URL = "https://api.mapbox.com";
+const GOOGLE_PLACES_API_URL = "https://places.googleapis.com/v1/places:searchText";
 
 export async function fetchSuggestions(query: string): Promise<any[]> {
   if (!query.trim()) {
@@ -8,13 +9,29 @@ export async function fetchSuggestions(query: string): Promise<any[]> {
   }
 
   try {
-    const response = await fetch(
-      `${BASE_URL}/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=PH`,
-    );
+    const response = await fetch(GOOGLE_PLACES_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": GOOGLE_API_KEY,
+        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.location",
+      },
+      body: JSON.stringify({
+        textQuery: query,
+      }),
+    });
     const data = await response.json();
 
-    if (data.features) {
-      return data.features;
+    if (data.places) {
+      console.log("Suggestions:", data.places);
+      const places = data.places.map((place: any) => ({
+        id: place.id,
+        place_name: place.displayName.text,
+        geometry: {
+          coordinates: [place.location.longitude, place.location.latitude],
+        },
+      }));
+      return places;
     }
 
     return [];
