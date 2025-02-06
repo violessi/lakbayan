@@ -9,7 +9,7 @@ export async function fetchSuggestions(query: string): Promise<any[]> {
 
   try {
     const response = await fetch(
-      `${BASE_URL}/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_ACCESS_TOKEN}`,
+      `${BASE_URL}/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=PH`,
     );
     const data = await response.json();
 

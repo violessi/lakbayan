@@ -4,6 +4,7 @@ import { useTrip } from "@contexts/TripContext";
 
 import { SafeAreaView, View, Alert } from "react-native";
 import Header from "@components/ui/Header";
+import PrimaryButton from "@components/ui/PrimaryButton";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 import TransportationModeSelection from "@components/contribute/TransportationModeSelection";
 
@@ -77,7 +78,7 @@ export default function RouteSelectInfo() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Route Input" />
+      <Header title="Route Information" />
 
       <View>
         <StartEndSearchBar
@@ -108,13 +109,11 @@ export default function RouteSelectInfo() {
         )}
       </MapView>
 
-      <View className="absolute bottom-0 mb-80 w-100">
-        <Button mode="contained" onPress={handleLastRoute}>
-          Final Location
-        </Button>
-      </View>
-
       <TransportationModeSelection onTransportationModeChange={handleTransportationModeChange} />
+
+      <View className="z-50 flex px-5 w-100">
+        <PrimaryButton label="Final Location" onPress={handleLastRoute} />
+      </View>
     </SafeAreaView>
   );
 }

@@ -67,6 +67,30 @@ export default function CustomTrip() {
           animationMode="easeTo"
         />
 
+        {trip.startCoordinates && (
+          <ShapeSource id="start-location" shape={featureCollection([point(trip.startCoordinates)])}>
+            <SymbolLayer
+              id="start-location-icon"
+              style={{
+                iconImage: "pin",
+                iconSize: 0.1,
+              }}
+            />
+          </ShapeSource>
+        )}
+
+        {trip.endCoordinates && (
+          <ShapeSource id="start-location" shape={featureCollection([point(trip.endCoordinates)])}>
+            <SymbolLayer
+              id="start-location-icon"
+              style={{
+                iconImage: "pin",
+                iconSize: 0.1,
+              }}
+            />
+          </ShapeSource>
+        )}
+
         {coordinates && (
           <ShapeSource id="todas" shape={featureCollection([point(coordinates)])}>
             <SymbolLayer

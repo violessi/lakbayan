@@ -16,6 +16,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo-google-fonts/dm-sans": "^0.2.3",
     "@expo/config": "^10.0.6",
     "@expo/vector-icons": "^14.0.4",
     "@gorhom/bottom-sheet": "^5",
@@ -27,7 +28,7 @@
     "dotenv": "^16.4.7",
     "expo": "~52.0.18",
     "expo-constants": "~17.0.3",
-    "expo-font": "~13.0.1",
+    "expo-font": "~13.0.3",
     "expo-linking": "~7.0.3",
     "expo-location": "~18.0.4",
     "expo-router": "~4.0.11",
