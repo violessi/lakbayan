@@ -23,7 +23,7 @@ export default function TripSummary({ startLocation, endLocation, trip }: TripSu
       <BottomSheetView className="flex flex-col px-5 gap-8">
         <View className="flex flex-row justify-center">
           {trip.routes.length === 0 ? (
-            <Text className="text-secondary">No transfers added yet.</Text>
+            <Text className="text-secondary mt-5">No transfers added yet.</Text>
           ) : (
             <FlatList
               data={trip.routes}

@@ -65,7 +65,7 @@ export default function StartEndSearch({
   };
 
   return (
-    <View className="absolute top-0 left-0 z-40 m-5flex flex-col bg-white rounded-[8]">
+    <View className="absolute top-0 left-0 z-40 flex flex-col bg-white rounded-[8]" style={{ width: "100%" }}>
       <View className="absolute top-0 left-0 z-50 m-5 flex-row items-center bg-white rounded-[8]">
         <TextInput
           placeholder={defaultStart || "Starting location"}
@@ -81,7 +81,7 @@ export default function StartEndSearch({
         {isStartActive && <IconButton icon="close" size={20} onPress={() => handleClearAll("start")} />}
       </View>
 
-      <View className="absolute top-16 left-0 z-50 m-5 flex-row items-center bg-white rounded-[8]">
+      <View className="absolute top-16 left-0 z-50 mx-5 my-3 flex-row items-center bg-white rounded-[8]">
         <TextInput
           placeholder={defaultEnd || "Destination"}
           value={endSearchQuery}
@@ -90,6 +90,7 @@ export default function StartEndSearch({
             handleFetchSuggestions(text, "end");
           }}
           dense={true}
+          editable={true}
           underlineStyle={{
             display: "none",
           }}
