@@ -1,42 +1,33 @@
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
+import { supabaseUrl } from "@utils/supabase";
+
 const BASE_URL = "https://api.mapbox.com";
-const GOOGLE_PLACES_API_URL = "https://places.googleapis.com/v1/places:searchText";
 
 export async function fetchSuggestions(query: string): Promise<any[]> {
   if (!query.trim()) {
     return [];
   }
 
+  const SUPABASE_EDGE_FUNCTION_URL = `${supabaseUrl}/functions/v1/fetch-suggestions`;
+
   try {
-    const response = await fetch(GOOGLE_PLACES_API_URL, {
+    const response = await fetch(SUPABASE_EDGE_FUNCTION_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Goog-Api-Key": GOOGLE_API_KEY,
-        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.location",
       },
-      body: JSON.stringify({
-        textQuery: query,
-      }),
+      body: JSON.stringify({ query }),
     });
-    const data = await response.json();
 
-    if (data.places) {
-      console.log("Suggestions:", data.places);
-      const places = data.places.map((place: any) => ({
-        id: place.id,
-        place_name: place.displayName.text,
-        geometry: {
-          coordinates: [place.location.longitude, place.location.latitude],
-        },
-      }));
-      return places;
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
     }
 
-    return [];
+    const data = await response.json();
+    return data.suggestions || [];
   } catch (error) {
-    console.error("Error fetching suggestions:", error);
+    console.error("Error fet:", error);
     return [];
   }
 }
