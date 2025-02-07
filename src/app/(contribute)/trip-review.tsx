@@ -45,7 +45,9 @@ export default function TripReview() {
     trip.routes.length > 0 && trip.endLocation === trip.routes[trip.routes.length - 1].endLocation;
 
   const handleSubmitTrip = () => {
-    insertTripSegment(trip.routes[0]);
+    trip.routes.forEach((route) => {
+      insertTripSegment(route);
+    });
     Alert.alert(
       "Trip Submitted",
       "Your custom route has been submitted. You may transit journal it for GPS verification?",

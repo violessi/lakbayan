@@ -4,12 +4,14 @@ export const insertTripSegment = async (route: Route) => {
   const {
     routeName,
     landmark,
+    instruction,
     startLocation,
     startCoordinates,
     endLocation,
     endCoordinates,
     directions,
     transportationMode,
+    cost,
   } = route;
 
   const {
@@ -29,18 +31,18 @@ export const insertTripSegment = async (route: Route) => {
       segment_mode: transportationMode,
       segment_name: routeName,
       landmark,
-      instruction: JSON.stringify(directions),
+      instruction,
       waypoints: JSON.stringify(directions.routes[0].geometry.coordinates),
       contributor_id: contributorId,
       last_updated: new Date().toISOString(),
-      gps_verified: 1,
-      mod_verified: 1,
-      duration: 0,
+      gps_verified: 0,
+      mod_verified: 0,
+      duration: Math.round(directions.routes[0].duration),
       start_location: startLocation,
       start_coords: startCoordinates,
       end_location: endLocation,
       end_coords: endCoordinates,
-      cost: 0,
+      cost,
     },
   ]);
 

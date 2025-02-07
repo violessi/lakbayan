@@ -29,11 +29,14 @@ declare global {
     id: string;
     routeName: string;
     landmark: string;
+    instruction: string;
     startLocation: string;
     startCoordinates: Coordinates;
     endLocation: string;
     endCoordinates: Coordinates;
     directions: MapboxDirectionsResponse;
+    duration: number;
+    cost: number;
     transportationMode: TransportationMode;
   }
 }
