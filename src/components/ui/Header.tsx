@@ -9,15 +9,18 @@ const back = require("@assets/left-arrow.png");
 interface HeaderProps {
   title: string;
   subtitle?: string;
+  hasBack?: boolean;
 }
 
-export default function Header({ title, subtitle }: HeaderProps) {
+export default function Header({ title, subtitle, hasBack = true }: HeaderProps) {
   return (
     <View className="h-24 bg-primary px-5 py-5 flex-col justify-end">
       <View className="flex-row gap-3 items-center">
-        <TouchableOpacity onPress={() => router.back()}>
-          <Image source={back} className="w-5 h-5" />
-        </TouchableOpacity>
+        {hasBack && (
+          <TouchableOpacity onPress={() => router.back()}>
+            <Image source={back} className="w-5 h-5" />
+          </TouchableOpacity>
+        )}
         <Text style={styles.title}>{title}</Text>
       </View>
       <View>{subtitle && <Text className="text-white text-sm">{subtitle}</Text>}</View>

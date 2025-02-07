@@ -11,6 +11,8 @@ import TripTitle from "@components/contribute/TripTitle";
 
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
+import { insertTripSegment } from "@services/trip-service";
+
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -43,6 +45,9 @@ export default function TripReview() {
     trip.routes.length > 0 && trip.endLocation === trip.routes[trip.routes.length - 1].endLocation;
 
   const handleSubmitTrip = () => {
+    trip.routes.forEach((route) => {
+      insertTripSegment(route);
+    });
     Alert.alert(
       "Trip Submitted",
       "Your custom route has been submitted. You may transit journal it for GPS verification?",

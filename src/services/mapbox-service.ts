@@ -1,5 +1,7 @@
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
+import { supabaseUrl } from "@utils/supabase";
+
 const BASE_URL = "https://api.mapbox.com";
 
 export async function fetchSuggestions(query: string): Promise<any[]> {
@@ -7,19 +9,25 @@ export async function fetchSuggestions(query: string): Promise<any[]> {
     return [];
   }
 
-  try {
-    const response = await fetch(
-      `${BASE_URL}/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=PH`,
-    );
-    const data = await response.json();
+  const SUPABASE_EDGE_FUNCTION_URL = `${supabaseUrl}/functions/v1/fetch-suggestions`;
 
-    if (data.features) {
-      return data.features;
+  try {
+    const response = await fetch(SUPABASE_EDGE_FUNCTION_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
     }
 
-    return [];
+    const data = await response.json();
+    return data.suggestions || [];
   } catch (error) {
-    console.error("Error fetching suggestions:", error);
+    console.error("Error fet:", error);
     return [];
   }
 }

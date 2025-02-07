@@ -30,6 +30,8 @@ export default function RouteInput() {
 
   const [routeName, setRouteName] = useState("");
   const [landmark, setLandmark] = useState("");
+  const [instruction, setInstruction] = useState("");
+  const [cost, setCost] = useState("");
 
   const {
     startRouteLocationParams,
@@ -98,6 +100,14 @@ export default function RouteInput() {
     setLandmark(landmark);
   };
 
+  const handleInstructionChange = (instruction: string) => {
+    setInstruction(instruction);
+  };
+
+  const handleCostChange = (cost: string) => {
+    setCost(cost);
+  };
+
   const { addRoute } = useTrip();
 
   const handleSubmit = () => {
@@ -110,12 +120,15 @@ export default function RouteInput() {
       id: uuid.v4(),
       routeName,
       landmark,
+      instruction,
       startLocation: startRouteLocation,
       startCoordinates: startRouteCoordinates,
       endLocation: endRouteLocation,
       endCoordinates: endRouteCoordinates,
       directions: directions,
       transportationMode: transportationMode,
+      cost: 0,
+      duration: 0,
     };
 
     addRoute(newRoute);
@@ -169,7 +182,7 @@ export default function RouteInput() {
         )}
       </MapView>
 
-      <View className="absolute bottom-0 mb-80 w-100">
+      <View className="absolute bottom-0 mb-96 w-100">
         <View className="flex flex-row">
           <View className="w-1/2 pl-12 pr-5">
             <PrimaryButton label={isAddPointsMode ? "Recalculate" : "Edit Route"} onPress={handleToggleMode} />
@@ -185,8 +198,12 @@ export default function RouteInput() {
       <RouteInformation
         onRouteNameChange={handleRouteNameChange}
         onLandmarkChange={handleLandmarkChange}
+        onInstructionChange={handleInstructionChange}
+        onCostChange={handleCostChange}
         routeName={routeName}
         landmark={landmark}
+        instruction={instruction}
+        cost={cost}
         onSubmit={handleSubmit}
       />
     </SafeAreaView>
