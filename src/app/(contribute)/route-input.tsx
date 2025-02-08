@@ -29,6 +29,7 @@ export default function RouteInput() {
   const [loadingDirections, setLoadingDirections] = useState(false);
 
   const [routeName, setRouteName] = useState("");
+  const [segmentName, setSegmentName] = useState("");
   const [landmark, setLandmark] = useState("");
   const [instruction, setInstruction] = useState("");
   const [cost, setCost] = useState("");
@@ -50,6 +51,8 @@ export default function RouteInput() {
   const transportationMode = transportationModeParams as TransportationMode;
 
   const directionCoordinates: Coordinates[] = directions?.routes?.[0]?.geometry.coordinates || [];
+  const directionCoordinates: Coordinates[] =
+    directions?.routes?.[0]?.geometry.coordinates || [];
 
   const handleGetDirections = async () => {
     setLoadingDirections(true);
@@ -94,21 +97,30 @@ export default function RouteInput() {
 
   const handleRouteNameChange = (routeName: string) => {
     setRouteName(routeName);
+  const handleRouteNameChange = (name: string) => {
+    setSegmentName(name);
   };
 
   const handleLandmarkChange = (landmark: string) => {
     setLandmark(landmark);
+  const handleLandmarkChange = (lm: string) => {
+    setLandmark(lm);
   };
 
   const handleInstructionChange = (instruction: string) => {
     setInstruction(instruction);
+  const handleInstructionChange = (instr: string) => {
+    setInstruction(instr);
   };
 
   const handleCostChange = (cost: string) => {
     setCost(cost);
+  const handleCostChange = (c: string) => {
+    setCost(c);
   };
 
   const { addRoute } = useTrip();
+  const { addSegment, setStartEndLocations, trip } = useTrip();
 
   const handleSubmit = () => {
     if (!directions) {
@@ -117,6 +129,7 @@ export default function RouteInput() {
     }
 
     const newRoute: Route = {
+    const newSegment: Segment = {
       id: uuid.v4(),
       routeName,
       landmark,
@@ -125,15 +138,36 @@ export default function RouteInput() {
       startCoordinates: startRouteCoordinates,
       endLocation: endRouteLocation,
       endCoordinates: endRouteCoordinates,
+      contributor_id: "",
+      segment_name: segmentName,
+      segment_mode: transportationMode,
       directions: directions,
       transportationMode: transportationMode,
       cost: 0,
       duration: 0,
+      waypoints: waypoints,
+      landmark: landmark,
+      instruction: instruction,
+      last_updated: new Date(),
+      gps_verified: 0,
+      mod_verified: 0,
+      start_location: startRouteLocation,
+      start_coords: startRouteCoordinates,
+      end_location: endRouteLocation,
+      end_coords: endRouteCoordinates,
+      duration: directions.routes[0].duration,
+      cost: Number(cost) || 0,
     };
 
     addRoute(newRoute);
     console.log("Added Route:", newRoute);
     router.dismissAll();
+    addSegment(newSegment);
+    console.log("Added Segment:", newSegment);
+    router.replace({
+      pathname: "/trip-review",
+      params: {},
+    });
   };
 
   return (
@@ -166,6 +200,18 @@ export default function RouteInput() {
 
         <LocationMarker coordinates={startRouteCoordinates} label={startRouteLocation} color={"red"} radius={8} />
         <LocationMarker coordinates={endRouteCoordinates} label={endRouteLocation} color={"red"} radius={8} />
+        <LocationMarker
+          coordinates={startRouteCoordinates}
+          label={startRouteLocation}
+          color="red"
+          radius={8}
+        />
+        <LocationMarker
+          coordinates={endRouteCoordinates}
+          label={endRouteLocation}
+          color="red"
+          radius={8}
+        />
 
         {waypoints.map((waypoint, index) => (
           <LocationMarker
@@ -180,6 +226,11 @@ export default function RouteInput() {
         {!loadingDirections && directionCoordinates && !isAddPointsMode && (
           <DirectionsLine coordinates={directionCoordinates} />
         )}
+        {!loadingDirections &&
+          directionCoordinates.length > 0 &&
+          !isAddPointsMode && (
+            <DirectionsLine coordinates={directionCoordinates} />
+          )}
       </MapView>
 
       <View className="absolute bottom-0 mb-96 w-100">
@@ -206,6 +257,16 @@ export default function RouteInput() {
         cost={cost}
         onSubmit={handleSubmit}
       />
+            onRouteNameChange={handleRouteNameChange}
+            onLandmarkChange={handleLandmarkChange}
+            onInstructionChange={handleInstructionChange}
+            onCostChange={handleCostChange}
+            routeName={segmentName}
+            landmark={landmark}
+            instruction={instruction}
+            cost={cost}
+            onSubmit={handleSubmit}
+          />
     </SafeAreaView>
   );
 }

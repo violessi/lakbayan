@@ -1,13 +1,15 @@
 import React, { createContext, useState, ReactNode } from "react";
 
+
 interface TripContextType {
   trip: Trip;
-  addRoute: (route: Route) => void;
+  segments: Segment[];
+  addSegment: (segment: Segment) => void;
   setStartEndLocations: (
-    startLocation: string,
-    startCoordinates: Coordinates,
-    endLocation: string,
-    endCoordinates: Coordinates,
+    start_location: string,
+    start_coords: Coordinates,
+    end_location: string,
+    end_coords: Coordinates,
   ) => void;
 }
 
@@ -18,37 +20,49 @@ interface TripProviderProps {
 }
 
 export const TripProvider = ({ children }: TripProviderProps) => {
+  // Initialize the Trip state with all required fields.
   const [trip, setTrip] = useState<Trip>({
-    routes: [],
-    startLocation: "",
-    startCoordinates: [0, 0],
-    endLocation: "",
-    endCoordinates: [0, 0],
+    id: "",
+    contributor_id: "",
+    name: "",
+    gps_verified: 0,
+    mod_verified: 0,
+    start_location: "",
+    start_coords: [0, 0],
+    end_location: "",
+    end_coords: [0, 0],
+    duration: 0,
+    cost: 0,
   });
 
-  const addRoute = (route: Route) => {
-    setTrip((prevTrip) => ({
-      ...prevTrip,
-      routes: [...prevTrip.routes, route],
-    }));
+  const [segments, setSegments] = useState<Segment[]>([]);
+
+  const addSegment = (segment: Segment) => {
+    setSegments((prevSegments) => [...prevSegments, segment]);
   };
 
   const setStartEndLocations = (
-    startLocation: string,
-    startCoordinates: Coordinates,
-    endLocation: string,
-    endCoordinates: Coordinates,
+    start_location: string,
+    start_coords: Coordinates,
+    end_location: string,
+    end_coords: Coordinates,
   ) => {
     setTrip((prevTrip) => ({
       ...prevTrip,
-      startLocation,
-      startCoordinates,
-      endLocation,
-      endCoordinates,
+      start_location,
+      start_coords,
+      end_location,
+      end_coords,
     }));
   };
 
-  return <TripContext.Provider value={{ trip, addRoute, setStartEndLocations }}>{children}</TripContext.Provider>;
+  return (
+    <TripContext.Provider
+      value={{ trip, segments, addSegment, setStartEndLocations }}
+    >
+      {children}
+    </TripContext.Provider>
+  );
 };
 
 export const useTrip = (): TripContextType => {

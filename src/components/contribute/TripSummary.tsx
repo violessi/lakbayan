@@ -8,14 +8,21 @@ interface TripSummaryProps {
   startLocation: string;
   endLocation: string;
   trip: Trip;
+  segments: Segment[];
 }
 
 export default function TripSummary({ startLocation, endLocation, trip }: TripSummaryProps) {
+export default function TripSummary({
+  startLocation,
+  endLocation,
+  segments,
+}: TripSummaryProps) {
   const snapPoints = ["15%", "25%", "72%"];
 
   {
     /* FIXME Move colors to constant */
   }
+  /* FIXME: Move colors to constant */
   const routeColors = ["#FF5733", "#3357FF", "#F3FF33", "#FF33A6"];
 
   return (
@@ -24,11 +31,20 @@ export default function TripSummary({ startLocation, endLocation, trip }: TripSu
         <View className="flex flex-row justify-center">
           {trip.routes.length === 0 ? (
             <Text className="text-secondary mt-5">No transfers added yet.</Text>
+          {segments.length === 0 ? (
+            <Text className="text-secondary mt-5">
+              No transfers added yet.
+            </Text>
           ) : (
             <FlatList
               data={trip.routes}
+              data={segments}
               renderItem={({ item, index }) => (
                 <RouteItem route={item} color={routeColors[index % routeColors.length]} />
+                <RouteItem
+                  segment={item}
+                  color={routeColors[index % routeColors.length]}
+                />
               )}
               keyExtractor={(item) => item.id}
             />

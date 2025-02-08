@@ -20,10 +20,12 @@ export default function CustomTrip() {
 
   const handleStartChange = (location: string, coordinates: [number, number]) => {
     setStartEndLocations(location, coordinates, trip.endLocation, trip.endCoordinates || [0, 0]);
+    setStartEndLocations(location, coordinates, trip.end_location, trip.end_coords || [0, 0]);
   };
 
   const handleEndChange = (location: string, coordinates: [number, number]) => {
     setStartEndLocations(trip.startLocation, trip.startCoordinates || [0, 0], location, coordinates);
+    setStartEndLocations(trip.start_location, trip.start_coords || [0, 0], location, coordinates);
   };
 
   const cameraRef = useRef<Camera>(null);
@@ -41,6 +43,7 @@ export default function CustomTrip() {
 
   useEffect(() => {
     if (trip.startLocation !== "" && trip.endLocation !== "") {
+    if (trip.start_location !== "" && trip.end_location !== "") {
       router.push("/(contribute)/trip-review");
     }
   }, [trip]);
@@ -69,6 +72,8 @@ export default function CustomTrip() {
 
         {trip.startCoordinates && (
           <ShapeSource id="start-location" shape={featureCollection([point(trip.startCoordinates)])}>
+        {trip.start_coords && (
+          <ShapeSource id="start-location" shape={featureCollection([point(trip.start_coords)])}>
             <SymbolLayer
               id="start-location-icon"
               style={{
@@ -81,6 +86,8 @@ export default function CustomTrip() {
 
         {trip.endCoordinates && (
           <ShapeSource id="start-location" shape={featureCollection([point(trip.endCoordinates)])}>
+        {trip.end_coords && (
+          <ShapeSource id="start-location" shape={featureCollection([point(trip.end_coords)])}>
             <SymbolLayer
               id="start-location-icon"
               style={{

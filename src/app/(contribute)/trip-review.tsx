@@ -1,6 +1,8 @@
 import React, { useRef } from "react";
 import { router } from "expo-router";
 import { useTrip } from "@contexts/TripContext";
+import { SafeAreaView, View, Alert } from "react-native";
+import uuid from "react-native-uuid";
 
 import { SafeAreaView, View, Alert, Text, Button } from "react-native";
 import Header from "@components/ui/Header";
@@ -24,11 +26,19 @@ export default function TripReview() {
   const routeCoordinates = trip.routes?.map((route) => route.directions.routes[0].geometry.coordinates) || [];
   const startCoordinates = trip.startCoordinates;
   const endCoordinates = trip.endCoordinates;
+  const { trip, segments = [] } = useTrip();
+
+  const segmentCoordinates = segments?.map((segment) => segment.directions.routes[0].geometry.coordinates) || [];
+  const startCoordinates = trip.start_coords;
+  const endCoordinates = trip.end_coords;
+  const startLocation = trip.start_location;
+  const endLocation = trip.end_location;
 
   {
     /* FIXME Move colors to constant */
   }
   // Assign colors to each route line based on index
+  /* FIXME: Move colors to constant */
   const routeColors = ["#FF5733", "#3357FF", "#F3FF33", "#FF33A6"];
 
   const handleMapLoaded = () => {
@@ -41,6 +51,8 @@ export default function TripReview() {
     router.push("/(contribute)/route-select-info");
   };
 
+  // Check if there is at least one segment and if the trip's end_location
+  // matches the last segment's end_location.
   const isSameEndLocation =
     trip.routes.length > 0 && trip.endLocation === trip.routes[trip.routes.length - 1].endLocation;
 
@@ -54,6 +66,9 @@ export default function TripReview() {
     );
     router.replace("/(tabs)");
   };
+    segments.length > 0 &&
+    trip.end_location === segments[segments.length - 1].end_location;
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -61,6 +76,7 @@ export default function TripReview() {
 
       <View className="flex justify-center items-center">
         <TripTitle startLocation={trip.startLocation} endLocation={trip.endLocation} />
+        <TripTitle startLocation={trip.start_location} endLocation={trip.end_location} />
       </View>
 
       <MapView
@@ -73,6 +89,12 @@ export default function TripReview() {
 
         {routeCoordinates.map((coordinates, index) => (
           <DirectionsLine key={index} coordinates={coordinates} color={routeColors[index % routeColors.length]} />
+        {segmentCoordinates.map((coordinates, index) => (
+          <DirectionsLine
+            key={index}
+            coordinates={coordinates}
+            color={routeColors[index % routeColors.length]}
+          />
         ))}
       </MapView>
 
@@ -84,6 +106,11 @@ export default function TripReview() {
       </View>
 
       <TripSummary startLocation={trip.startLocation} endLocation={trip.endLocation} trip={trip} />
+      <TripSummary
+        startLocation={trip.start_location}
+        endLocation={trip.end_location}
+        segments={segments}
+      />
     </SafeAreaView>
   );
 }
