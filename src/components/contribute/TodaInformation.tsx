@@ -7,11 +7,14 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { insertStop } from "@services/supabase-service";
 
+import { useSession } from "@contexts/SessionContext";
+
 interface TodaStopsProps {
   coordinates: [number, number] | null;
 }
 
 export default function TodaStops({ coordinates }: TodaStopsProps) {
+  const { userId } = useSession();
   const [todaName, setTodaName] = useState("");
   const [color, setColor] = useState("");
   const [landmark, setLandmark] = useState("");
@@ -34,7 +37,8 @@ export default function TodaStops({ coordinates }: TodaStopsProps) {
         landmark: landmark,
         latitude: coordinates[1],
         longitude: coordinates[0],
-        type: "tricycle",
+        transpo_mode: "tricycle",
+        contributor_id: userId || ""
       });
 
       Alert.alert("Success!", "TODA stop information submitted successfully!");
