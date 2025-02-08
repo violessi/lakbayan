@@ -4,28 +4,23 @@ import { useTrip } from "@contexts/TripContext";
 import { SafeAreaView, View, Alert } from "react-native";
 import uuid from "react-native-uuid";
 
-import { SafeAreaView, View, Alert, Text, Button } from "react-native";
 import Header from "@components/ui/Header";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import TripSummary from "@components/contribute/TripSummary";
 import DirectionsLine from "@components/ui/DirectionsLine";
+import LocationMarker from "@components/ui/LocationMarker";
 import TripTitle from "@components/contribute/TripTitle";
 
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
-import { insertTripSegment } from "@services/trip-service";
-
+import { insertTrip, insertTripSegments, insertSegmentsToTrips, insertTripAndRelated } from "@services/trip-service";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
-  const { trip } = useTrip();
 
-  const routeCoordinates = trip.routes?.map((route) => route.directions.routes[0].geometry.coordinates) || [];
-  const startCoordinates = trip.startCoordinates;
-  const endCoordinates = trip.endCoordinates;
   const { trip, segments = [] } = useTrip();
 
   const segmentCoordinates = segments?.map((segment) => segment.directions.routes[0].geometry.coordinates) || [];
@@ -34,10 +29,6 @@ export default function TripReview() {
   const startLocation = trip.start_location;
   const endLocation = trip.end_location;
 
-  {
-    /* FIXME Move colors to constant */
-  }
-  // Assign colors to each route line based on index
   /* FIXME: Move colors to constant */
   const routeColors = ["#FF5733", "#3357FF", "#F3FF33", "#FF33A6"];
 
@@ -54,20 +45,50 @@ export default function TripReview() {
   // Check if there is at least one segment and if the trip's end_location
   // matches the last segment's end_location.
   const isSameEndLocation =
-    trip.routes.length > 0 && trip.endLocation === trip.routes[trip.routes.length - 1].endLocation;
-
-  const handleSubmitTrip = () => {
-    trip.routes.forEach((route) => {
-      insertTripSegment(route);
-    });
-    Alert.alert(
-      "Trip Submitted",
-      "Your custom route has been submitted. You may transit journal it for GPS verification?",
-    );
-    router.replace("/(tabs)");
-  };
     segments.length > 0 &&
     trip.end_location === segments[segments.length - 1].end_location;
+
+    const handleSubmitTrip = async () => {
+      // Generate a new trip id.
+      const tripId = uuid.v4();
+    
+      // Build the new trip object.
+      const newTrip: Trip = {
+        ...trip,
+        id: tripId,
+        name: `${trip.start_location} to ${trip.end_location}`,
+        duration: segments.reduce((acc, segment) => acc + segment.duration, 0),
+        cost: segments.reduce((acc, segment) => acc + segment.cost, 0),
+      };
+    
+      // Build the joint segments array as an array of objects
+      // that conform to the SegmentsToTrips interface.
+      const jointSegments: SegmentsToTrips[] = segments.map((segment, index) => ({
+        trip_id: tripId,
+        segment_id: segment.id,
+        segment_order: index,
+      }));
+    
+      try {
+        // Call the new helper function that performs sequential inserts.
+        const result = await insertTripAndRelated(newTrip, segments, jointSegments);
+        console.log("Trip and related inserted:", result);
+    
+        // Alert the user and navigate to the desired page.
+        Alert.alert(
+          "Trip Submitted",
+          "Your custom route has been submitted. Do you want to transit journal it for GPS verification?"
+        );
+        router.replace("/(tabs)");
+      } catch (error) {
+        console.error("Error inserting trip and related:", error);
+        Alert.alert("Error", "There was an error submitting your trip. Please try again.");
+      }
+    };
+    
+  console.log("Trip segments: ", segments);
+  console.log("Start and end locations: ", trip.start_location, trip.end_location);
+  console.log("Is same end location: ", isSameEndLocation);
 
 
   return (
@@ -75,7 +96,6 @@ export default function TripReview() {
       <Header title="Trip Review" />
 
       <View className="flex justify-center items-center">
-        <TripTitle startLocation={trip.startLocation} endLocation={trip.endLocation} />
         <TripTitle startLocation={trip.start_location} endLocation={trip.end_location} />
       </View>
 
@@ -85,10 +105,26 @@ export default function TripReview() {
         projection="mercator"
         onDidFinishLoadingMap={handleMapLoaded}
       >
-        <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} animationMode="easeTo" zoomLevel={10} />
+        <Camera
+          ref={cameraRef}
+          centerCoordinate={[121.05, 14.63]}
+          animationMode="easeTo"
+          zoomLevel={10}
+        />
 
-        {routeCoordinates.map((coordinates, index) => (
-          <DirectionsLine key={index} coordinates={coordinates} color={routeColors[index % routeColors.length]} />
+        <LocationMarker
+          coordinates={startCoordinates}
+          label={startLocation}
+          color="red"
+          radius={8}
+        />
+        <LocationMarker
+          coordinates={endCoordinates}
+          label={endLocation}
+          color="red"
+          radius={8}
+        />
+
         {segmentCoordinates.map((coordinates, index) => (
           <DirectionsLine
             key={index}
@@ -98,14 +134,13 @@ export default function TripReview() {
         ))}
       </MapView>
 
-      <View className="z-50 flex px-5 w-100">
+      <View className="px-10 py-20 z-10">
         <PrimaryButton
           label={isSameEndLocation ? "Submit" : "Add Transfers"}
           onPress={isSameEndLocation ? handleSubmitTrip : handleNavigateToRouteInput}
         />
       </View>
 
-      <TripSummary startLocation={trip.startLocation} endLocation={trip.endLocation} trip={trip} />
       <TripSummary
         startLocation={trip.start_location}
         endLocation={trip.end_location}
