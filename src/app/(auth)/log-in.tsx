@@ -4,6 +4,7 @@ import { Button, TextInput } from "react-native-paper";
 import { Alert, View, AppState, SafeAreaView } from "react-native";
 
 import { supabase } from "@utils/supabase";
+import { useSession } from "@contexts/SessionContext";
 
 AppState.addEventListener("change", (state) => {
   if (state === "active") {
@@ -14,6 +15,7 @@ AppState.addEventListener("change", (state) => {
 });
 
 export default function LogIn() {
+  const { userId } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,6 +30,7 @@ export default function LogIn() {
     if (error) {
       Alert.alert(error.message);
     } else {
+      console.log("Logged in user ID:", userId);
       router.replace("/(tabs)");
     }
     setLoading(false);
@@ -35,10 +38,7 @@ export default function LogIn() {
 
   async function signUpWithEmail() {
     setLoading(true);
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: email,
       password: password,
     });
@@ -48,8 +48,6 @@ export default function LogIn() {
     } else {
       Alert.alert("Success! Please log in.");
     }
-    // if (!session)
-    //   Alert.alert("Please check your inbox for email verification!");
     setLoading(false);
   }
 
@@ -73,10 +71,10 @@ export default function LogIn() {
         />
       </View>
       <View className="flex flex-col w-full">
-        <Button disabled={loading} onPress={() => signInWithEmail()}>
+        <Button disabled={loading} onPress={signInWithEmail}>
           Log in
         </Button>
-        <Button disabled={loading} onPress={() => signUpWithEmail()}>
+        <Button disabled={loading} onPress={signUpWithEmail}>
           Sign up
         </Button>
       </View>
