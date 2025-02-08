@@ -19,12 +19,10 @@ export default function CustomTrip() {
   const [zoomLevel, setZoomLevel] = useState(12);
 
   const handleStartChange = (location: string, coordinates: [number, number]) => {
-    setStartEndLocations(location, coordinates, trip.endLocation, trip.endCoordinates || [0, 0]);
     setStartEndLocations(location, coordinates, trip.end_location, trip.end_coords || [0, 0]);
   };
 
   const handleEndChange = (location: string, coordinates: [number, number]) => {
-    setStartEndLocations(trip.startLocation, trip.startCoordinates || [0, 0], location, coordinates);
     setStartEndLocations(trip.start_location, trip.start_coords || [0, 0], location, coordinates);
   };
 
@@ -42,7 +40,6 @@ export default function CustomTrip() {
   };
 
   useEffect(() => {
-    if (trip.startLocation !== "" && trip.endLocation !== "") {
     if (trip.start_location !== "" && trip.end_location !== "") {
       router.push("/(contribute)/trip-review");
     }
@@ -59,7 +56,7 @@ export default function CustomTrip() {
       <MapView
         style={{ flex: 1 }}
         styleURL="mapbox://styles/mapbox/streets-v12"
-        onPress={handleMapPress}
+        // onPress={handleMapPress}
         onRegionDidChange={handleZoomChange}
         projection="mercator"
       >
@@ -70,8 +67,6 @@ export default function CustomTrip() {
           animationMode="easeTo"
         />
 
-        {trip.startCoordinates && (
-          <ShapeSource id="start-location" shape={featureCollection([point(trip.startCoordinates)])}>
         {trip.start_coords && (
           <ShapeSource id="start-location" shape={featureCollection([point(trip.start_coords)])}>
             <SymbolLayer
@@ -84,8 +79,6 @@ export default function CustomTrip() {
           </ShapeSource>
         )}
 
-        {trip.endCoordinates && (
-          <ShapeSource id="start-location" shape={featureCollection([point(trip.endCoordinates)])}>
         {trip.end_coords && (
           <ShapeSource id="start-location" shape={featureCollection([point(trip.end_coords)])}>
             <SymbolLayer

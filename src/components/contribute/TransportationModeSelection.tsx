@@ -5,7 +5,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { TRANSPORTATION_MODES } from "@constants/transportation-modes";
 
 interface TransportationModeSelectionProps {
-  onTransportationModeChange: (mode: string) => void;
+  onTransportationModeChange: (mode: TransportationMode) => void;
 }
 
 export default function TransportationModeSelection({ onTransportationModeChange }: TransportationModeSelectionProps) {

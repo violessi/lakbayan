@@ -3,14 +3,10 @@ import { View } from "react-native";
 import { Text } from "react-native-paper";
 
 interface RouteItemProps {
-  route: Route;
-  color: string; // Accept color as a prop
   segment: Segment;
   color: string;
 }
 
-export default function RouteItem({ route, color }: RouteItemProps) {
-  const estimatedTime = Math.floor(route.directions.routes[0].duration / 60);
 export default function RouteItem({ segment, color }: RouteItemProps) {
   const estimatedTime = Math.floor(segment.duration / 60);
 
@@ -22,12 +18,10 @@ export default function RouteItem({ segment, color }: RouteItemProps) {
         <View className="flex-row gap-7 items-start">
           <View className="w-3/12 flex-col justify-end gap-3">
             <Text className="text-lg font-extrabold" style={{ textAlign: "right" }}>
-              {route.transportationMode}
               {segment.segment_mode}
             </Text>
           </View>
           <View className="w-6/12 flex-col justify-end gap-3">
-            <Text className="text-lg font-bold text-black">{route.routeName}</Text>
             <Text className="text-lg font-bold text-black">{segment.segment_name}</Text>
           </View>
           <View className="w-3/12 flex-row items-center">
@@ -45,7 +39,6 @@ export default function RouteItem({ segment, color }: RouteItemProps) {
           </View>
           <View className="w-6/12 flex-col justify-end gap-3">
             <View className="flex flex-col gap-1">
-              <Text className="font-medium text-sm">{route.startLocation.split(",")[0]}</Text>
               <Text className="font-medium text-sm">{segment.start_location.split(",")[0]}</Text>
             </View>
           </View>
@@ -62,7 +55,6 @@ export default function RouteItem({ segment, color }: RouteItemProps) {
           </View>
           <View className="w-6/12 flex-col justify-end gap-3">
             <View className="flex flex-col gap-1">
-              <Text className="font-medium text-sm">{route.endLocation.split(",")[0]}</Text>
               <Text className="font-medium text-sm">{segment.end_location.split(",")[0]}</Text>
             </View>
           </View>
@@ -70,7 +62,6 @@ export default function RouteItem({ segment, color }: RouteItemProps) {
         </View>
 
         <Text className="text-secondary text-md" style={{ textAlign: "center" }}>
-          {route.landmark}
           {segment.landmark}
         </Text>
       </View>

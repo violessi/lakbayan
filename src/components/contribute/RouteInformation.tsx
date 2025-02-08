@@ -28,7 +28,7 @@ export default function RouteInformation({
   cost,
   onSubmit,
 }: RouteInformationProps) {
-  const snapPoints = ["36%"];
+  const snapPoints = ["40%"];
 
   return (
     <>
@@ -47,7 +47,7 @@ export default function RouteInformation({
           <OutlinedTextInput label="Instruction" value={instruction} onChangeText={onInstructionChange} />
         </BottomSheetView>
       </BottomSheet>
-      <View className="z-50 flex px-5 w-100">
+      <View className="z-50 flex p-5 w-100">
         <PrimaryButton label="Submit" onPress={onSubmit} />
       </View>
     </>

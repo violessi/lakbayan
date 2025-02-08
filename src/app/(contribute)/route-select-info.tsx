@@ -5,6 +5,7 @@ import { useTrip } from "@contexts/TripContext";
 import { SafeAreaView, View, Alert } from "react-native";
 import Header from "@components/ui/Header";
 import PrimaryButton from "@components/ui/PrimaryButton";
+import LocationMarker from "@components/ui/LocationMarker";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 import TransportationModeSelection from "@components/contribute/TransportationModeSelection";
 
@@ -16,22 +17,16 @@ import { Button } from "react-native-paper";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteSelectInfo() {
-  const { trip } = useTrip();
   // Destructure both trip and segments from context
   const { trip, segments } = useTrip();
   const cameraRef = useRef<Camera>(null);
 
   const [transportationMode, setTransportationMode] = useState<TransportationMode | null>(null);
 
-  let startRouteLocation = trip.startLocation as string;
-  let startRouteCoordinates = trip.startCoordinates as Coordinates;
   // Default start location and coordinates come from the trip
   let startRouteLocation = trip.start_location as string;
   let startRouteCoordinates = trip.start_coords as Coordinates;
 
-  if (trip.routes.length > 0) {
-    startRouteLocation = trip.routes[trip.routes.length - 1].endLocation;
-    startRouteCoordinates = trip.routes[trip.routes.length - 1].endCoordinates;
   // If there are any segments, use the end of the last segment as the start for the new leg
   if (segments.length > 0) {
     startRouteLocation = segments[segments.length - 1].end_location;
@@ -45,15 +40,12 @@ export default function RouteSelectInfo() {
     const coordinates = event.geometry.coordinates as [number, number];
     setEndRouteCoordinates(coordinates);
 
-    const locationName = await reverseGeocode(coordinates, MAPBOX_ACCESS_TOKEN);
     const locationName = await reverseGeocode(coordinates);
     setEndRouteLocation(locationName);
   };
 
   // Update final route values using the trip's end_location and end_coords
   const handleLastRoute = () => {
-    setEndRouteLocation(trip.endLocation);
-    setEndRouteCoordinates(trip.endCoordinates);
     setEndRouteLocation(trip.end_location);
     setEndRouteCoordinates(trip.end_coords);
   };
@@ -63,8 +55,6 @@ export default function RouteSelectInfo() {
   };
 
   const handleMapLoaded = () => {
-    if (startRouteCoordinates && trip.endCoordinates && cameraRef.current) {
-      cameraRef.current.fitBounds(startRouteCoordinates, trip.endCoordinates, [150, 150, 250, 150]);
     if (startRouteCoordinates && trip.end_coords && cameraRef.current) {
       cameraRef.current.fitBounds(startRouteCoordinates, trip.end_coords, [150, 150, 250, 150]);
     }
@@ -77,7 +67,6 @@ export default function RouteSelectInfo() {
 
   // Once we have all necessary information, navigate to the next screen.
   useEffect(() => {
-    if (startRouteLocation && startRouteCoordinates && endRouteLocation && endRouteCoordinates && transportationMode) {
     if (
       startRouteLocation &&
       startRouteCoordinates &&
