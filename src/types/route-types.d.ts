@@ -1,5 +1,6 @@
 import type { FeatureCollection, LineString } from "geojson";
 import { TRANSPORTATION_MODES } from "@constants/transportation-modes";
+import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
 
 declare global {
   export type TransportationMode = ["Train", "Bus", "Jeep", "UV", "Tricycle", "Walk"][number];
@@ -17,26 +18,55 @@ declare global {
       }
     > {}
 
-  export interface Trip {
-    routes: Route[];
-    startLocation: string;
-    startCoordinates: Coordinates;
-    endLocation: string;
-    endCoordinates: Coordinates;
+  export interface StopData {
+    name: string;
+    color: string;
+    landmark: string;
+    latitude: number;
+    longitude: number;
+    transpo_mode: string;
+    contributor_id: string;
   }
 
-  export interface Route {
+  export interface Trip {
     id: string;
-    routeName: string;
-    landmark: string;
-    instruction: string;
-    startLocation: string;
-    startCoordinates: Coordinates;
-    endLocation: string;
-    endCoordinates: Coordinates;
-    directions: MapboxDirectionsResponse;
+    contributor_id: string;
+    name: string;
+    gps_verified: number;
+    mod_verified: number;
+    start_location: string;
+    start_coords: Coordinates;
+    end_location: string;
+    end_coords: Coordinates;
     duration: number;
     cost: number;
-    transportationMode: TransportationMode;
+  }
+
+  export interface Segment {
+    id: string;
+    contributor_id: string;
+    segment_name: string;
+    segment_mode: TransportationMode;
+    directions: MapboxDirectionsResponse;
+    waypoints: Coordinates[];
+    landmark: string;
+    instruction: string;
+    last_updated: Date;
+    gps_verified: number;
+    mod_verified: number;
+    start_location: string;
+    start_coords: Coordinates;
+    end_location: string;
+    end_coords: Coordinates;
+    duration: number;
+    cost: number;
+  }
+
+  export interface SegmentsToTrips{
+    trip_id: string;
+    segment_id: string;
+    segment_order: number;
   }
 }
+
+
