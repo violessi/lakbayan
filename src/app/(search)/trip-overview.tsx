@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState, useMemo, Fragment } from "react";
 import { useLocalSearchParams } from "expo-router";
-import { SafeAreaView, Text, ActivityIndicator } from "react-native";
+import { View, SafeAreaView, Text, ActivityIndicator } from "react-native";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
-import Header from "../../components/ui/Header";
-import DirectionsLine from "../../components/ui/DirectionsLine";
-import LocationMarker from "../../components/ui/LocationMarker";
+import Header from "@components/ui/Header";
+import DirectionsLine from "@components/ui/DirectionsLine";
+import LocationMarker from "@components/ui/LocationMarker";
+import PrimaryButton from "@components/ui/PrimaryButton";
 
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 
@@ -105,6 +106,9 @@ export default function TripOverview() {
         )}
       </MapView>
 
+      <View className="px-10  z-10">
+        <PrimaryButton label="Start" />
+      </View>
       <TripSummary startLocation={startLocation} endLocation={endLocation} segments={segmentData} />
     </SafeAreaView>
   );

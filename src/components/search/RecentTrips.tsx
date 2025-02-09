@@ -3,7 +3,7 @@ import { Text } from "react-native";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
-export default function RouteInformation() {
+export default function RecentTrips() {
   const snapPoints = ["20%"];
 
   return (
