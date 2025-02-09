@@ -66,27 +66,23 @@ export default function RouteSelectInfo() {
   }, []);
 
   // Once we have all necessary information, navigate to the next screen.
-  useEffect(() => {
-    if (
-      startRouteLocation &&
-      startRouteCoordinates &&
-      endRouteLocation &&
-      endRouteCoordinates &&
-      transportationMode
-    ) {
-      console.log("Navigate to route input");
-      router.push({
-        pathname: "/route-input",
-        params: {
-          startRouteLocationParams: startRouteLocation,
-          startRouteCoordinatesParams: JSON.stringify(startRouteCoordinates),
-          endRouteLocationParams: endRouteLocation,
-          endRouteCoordinatesParams: JSON.stringify(endRouteCoordinates),
-          transportationModeParams: transportationMode,
-        },
-      });
+  const handleConfirmLocation = () => {
+    if (!startRouteLocation || !startRouteCoordinates || !endRouteLocation || !endRouteCoordinates || !transportationMode) {
+      Alert.alert("Missing Information", "Please fill in all fields to proceed.");
+      return;
     }
-  }, [startRouteLocation, startRouteCoordinates, endRouteLocation, endRouteCoordinates, transportationMode]);
+
+    router.push({
+      pathname: "/route-input",
+      params: {
+        startRouteLocationParams: startRouteLocation,
+        startRouteCoordinatesParams: JSON.stringify(startRouteCoordinates),
+        endRouteLocationParams: endRouteLocation,
+        endRouteCoordinatesParams: JSON.stringify(endRouteCoordinates),
+        transportationModeParams: transportationMode,
+      },
+    });
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -129,8 +125,9 @@ export default function RouteSelectInfo() {
 
       <TransportationModeSelection onTransportationModeChange={handleTransportationModeChange} />
 
-      <View className="z-50 flex px-5 w-100">
+      <View className="z-50 flex flex-row gap-4 p-5 justify-center">
         <PrimaryButton label="Final Location" onPress={handleLastRoute} />
+        <PrimaryButton label="Confirm" onPress={handleConfirmLocation} />
       </View>
     </SafeAreaView>
   );

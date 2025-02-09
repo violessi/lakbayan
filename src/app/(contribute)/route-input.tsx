@@ -21,10 +21,10 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteInput() {
   const { userId } = useSession();
-  const { addSegment, setStartEndLocations, trip } = useTrip();
+  const { addSegment, trip } = useTrip();
 
   const cameraRef = useRef<Camera>(null);
-  const [zoomLevel, setZoomLevel] = useState(15);
+  const [zoomLevel, setZoomLevel] = useState(13);
   const [directions, setDirections] = useState<MapboxDirectionsResponse | null>(null);
   const [waypoints, setWaypoints] = useState<Coordinates[]>([]);
 
@@ -140,10 +140,7 @@ export default function RouteInput() {
 
     addSegment(newSegment);
     console.log("Added Segment:", newSegment);
-    router.replace({
-      pathname: "/trip-review",
-      params: {},
-    });
+    router.push("/(contribute)/trip-review");
   };
 
   return (
