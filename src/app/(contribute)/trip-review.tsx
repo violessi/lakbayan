@@ -88,11 +88,6 @@ export default function TripReview() {
         Alert.alert("Error", "There was an error submitting your trip. Please try again.");
       }
     };
-    
-  console.log("Trip segments: ", segments);
-  console.log("Start and end locations: ", trip.start_location, trip.end_location);
-  console.log("Is same end location: ", isSameEndLocation);
-
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
