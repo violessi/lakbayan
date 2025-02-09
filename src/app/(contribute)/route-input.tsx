@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useTrip } from "@contexts/TripContext";
+import { useSession } from "@contexts/SessionContext";
 import { useLocalSearchParams, router } from "expo-router";
 import { SafeAreaView, View } from "react-native";
 import uuid from "react-native-uuid";
@@ -19,6 +20,9 @@ import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteInput() {
+  const { userId } = useSession();
+  const { addSegment, setStartEndLocations, trip } = useTrip();
+
   const cameraRef = useRef<Camera>(null);
   const [zoomLevel, setZoomLevel] = useState(15);
   const [directions, setDirections] = useState<MapboxDirectionsResponse | null>(null);
@@ -108,8 +112,6 @@ export default function RouteInput() {
     setCost(c);
   };
 
-  const { addSegment, setStartEndLocations, trip } = useTrip();
-
   const handleSubmit = () => {
     if (!directions) {
       console.log("Error: Directions are required.");
@@ -118,7 +120,7 @@ export default function RouteInput() {
 
     const newSegment: Segment = {
       id: uuid.v4(),
-      contributor_id: "",
+      contributor_id: userId || "",
       segment_name: segmentName,
       segment_mode: transportationMode,
       directions: directions,

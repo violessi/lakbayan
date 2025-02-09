@@ -1,19 +1,6 @@
 import { supabase } from "@utils/supabase";
 
-//TO FIX: GETTING OF USER IN SESSION
 export const insertTripSegments = async (segments: Segment[]) => {
-  // Fetch the currently authenticated user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-  if (authError || !user) {
-    console.error("Error fetching user or no user is logged in:", authError);
-    return null;
-  }
-
-  const contributorId = user.id;
-
   const insertData = segments.map((segment) => ({
     id: segment.id,
     segment_mode: segment.segment_mode,
@@ -21,7 +8,7 @@ export const insertTripSegments = async (segments: Segment[]) => {
     landmark: segment.landmark,
     instruction: segment.instruction,
     waypoints: JSON.stringify(segment.waypoints),
-    contributor_id: contributorId,
+    contributor_id: segment.contributor_id,
     last_updated: new Date().toISOString(),
     gps_verified: 0,
     mod_verified: 0,
@@ -51,6 +38,7 @@ export const insertTripSegments = async (segments: Segment[]) => {
 
 export const insertTrip = async (trip: Trip) => {
   const {
+    contributor_id,
     id,
     name,
     start_location,
@@ -61,24 +49,12 @@ export const insertTrip = async (trip: Trip) => {
     cost,
   } = trip;
 
-  // Fetch the currently authenticated user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-  if (authError || !user) {
-    console.error("Error fetching user or no user is logged in:", authError);
-    return null;
-  }
-
-  const contributorId = user.id;
-
   // Insert the trip into the "trips" table
   const { data, error } = await supabase.from("trips").insert([
     {
       id,
       name,
-      contributor_id: contributorId,
+      contributor_id,
       start_location,
       start_coords,
       end_location,
