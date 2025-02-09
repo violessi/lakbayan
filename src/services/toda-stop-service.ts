@@ -9,3 +9,13 @@ export const insertStop = async (stopData: StopData) => {
 
   return data;
 };
+
+export const fetchStops = async () => {
+  const { data, error } = await supabase.from("toda-stops").select();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};

@@ -32,6 +32,7 @@ export default function TodaStops({ coordinates }: TodaStopsProps) {
 
     try {
       await insertStop({
+        id: "",
         name: todaName,
         color: color,
         landmark: landmark,
