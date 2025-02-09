@@ -5,7 +5,7 @@ import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
-import { insertStop } from "@services/supabase-service";
+import { insertStop } from "@services/toda-stop-service";
 
 import { useSession } from "@contexts/SessionContext";
 
