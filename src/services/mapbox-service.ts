@@ -42,7 +42,6 @@ export async function getDirections(
   if (transportationMode === "Walk") {
     mode = "walking";
   }
-
   const coordinates = [
     `${start[0]},${start[1]}`,
     ...waypoints.map((point) => `${point[0]},${point[1]}`),
@@ -57,6 +56,7 @@ export async function getDirections(
   );
 
   const responseJSON = await response.json();
+  console.log("Directions response:", responseJSON);
   const directions: MapboxDirectionsResponse = { routes: responseJSON.routes, waypoints: responseJSON.waypoints };
   return directions;
 }

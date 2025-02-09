@@ -17,11 +17,9 @@ const uv = require("@assets/transpo-uv.png");
 const walk = require("@assets/transpo-walk.png");
 
 interface TripPreviewProps {
-  route: Route;
-  color: string; // Accept color as a prop
+  trip: Trip;
+  segments: Segment[];
 }
-
-const testTranspo = ["Jeep", "Walk", "Train"];
 
 const getImageSource = (mode: string) => {
   switch (mode) {
@@ -42,13 +40,17 @@ const getImageSource = (mode: string) => {
   }
 };
 
-export default function TripPreview() {
+export default function TripPreview({ trip, segments }: TripPreviewProps) {
+  const totalDuration = segments.reduce((sum, seg) => sum + seg.duration, 0);
+  const totalCost = segments.reduce((sum, seg) => sum + seg.cost, 0);
+  const transportModes = segments.map((seg) => seg.segment_mode);
+
   return (
     <View className="w-full border-b border-gray-200 py-6 px-2">
       <View className="flex-row items-center">
         <View className="items-center" style={{ flex: 7 }}>
           <View className="flex-row items-center gap-1">
-            {testTranspo.map((mode, index) => (
+            {transportModes.map((mode, index) => (
               <View key={index} className="flex-row items-center gap-1">
                 <View className="flex-col items-center gap-1 text-sm">
                   <Text className="text-xs text-secondary">{mode}</Text>
@@ -58,24 +60,24 @@ export default function TripPreview() {
                     resizeMode="contain"
                   />
                 </View>
-                {index < testTranspo.length - 1 && <View style={styles.divider} />}
+                {index < transportModes.length - 1 && <View style={styles.divider} />}
               </View>
             ))}
           </View>
         </View>
         <View className="gap-1" style={{ flex: 6 }}>
           <Text className="text-ms" style={{ fontWeight: 700 }}>
-            Est. Travel Time:
+            Est. Travel Time: {Math.round(totalDuration / 60)} min
           </Text>
           <View className="flex flex-row gap-4 items-center">
             <View className="flex flex-row gap-2">
               <View className="flex flex-row gap-1 items-center">
                 <Image source={verifiedMod} style={{ width: 16, height: 16 }} resizeMode="contain" />
-                <Text className="text-sm">0</Text>
+                <Text className="text-sm">{trip.mod_verified}</Text>
               </View>
               <View className="flex flex-row gap-1 items-center">
                 <Image source={verifiedGPS} style={{ width: 16, height: 16 }} resizeMode="contain" />
-                <Text className="text-sm">0</Text>
+                <Text className="text-sm">{trip.gps_verified}</Text>
               </View>
             </View>
             <View className="flex flex-row gap-1">
