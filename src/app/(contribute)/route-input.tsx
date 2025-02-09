@@ -1,8 +1,8 @@
 import React, { useRef, useState } from "react";
 import { useTrip } from "@contexts/TripContext";
+import { useSession } from "@contexts/SessionContext";
 import { useLocalSearchParams, router } from "expo-router";
 import { SafeAreaView, View } from "react-native";
-import { Button } from "react-native-paper";
 import uuid from "react-native-uuid";
 
 import Header from "@components/ui/Header";
@@ -20,15 +20,18 @@ import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteInput() {
+  const { userId } = useSession();
+  const { addSegment, trip } = useTrip();
+
   const cameraRef = useRef<Camera>(null);
-  const [zoomLevel, setZoomLevel] = useState(12);
+  const [zoomLevel, setZoomLevel] = useState(13);
   const [directions, setDirections] = useState<MapboxDirectionsResponse | null>(null);
   const [waypoints, setWaypoints] = useState<Coordinates[]>([]);
 
   const [isAddPointsMode, setIsAddPointsMode] = useState(false);
   const [loadingDirections, setLoadingDirections] = useState(false);
 
-  const [routeName, setRouteName] = useState("");
+  const [segmentName, setSegmentName] = useState("");
   const [landmark, setLandmark] = useState("");
   const [instruction, setInstruction] = useState("");
   const [cost, setCost] = useState("");
@@ -49,7 +52,8 @@ export default function RouteInput() {
 
   const transportationMode = transportationModeParams as TransportationMode;
 
-  const directionCoordinates: Coordinates[] = directions?.routes?.[0]?.geometry.coordinates || [];
+  const directionCoordinates: Coordinates[] =
+    directions?.routes?.[0]?.geometry.coordinates || [];
 
   const handleGetDirections = async () => {
     setLoadingDirections(true);
@@ -92,23 +96,21 @@ export default function RouteInput() {
     }
   };
 
-  const handleRouteNameChange = (routeName: string) => {
-    setRouteName(routeName);
+  const handleRouteNameChange = (name: string) => {
+    setSegmentName(name);
   };
 
-  const handleLandmarkChange = (landmark: string) => {
-    setLandmark(landmark);
+  const handleLandmarkChange = (lm: string) => {
+    setLandmark(lm);
   };
 
-  const handleInstructionChange = (instruction: string) => {
-    setInstruction(instruction);
+  const handleInstructionChange = (instr: string) => {
+    setInstruction(instr);
   };
 
-  const handleCostChange = (cost: string) => {
-    setCost(cost);
+  const handleCostChange = (c: string) => {
+    setCost(c);
   };
-
-  const { addRoute } = useTrip();
 
   const handleSubmit = () => {
     if (!directions) {
@@ -116,24 +118,29 @@ export default function RouteInput() {
       return;
     }
 
-    const newRoute: Route = {
+    const newSegment: Segment = {
       id: uuid.v4(),
-      routeName,
-      landmark,
-      instruction,
-      startLocation: startRouteLocation,
-      startCoordinates: startRouteCoordinates,
-      endLocation: endRouteLocation,
-      endCoordinates: endRouteCoordinates,
+      contributor_id: userId || "",
+      segment_name: segmentName,
+      segment_mode: transportationMode,
       directions: directions,
-      transportationMode: transportationMode,
-      cost: 0,
-      duration: 0,
+      waypoints: waypoints,
+      landmark: landmark,
+      instruction: instruction,
+      last_updated: new Date(),
+      gps_verified: 0,
+      mod_verified: 0,
+      start_location: startRouteLocation,
+      start_coords: startRouteCoordinates,
+      end_location: endRouteLocation,
+      end_coords: endRouteCoordinates,
+      duration: directions.routes[0].duration,
+      cost: Number(cost) || 0,
     };
 
-    addRoute(newRoute);
-    console.log("Added Route:", newRoute);
-    router.dismissAll();
+    addSegment(newSegment);
+    console.log("Added Segment:", newSegment);
+    router.push("/(contribute)/trip-review");
   };
 
   return (
@@ -164,48 +171,65 @@ export default function RouteInput() {
           animationMode="easeTo"
         />
 
-        <LocationMarker coordinates={startRouteCoordinates} label={startRouteLocation} color={"red"} radius={8} />
-        <LocationMarker coordinates={endRouteCoordinates} label={endRouteLocation} color={"red"} radius={8} />
+        <LocationMarker
+          coordinates={startRouteCoordinates}
+          label={startRouteLocation}
+          color="red"
+          radius={8}
+        />
+        <LocationMarker
+          coordinates={endRouteCoordinates}
+          label={endRouteLocation}
+          color="red"
+          radius={8}
+        />
 
         {waypoints.map((waypoint, index) => (
           <LocationMarker
             key={`waypoint-${index}`}
             coordinates={waypoint}
             label={`Waypoint ${index + 1}`}
-            color={"blue"}
+            color="blue"
             radius={6}
           />
         ))}
 
-        {!loadingDirections && directionCoordinates && !isAddPointsMode && (
-          <DirectionsLine coordinates={directionCoordinates} />
-        )}
+        {!loadingDirections &&
+          directionCoordinates.length > 0 &&
+          !isAddPointsMode && (
+            <DirectionsLine coordinates={directionCoordinates} />
+          )}
       </MapView>
 
-      <View className="absolute bottom-0 mb-96 w-100">
-        <View className="flex flex-row">
-          <View className="w-1/2 pl-12 pr-5">
-            <PrimaryButton label={isAddPointsMode ? "Recalculate" : "Edit Route"} onPress={handleToggleMode} />
+      <View className="absolute bottom-96 w-full flex flex-col gap-4">
+        <View className="flex-row z-10">
+          <View className="flex-1 pl-3 pr-[5px]">
+            <PrimaryButton
+              label={isAddPointsMode ? "Recalculate" : "Edit Route"}
+              onPress={handleToggleMode}
+            />
           </View>
 
-          <View className="w-1/2 pr-12 pl-5">
-            {isAddPointsMode && <PrimaryButton label="Clear" onPress={clearWaypoints} />}
-            {!isAddPointsMode && <PrimaryButton label="Calculate" onPress={handleGetDirections} />}
+          <View className="flex-1 pr-3 pl-[5px]">
+            {isAddPointsMode ? (
+              <PrimaryButton label="Clear" onPress={clearWaypoints} />
+            ) : (
+              <PrimaryButton label="Calculate" onPress={handleGetDirections} />
+            )}
           </View>
         </View>
       </View>
-
       <RouteInformation
-        onRouteNameChange={handleRouteNameChange}
-        onLandmarkChange={handleLandmarkChange}
-        onInstructionChange={handleInstructionChange}
-        onCostChange={handleCostChange}
-        routeName={routeName}
-        landmark={landmark}
-        instruction={instruction}
-        cost={cost}
-        onSubmit={handleSubmit}
-      />
+            onRouteNameChange={handleRouteNameChange}
+            onLandmarkChange={handleLandmarkChange}
+            onInstructionChange={handleInstructionChange}
+            onCostChange={handleCostChange}
+            routeName={segmentName}
+            landmark={landmark}
+            instruction={instruction}
+            cost={cost}
+            onSubmit={handleSubmit}
+          />
     </SafeAreaView>
   );
 }

@@ -5,13 +5,16 @@ import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
-import { insertStop } from "@services/supabase-service";
+import { insertStop } from "@services/toda-stop-service";
+
+import { useSession } from "@contexts/SessionContext";
 
 interface TodaStopsProps {
   coordinates: [number, number] | null;
 }
 
 export default function TodaStops({ coordinates }: TodaStopsProps) {
+  const { userId } = useSession();
   const [todaName, setTodaName] = useState("");
   const [color, setColor] = useState("");
   const [landmark, setLandmark] = useState("");
@@ -29,12 +32,14 @@ export default function TodaStops({ coordinates }: TodaStopsProps) {
 
     try {
       await insertStop({
+        id: "",
         name: todaName,
         color: color,
         landmark: landmark,
         latitude: coordinates[1],
         longitude: coordinates[0],
-        type: "tricycle",
+        transpo_mode: "tricycle",
+        contributor_id: userId || ""
       });
 
       Alert.alert("Success!", "TODA stop information submitted successfully!");
