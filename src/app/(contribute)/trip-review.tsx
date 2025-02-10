@@ -12,6 +12,8 @@ import DirectionsLine from "@components/ui/DirectionsLine";
 import LocationMarker from "@components/ui/LocationMarker";
 import TripTitle from "@components/contribute/TripTitle";
 
+import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
+
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
 import { insertTrip, insertTripSegments, insertSegmentsToTrips, insertTripAndRelated } from "@services/trip-service";
@@ -31,9 +33,6 @@ export default function TripReview() {
   const startLocation = trip.start_location;
   const endLocation = trip.end_location;
 
-  /* FIXME: Move colors to constant */
-  const routeColors = ["#FF5733", "#3357FF", "#F3FF33", "#FF33A6"];
-
   const handleMapLoaded = () => {
     if (startCoordinates && endCoordinates && cameraRef.current) {
       cameraRef.current.fitBounds(startCoordinates, endCoordinates, [150, 150, 250, 150]);
@@ -46,48 +45,46 @@ export default function TripReview() {
 
   // Check if there is at least one segment and if the trip's end_location
   // matches the last segment's end_location.
-  const isSameEndLocation =
-    segments.length > 0 &&
-    trip.end_location === segments[segments.length - 1].end_location;
+  const isSameEndLocation = segments.length > 0 && trip.end_location === segments[segments.length - 1].end_location;
 
-    const handleSubmitTrip = async () => {
-      // Generate a new trip id.
-      const tripId = uuid.v4();
-    
-      // Build the new trip object.
-      const newTrip: Trip = {
-        ...trip,
-        id: tripId,
-        contributor_id: userId || "",
-        name: `${trip.start_location} to ${trip.end_location}`,
-        duration: segments.reduce((acc, segment) => acc + segment.duration, 0),
-        cost: segments.reduce((acc, segment) => acc + segment.cost, 0),
-      };
-    
-      // Build the joint segments array as an array of objects
-      // that conform to the SegmentsToTrips interface.
-      const jointSegments: SegmentsToTrips[] = segments.map((segment, index) => ({
-        trip_id: tripId,
-        segment_id: segment.id,
-        segment_order: index,
-      }));
-    
-      try {
-        // Call the new helper function that performs sequential inserts.
-        const result = await insertTripAndRelated(newTrip, segments, jointSegments);
-        console.log("Trip and related inserted:", result);
-    
-        // Alert the user and navigate to the desired page.
-        Alert.alert(
-          "Trip Submitted",
-          "Your custom route has been submitted. Do you want to transit journal it for GPS verification?"
-        );
-        router.replace("/(tabs)");
-      } catch (error) {
-        console.error("Error inserting trip and related:", error);
-        Alert.alert("Error", "There was an error submitting your trip. Please try again.");
-      }
+  const handleSubmitTrip = async () => {
+    // Generate a new trip id.
+    const tripId = uuid.v4();
+
+    // Build the new trip object.
+    const newTrip: Trip = {
+      ...trip,
+      id: tripId,
+      contributor_id: userId || "",
+      name: `${trip.start_location} to ${trip.end_location}`,
+      duration: segments.reduce((acc, segment) => acc + segment.duration, 0),
+      cost: segments.reduce((acc, segment) => acc + segment.cost, 0),
     };
+
+    // Build the joint segments array as an array of objects
+    // that conform to the SegmentsToTrips interface.
+    const jointSegments: SegmentsToTrips[] = segments.map((segment, index) => ({
+      trip_id: tripId,
+      segment_id: segment.id,
+      segment_order: index,
+    }));
+
+    try {
+      // Call the new helper function that performs sequential inserts.
+      const result = await insertTripAndRelated(newTrip, segments, jointSegments);
+      console.log("Trip and related inserted:", result);
+
+      // Alert the user and navigate to the desired page.
+      Alert.alert(
+        "Trip Submitted",
+        "Your custom route has been submitted. Do you want to transit journal it for GPS verification?",
+      );
+      router.replace("/(tabs)");
+    } catch (error) {
+      console.error("Error inserting trip and related:", error);
+      Alert.alert("Error", "There was an error submitting your trip. Please try again.");
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -103,31 +100,16 @@ export default function TripReview() {
         projection="mercator"
         onDidFinishLoadingMap={handleMapLoaded}
       >
-        <Camera
-          ref={cameraRef}
-          centerCoordinate={[121.05, 14.63]}
-          animationMode="easeTo"
-          zoomLevel={10}
-        />
+        <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} animationMode="easeTo" zoomLevel={10} />
 
-        <LocationMarker
-          coordinates={startCoordinates}
-          label={startLocation}
-          color="red"
-          radius={8}
-        />
-        <LocationMarker
-          coordinates={endCoordinates}
-          label={endLocation}
-          color="red"
-          radius={8}
-        />
+        <LocationMarker coordinates={startCoordinates} label={startLocation} color="red" radius={8} />
+        <LocationMarker coordinates={endCoordinates} label={endLocation} color="red" radius={8} />
 
         {segmentCoordinates.map((coordinates, index) => (
           <DirectionsLine
             key={index}
             coordinates={coordinates}
-            color={routeColors[index % routeColors.length]}
+            color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
           />
         ))}
       </MapView>
@@ -139,11 +121,7 @@ export default function TripReview() {
         />
       </View>
 
-      <TripSummary
-        startLocation={trip.start_location}
-        endLocation={trip.end_location}
-        segments={segments}
-      />
+      <TripSummary startLocation={trip.start_location} endLocation={trip.end_location} segments={segments} />
     </SafeAreaView>
   );
 }

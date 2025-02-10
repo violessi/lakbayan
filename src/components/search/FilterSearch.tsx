@@ -3,12 +3,12 @@ import { View, Text, Pressable } from "react-native";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Checkbox, Button, Menu } from "react-native-paper";
+import { Checkbox, Modal, Menu, RadioButton } from "react-native-paper";
 
 import PrimaryButton from "@components/ui/PrimaryButton";
 
 export default function FilterSearch({ onClose, filters, setFilters }) {
-  const snapPoints = useMemo(() => ["50%"], []);
+  const snapPoints = useMemo(() => ["55%"], []);
   const bottomSheetRef = useRef(null);
 
   const [timeToLeave, setTimeToLeave] = useState(new Date());
@@ -62,26 +62,34 @@ export default function FilterSearch({ onClose, filters, setFilters }) {
 
         <View>
           <Text className="text-gray-600">Sort by</Text>
-          <Menu
-            visible={sortMenuVisible}
-            onDismiss={() => setSortMenuVisible(false)}
-            anchor={
-              <Pressable onPress={() => setSortMenuVisible(true)} className="p-2 border border-gray-300 rounded">
-                <Text>{sortBy}</Text>
-              </Pressable>
-            }
-          >
-            <Menu.Item onPress={() => setSortBy("Verified by moderators")} title="Verified by moderators" />
-            <Menu.Item onPress={() => setSortBy("Verified by GPS")} title="Verified by GPS" />
-            <Menu.Item onPress={() => setSortBy("Votes")} title="Votes" />
-          </Menu>
+
+          <RadioButton.Group onValueChange={setSortBy} value={sortBy}>
+            <View className="flex-row items-center">
+              <RadioButton value="Verified by moderators" />
+              <Text>Verified by moderators</Text>
+            </View>
+            <View className="flex-row items-center">
+              <RadioButton value="Verified by GPS" />
+              <Text>Verified by GPS</Text>
+            </View>
+            <View className="flex-row items-center">
+              <RadioButton value="Votes" />
+              <Text>Votes</Text>
+            </View>
+            <View className="flex-row items-center">
+              <RadioButton value="Duration" />
+              <Text>Duration</Text>
+            </View>
+          </RadioButton.Group>
         </View>
 
         <View>
-          {["Trains", "Bus", "Jeep", "UV Express", "Tricycle"].map((mode) => (
+          {["Train", "Bus", "Jeep", "UV", "Tricycle"].map((mode) => (
             <Pressable key={mode} onPress={() => toggleTransportMode(mode)}>
-              <Checkbox status={selectedModes.includes(mode) ? "checked" : "unchecked"} />
-              <Text>{mode}</Text>
+              <View className="flex-row items-center gap-2">
+                <Checkbox status={selectedModes.includes(mode) ? "checked" : "unchecked"} />
+                <Text>{mode}</Text>
+              </View>
             </Pressable>
           ))}
         </View>

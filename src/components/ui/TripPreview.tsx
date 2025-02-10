@@ -55,7 +55,7 @@ export default function TripPreview({ trip, segments }: TripPreviewProps) {
     <View className="w-full border-b border-gray-200 py-6 px-2">
       <View className="flex-row items-center">
         <View className="items-center" style={{ flex: 7 }}>
-          <View className="flex-row items-center gap-1">
+          <View className="flex-row flex-wrap justify-center items-center gap-1">
             {transportModes.map((mode, index) => (
               <View key={index} className="flex-row items-center gap-1">
                 <View className="flex-col items-center gap-1 text-sm">
