@@ -41,7 +41,13 @@ const getImageSource = (mode: string) => {
 };
 
 export default function TripPreview({ trip, segments }: TripPreviewProps) {
+  segments.forEach((seg, index) => {
+    console.log(`Segment ${index + 1} duration:`, seg.duration);
+  });
+
   const totalDuration = segments.reduce((sum, seg) => sum + seg.duration, 0);
+  console.log("Total duration:", totalDuration);
+
   const totalCost = segments.reduce((sum, seg) => sum + seg.cost, 0);
   const transportModes = segments.map((seg) => seg.segment_mode);
 

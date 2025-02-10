@@ -28,9 +28,17 @@ export default function Contribute() {
 
   useEffect(() => {
     if (startLocation && endLocation) {
-      router.push("/(search)/suggested-trips");
+      router.push({
+        pathname: "/(search)/suggested-trips",
+        params: {
+          startLocation,
+          endLocation,
+          startCoords: JSON.stringify(startCoordinates),
+          endCoords: JSON.stringify(endCoordinates),
+        },
+      });
     }
-  }, [startLocation, endLocation, router]);
+  }, [startLocation, endLocation, router, startCoordinates, endCoordinates]);
 
   return (
     <SafeAreaView className="flex-1">
