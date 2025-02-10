@@ -42,7 +42,6 @@ export async function getDirections(
   if (transportationMode === "Walk") {
     mode = "walking";
   }
-
   const coordinates = [
     `${start[0]},${start[1]}`,
     ...waypoints.map((point) => `${point[0]},${point[1]}`),
@@ -57,8 +56,22 @@ export async function getDirections(
   );
 
   const responseJSON = await response.json();
+  console.log("Directions response:", responseJSON);
   const directions: MapboxDirectionsResponse = { routes: responseJSON.routes, waypoints: responseJSON.waypoints };
   return directions;
+}
+
+export async function getDistanceDuration(start: Coordinates, end: Coordinates) {
+  const coordinates = [`${start[0]},${start[1]}`, `${end[0]},${end[1]}`].join(";");
+
+  const response = await fetch(
+    `${BASE_URL}/directions/v5/mapbox/walking/${encodeURIComponent(coordinates)}?alternatives=true&geometries=geojson&language=en&overview=full&steps=true&access_token=${MAPBOX_ACCESS_TOKEN}`,
+  );
+
+  const responseJSON = await response.json();
+  console.log("Directions response:", responseJSON);
+  const walkingInfo = { distance: responseJSON.routes[0].distance, duration: responseJSON.routes[0].duration };
+  return walkingInfo;
 }
 
 export async function reverseGeocode(coordinates: Coordinates) {
