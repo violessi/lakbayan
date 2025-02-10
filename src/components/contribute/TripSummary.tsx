@@ -12,7 +12,7 @@ interface TripSummaryProps {
 }
 
 export default function TripSummary({ startLocation, endLocation, segments }: TripSummaryProps) {
-  const snapPoints = ["15%", "25%", "72%"];
+  const snapPoints = ["15%", "25%", "40%", "72%"];
 
   return (
     <BottomSheet snapPoints={snapPoints} index={2}>

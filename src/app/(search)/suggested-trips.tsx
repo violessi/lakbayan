@@ -66,7 +66,9 @@ export default function SuggestedTrips() {
                 segment_mode: "Walk",
                 waypoints: [startCoordinates, firstSegment.start_coords],
                 start_location: startLocation,
+                start_coords: startCoordinates,
                 end_location: firstSegment.start_location,
+                end_coords: firstSegment.start_coords,
                 duration: (startDist / 80) * 60,
               }
             : null;
@@ -78,7 +80,9 @@ export default function SuggestedTrips() {
                 segment_mode: "Walk",
                 waypoints: [lastSegment.end_coords, endCoordinates],
                 start_location: lastSegment.end_location,
+                start_coords: lastSegment.end_coords,
                 end_location: endLocation,
+                end_coords: endCoordinates,
                 duration: (endDist / 80) * 60,
               }
             : null;
