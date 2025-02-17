@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Text, View, Alert, Keyboard } from "react-native";
+import uuid from "react-native-uuid";
 
 import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
@@ -32,14 +33,14 @@ export default function TodaStops({ coordinates }: TodaStopsProps) {
 
     try {
       await insertStop({
-        id: "",
+        id: uuid.v4(),
         name: todaName,
         color: color,
         landmark: landmark,
         latitude: coordinates[1],
         longitude: coordinates[0],
         transpo_mode: "tricycle",
-        contributor_id: userId || ""
+        contributor_id: userId || "",
       });
 
       Alert.alert("Success!", "TODA stop information submitted successfully!");
