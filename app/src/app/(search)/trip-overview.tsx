@@ -10,7 +10,7 @@ import PrimaryButton from "@components/ui/PrimaryButton";
 
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 
-import TripSummary from "@components/contribute/TripSummary";
+import TripSummary from "@components/search/TripSummary";
 
 import { getDirections } from "@services/mapbox-service";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
@@ -109,7 +109,7 @@ export default function TripOverview() {
       <View className="px-10  z-10">
         <PrimaryButton label="Start" />
       </View>
-      <TripSummary startLocation={startLocation} endLocation={endLocation} segments={segmentData} />
+      <TripSummary startLocation={startLocation} endLocation={endLocation} trip={tripData} segments={segmentData} />
     </SafeAreaView>
   );
 }

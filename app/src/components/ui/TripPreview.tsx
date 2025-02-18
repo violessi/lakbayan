@@ -1,6 +1,7 @@
-import React from "react";
-import { View, StyleSheet, Image } from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Text } from "react-native-paper";
+import { updateVotes } from "@services/socials-service";
 
 const verifiedMod = require("@assets/verified-mod.png");
 const verifiedGPS = require("@assets/verified-gps.png");
@@ -16,12 +17,7 @@ const tricycle = require("@assets/transpo-tricycle.png");
 const uv = require("@assets/transpo-uv.png");
 const walk = require("@assets/transpo-walk.png");
 
-interface TripPreviewProps {
-  trip: Trip;
-  segments: Segment[];
-}
-
-const getImageSource = (mode: string) => {
+const getImageSource = (mode: TransportationMode) => {
   switch (mode) {
     case "Jeep":
       return jeep;
@@ -40,14 +36,47 @@ const getImageSource = (mode: string) => {
   }
 };
 
-export default function TripPreview({ trip, segments }: TripPreviewProps) {
-  segments.forEach((seg, index) => {
-    console.log(`Segment ${index + 1} duration:`, seg.duration);
-  });
+export default function TripPreview({ trip, segments }) {
+  const [upvotes, setUpvotes] = useState(trip.upvotes);
+  const [downvotes, setDownvotes] = useState(trip.downvotes);
+  const [userVote, setUserVote] = useState(null);
+  const [points, setPoints] = useState(upvotes - downvotes);
+
+  const handleUpvote = async () => {
+    try {
+      const newUpvotes = userVote === "upvote" ? upvotes - 1 : upvotes + 1;
+      const newDownvotes = userVote === "downvote" ? downvotes - 1 : downvotes;
+      const newUserVote = userVote === "upvote" ? null : "upvote";
+
+      setUpvotes(newUpvotes);
+      setDownvotes(newDownvotes);
+      setPoints(newUpvotes - newDownvotes);
+      setUserVote(newUserVote);
+
+      await updateVotes(trip.id, newUpvotes, newDownvotes);
+    } catch (error) {
+      console.error("Error handling upvote:", error.message);
+    }
+  };
+
+  const handleDownvote = async () => {
+    try {
+      const newDownvotes = userVote === "downvote" ? downvotes - 1 : downvotes + 1;
+      const newUpvotes = userVote === "upvote" ? upvotes - 1 : upvotes;
+      const newUserVote = userVote === "downvote" ? null : "downvote";
+
+      setDownvotes(newDownvotes);
+      setUpvotes(newUpvotes);
+      setPoints(newUpvotes - newDownvotes);
+      setUserVote(newUserVote);
+
+      await updateVotes(trip.id, newUpvotes, newDownvotes);
+    } catch (error) {
+      console.error("Error handling downvote:", error.message);
+    }
+  };
 
   const totalDuration = segments.reduce((sum, seg) => sum + seg.duration, 0);
-  console.log("Total duration:", totalDuration);
-
   const totalCost = segments.reduce((sum, seg) => sum + seg.cost, 0);
   const transportModes = segments.map((seg) => seg.segment_mode);
 
@@ -87,14 +116,23 @@ export default function TripPreview({ trip, segments }: TripPreviewProps) {
               </View>
             </View>
             <View className="flex flex-row gap-1">
-              <View className="flex flex-row gap-1 items-center">
-                <Image source={upvote} style={{ width: 12, height: 12 }} resizeMode="contain" />
-                <Text className="text-sm">0</Text>
+              <TouchableOpacity onPress={handleUpvote} className="flex flex-row gap-1 items-center">
+                <Image
+                  source={upvote}
+                  style={{ width: 12, height: 12, tintColor: userVote === "upvote" ? "#7F55D9" : "#000" }}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+              <View>
+                <Text className="text-sm">{points}</Text>
               </View>
-              <View className="flex flex-row gap-1 items-center">
-                <Image source={downvote} style={{ width: 12, height: 12 }} resizeMode="contain" />
-                <Text className="text-sm">0</Text>
-              </View>
+              <TouchableOpacity onPress={handleDownvote} className="flex flex-row gap-1 items-center">
+                <Image
+                  source={downvote}
+                  style={{ width: 12, height: 12, tintColor: userVote === "downvote" ? "#7F55D9" : "#000" }}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
               <View className="flex flex-row gap-1 items-center">
                 <Image source={comment} style={{ width: 11, height: 11 }} resizeMode="contain" />
                 <Text className="text-sm">0</Text>
