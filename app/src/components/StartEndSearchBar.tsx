@@ -104,7 +104,7 @@ export default function StartEndSearch({
             <View>
               <FlatList
                 data={startSuggestions}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item, index) => `${item.id}-${index}`}
                 renderItem={({ item }) => (
                   <List.Item
                     title={item.place_name}
