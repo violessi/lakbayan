@@ -6,6 +6,7 @@ export default function ContributeLayout() {
       <Stack.Screen name="location-input" options={{ headerShown: false }} />
       <Stack.Screen name="suggested-trips" options={{ headerShown: false }} />
       <Stack.Screen name="trip-overview" options={{ headerShown: false }} />
+      <Stack.Screen name="comments-list" options={{ headerShown: false }} />
     </Stack>
   );
 }

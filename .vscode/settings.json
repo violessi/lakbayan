@@ -1,0 +1,6 @@
+{
+    "eslint.workingDirectories": [
+      { "directory": "app", "changeProcessCWD": true },
+      { "directory": "supabase", "changeProcessCWD": true }
+    ]
+  }

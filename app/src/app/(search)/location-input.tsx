@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 
 import { Text, SafeAreaView, View } from "react-native";
-import Option from "../../components/ContributeOption";
 
 import Header from "../../components/ui/Header";
 

@@ -13,7 +13,7 @@ export function useTripData() {
         const { data: trips, error: tripError } = await supabase
           .from("trips")
           .select(
-            `id, contributor_id, name, start_location, start_coords, end_location, end_coords, gps_verified, mod_verified`,
+            `id, contributor_id, name, start_location, start_coords, end_location, end_coords, gps_verified, mod_verified, upvotes, downvotes`,
           );
 
         if (tripError) throw tripError;

@@ -41,6 +41,8 @@ declare global {
     end_coords: Coordinates;
     duration: number;
     cost: number;
+    upvotes: number;
+    downvotes: number;
   }
 
   export interface Segment {
@@ -63,11 +65,9 @@ declare global {
     cost: number;
   }
 
-  export interface SegmentsToTrips{
+  export interface SegmentsToTrips {
     trip_id: string;
     segment_id: string;
     segment_order: number;
   }
 }
-
-
