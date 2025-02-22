@@ -128,9 +128,9 @@ export default function SuggestedTrips() {
     }
 
     setFilteredTrips(updatedTrips);
-  }, [tripsWithSegments, filters, startCoordinates, endCoordinates]);
+  }, [tripsWithSegments, filters, startCoordinates, endCoordinates, startLocation, endLocation]);
 
-  const handlePress = (trip) => {
+  const handlePress = (trip: Trip) => {
     router.push({
       pathname: "/(search)/trip-overview",
       params: {

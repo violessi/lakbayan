@@ -61,7 +61,7 @@ export default function TripOverview() {
     if (startCoordinates && endCoordinates && cameraRef.current) {
       cameraRef.current.fitBounds(startCoordinates, endCoordinates, [150, 150, 250, 150]);
     }
-  }, [segmentRoutes]);
+  }, [segmentRoutes, startCoordinates, endCoordinates]);
 
   return (
     <SafeAreaView className="flex-1">

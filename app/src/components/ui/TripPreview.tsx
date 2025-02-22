@@ -1,12 +1,13 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import React from "react";
+import { View, StyleSheet, Image } from "react-native";
 import { Text } from "react-native-paper";
-import { updateVotes } from "@services/socials-service";
+
+import { useSession } from "@contexts/SessionContext";
+
+import VotingBar from "@components/VotingBar";
 
 const verifiedMod = require("@assets/verified-mod.png");
 const verifiedGPS = require("@assets/verified-gps.png");
-const upvote = require("@assets/social-upvote.png");
-const downvote = require("@assets/social-downvote.png");
 const comment = require("@assets/social-comment.png");
 const bookmark = require("@assets/social-bookmark.png");
 
@@ -36,45 +37,13 @@ const getImageSource = (mode: TransportationMode) => {
   }
 };
 
-export default function TripPreview({ trip, segments }) {
-  const [upvotes, setUpvotes] = useState(trip.upvotes);
-  const [downvotes, setDownvotes] = useState(trip.downvotes);
-  const [userVote, setUserVote] = useState(null);
-  const [points, setPoints] = useState(upvotes - downvotes);
+interface TripPreviewProps {
+  trip: Trip;
+  segments: Segment[];
+}
 
-  const handleUpvote = async () => {
-    try {
-      const newUpvotes = userVote === "upvote" ? upvotes - 1 : upvotes + 1;
-      const newDownvotes = userVote === "downvote" ? downvotes - 1 : downvotes;
-      const newUserVote = userVote === "upvote" ? null : "upvote";
-
-      setUpvotes(newUpvotes);
-      setDownvotes(newDownvotes);
-      setPoints(newUpvotes - newDownvotes);
-      setUserVote(newUserVote);
-
-      await updateVotes(trip.id, newUpvotes, newDownvotes);
-    } catch (error) {
-      console.error("Error handling upvote:", error.message);
-    }
-  };
-
-  const handleDownvote = async () => {
-    try {
-      const newDownvotes = userVote === "downvote" ? downvotes - 1 : downvotes + 1;
-      const newUpvotes = userVote === "upvote" ? upvotes - 1 : upvotes;
-      const newUserVote = userVote === "downvote" ? null : "downvote";
-
-      setDownvotes(newDownvotes);
-      setUpvotes(newUpvotes);
-      setPoints(newUpvotes - newDownvotes);
-      setUserVote(newUserVote);
-
-      await updateVotes(trip.id, newUpvotes, newDownvotes);
-    } catch (error) {
-      console.error("Error handling downvote:", error.message);
-    }
-  };
+export default function TripPreview({ trip, segments }: TripPreviewProps) {
+  const { userId } = useSession();
 
   const totalDuration = segments.reduce((sum, seg) => sum + seg.duration, 0);
   const totalCost = segments.reduce((sum, seg) => sum + seg.cost, 0);
@@ -116,23 +85,7 @@ export default function TripPreview({ trip, segments }) {
               </View>
             </View>
             <View className="flex flex-row gap-1">
-              <TouchableOpacity onPress={handleUpvote} className="flex flex-row gap-1 items-center">
-                <Image
-                  source={upvote}
-                  style={{ width: 12, height: 12, tintColor: userVote === "upvote" ? "#7F55D9" : "#000" }}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
-              <View>
-                <Text className="text-sm">{points}</Text>
-              </View>
-              <TouchableOpacity onPress={handleDownvote} className="flex flex-row gap-1 items-center">
-                <Image
-                  source={downvote}
-                  style={{ width: 12, height: 12, tintColor: userVote === "downvote" ? "#7F55D9" : "#000" }}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
+              {userId && <VotingBar tripId={trip.id} userId={userId} />}
               <View className="flex flex-row gap-1 items-center">
                 <Image source={comment} style={{ width: 11, height: 11 }} resizeMode="contain" />
                 <Text className="text-sm">0</Text>
