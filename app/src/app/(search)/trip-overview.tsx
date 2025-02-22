@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, useMemo, Fragment } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { View, SafeAreaView, Text, ActivityIndicator } from "react-native";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
+import { useSession } from "@contexts/SessionContext";
 
 import Header from "@components/ui/Header";
 import DirectionsLine from "@components/ui/DirectionsLine";
@@ -19,7 +20,10 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TripOverview() {
   const cameraRef = useRef<Camera>(null);
+  const router = useRouter();
+
   const { trip, segments } = useLocalSearchParams();
+  const { userId } = useSession();
 
   const tripData = useMemo(() => (trip ? JSON.parse(trip) : null), [trip]);
   const segmentData = useMemo(() => (segments ? JSON.parse(segments) : []), [segments]);
@@ -62,6 +66,13 @@ export default function TripOverview() {
       cameraRef.current.fitBounds(startCoordinates, endCoordinates, [150, 150, 250, 150]);
     }
   }, [segmentRoutes, startCoordinates, endCoordinates]);
+
+  function handleCommentPress(tripId: string) {
+    router.push({
+      pathname: "/(search)/comments-list",
+      params: { tripId },
+    });
+  }
 
   return (
     <SafeAreaView className="flex-1">
@@ -109,7 +120,16 @@ export default function TripOverview() {
       <View className="px-10  z-10">
         <PrimaryButton label="Start" />
       </View>
-      <TripSummary startLocation={startLocation} endLocation={endLocation} trip={tripData} segments={segmentData} />
+      {userId && (
+        <TripSummary
+          startLocation={startLocation}
+          endLocation={endLocation}
+          trip={tripData}
+          segments={segmentData}
+          currentUserId={userId}
+          onCommentPress={handleCommentPress}
+        />
+      )}
     </SafeAreaView>
   );
 }

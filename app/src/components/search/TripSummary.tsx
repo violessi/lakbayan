@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, FlatList, Image } from "react-native";
+import { Text, View, FlatList, Image, TouchableOpacity } from "react-native";
 
 import { getUsername } from "@services/account-service";
 import { getPoints } from "@services/socials-service";
 
 import RouteItem from "@components/ui/RouteItem";
+import VotingBar from "@components/VotingBar";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
+
 const comment = require("@assets/social-comment.png");
 
 interface TripSummaryProps {
@@ -15,9 +17,18 @@ interface TripSummaryProps {
   endLocation: string;
   trip: Trip;
   segments: Segment[];
+  currentUserId: string;
+  onCommentPress: (tripId: string) => void;
 }
 
-export default function TripSummary({ startLocation, endLocation, trip, segments }: TripSummaryProps) {
+export default function TripSummary({
+  startLocation,
+  endLocation,
+  trip,
+  segments,
+  currentUserId,
+  onCommentPress,
+}: TripSummaryProps) {
   const snapPoints = ["15%", "25%", "40%", "72%"];
 
   const [contributor, setContributor] = useState<string | null>(null);
@@ -31,7 +42,6 @@ export default function TripSummary({ startLocation, endLocation, trip, segments
 
     async function fetchPoints() {
       const points = await getPoints(trip.id);
-      console.log("Points:", points);
       setPoints(points || 0);
     }
 
@@ -47,12 +57,13 @@ export default function TripSummary({ startLocation, endLocation, trip, segments
             <Text>Contributed by</Text>
             <Text className="text-primary font-bold"> {contributor || ""}</Text>
           </View>
-          <View className="flex flex-row">
-            <Text>{points} Points</Text>
-            <Image source={comment} style={{ width: 11, height: 11 }} resizeMode="contain" />
+          <View className="flex flex-row gap-3 items-center">
+            <VotingBar tripId={trip.id} userId={currentUserId} />
+            <TouchableOpacity onPress={() => onCommentPress(trip.id)}>
+              <Image source={comment} style={{ width: 12, height: 12 }} resizeMode="contain" />
+            </TouchableOpacity>
           </View>
         </View>
-        <Text>{trip.id}</Text>
         <View className="flex flex-row justify-center">
           {segments.length === 0 ? (
             <Text className="text-secondary mt-5">No transfers added yet.</Text>
