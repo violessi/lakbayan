@@ -7,6 +7,8 @@ interface Comment {
   created_at: string;
 }
 
+// Votes
+
 export async function getPoints(tripId: string): Promise<number> {
   const { data, error } = await supabase.from("votes").select("vote_type", { count: "exact" }).eq("trip_id", tripId);
 
@@ -73,6 +75,8 @@ export async function getUserVote(tripId: string, userId: string | null): Promis
   return data?.vote_type || null;
 }
 
+// Comments
+
 export async function getComments(tripId: string): Promise<Comment[] | null> {
   const { data, error } = await supabase
     .from("comments")
@@ -99,6 +103,41 @@ export async function addComment(tripId: string, userId: string, content: string
 
   if (error) {
     console.error("Error adding comment:", error);
+    return false;
+  }
+
+  return true;
+}
+
+// Bookmarks
+
+export async function getBookmarks(userId: string) {
+  const { data, error } = await supabase.from("bookmarks").select("trip_id").eq("user_id", userId);
+
+  if (error) {
+    console.error("Error fetching bookmarks:", error);
+    return [];
+  }
+
+  return data.map((b) => b.trip_id);
+}
+
+export async function addBookmark(userId: string, tripId: string) {
+  const { error } = await supabase.from("bookmarks").insert([{ user_id: userId, trip_id: tripId }]);
+
+  if (error) {
+    console.error("Error adding bookmark:", error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function removeBookmark(userId: string, tripId: string) {
+  const { error } = await supabase.from("bookmarks").delete().eq("user_id", userId).eq("trip_id", tripId);
+
+  if (error) {
+    console.error("Error removing bookmark:", error);
     return false;
   }
 

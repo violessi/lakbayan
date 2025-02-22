@@ -1,15 +1,17 @@
-import React from "react";
-import { View, StyleSheet, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Text } from "react-native-paper";
 
 import { useSession } from "@contexts/SessionContext";
+import { getBookmarks, addBookmark, removeBookmark } from "@services/socials-service";
 
 import VotingBar from "@components/VotingBar";
 
 const verifiedMod = require("@assets/verified-mod.png");
 const verifiedGPS = require("@assets/verified-gps.png");
 const comment = require("@assets/social-comment.png");
-const bookmark = require("@assets/social-bookmark.png");
+const bookmarkIcon = require("@assets/social-bookmark.png");
+const bookmarkedIcon = require("@assets/social-bookmarked.png");
 
 const jeep = require("@assets/transpo-jeep.png");
 const bus = require("@assets/transpo-bus.png");
@@ -44,6 +46,29 @@ interface TripPreviewProps {
 
 export default function TripPreview({ trip, segments }: TripPreviewProps) {
   const { userId } = useSession();
+
+  const [bookmarked, setBookmarked] = useState(false);
+
+  useEffect(() => {
+    async function fetchBookmarks() {
+      if (userId) {
+        const bookmarks = await getBookmarks(userId);
+        setBookmarked(bookmarks.includes(trip.id));
+      }
+    }
+    fetchBookmarks();
+  }, [userId, trip.id]);
+
+  const toggleBookmark = async () => {
+    if (!userId) return;
+
+    if (bookmarked) {
+      await removeBookmark(userId, trip.id);
+    } else {
+      await addBookmark(userId, trip.id);
+    }
+    setBookmarked(!bookmarked);
+  };
 
   const totalDuration = segments.reduce((sum, seg) => sum + seg.duration, 0);
   const totalCost = segments.reduce((sum, seg) => sum + seg.cost, 0);
@@ -94,7 +119,13 @@ export default function TripPreview({ trip, segments }: TripPreviewProps) {
           </View>
         </View>
         <View style={{ flex: 1, alignItems: "flex-end" }}>
-          <Image source={bookmark} style={{ width: 15, height: 15, tintColor: "#7F55D9" }} resizeMode="contain" />
+          <TouchableOpacity onPress={toggleBookmark}>
+            <Image
+              source={bookmarked ? bookmarkedIcon : bookmarkIcon}
+              style={{ width: 15, height: 15, tintColor: "#7F55D9" }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
         </View>
       </View>
     </View>
