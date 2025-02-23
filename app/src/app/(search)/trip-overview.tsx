@@ -74,6 +74,13 @@ export default function TripOverview() {
     });
   }
 
+  function handleStartPress() {
+    router.push({
+      pathname: "/(journal)/transit-journal",
+      params: { segments: JSON.stringify(segmentData) },
+    });
+  }
+
   return (
     <SafeAreaView className="flex-1">
       <Header title="Trip Overview" />
@@ -118,7 +125,7 @@ export default function TripOverview() {
       </MapView>
 
       <View className="px-10  z-10">
-        <PrimaryButton label="Start" />
+        <PrimaryButton label="Start" onPress={handleStartPress} />
       </View>
       {userId && (
         <TripSummary
