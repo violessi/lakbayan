@@ -12,6 +12,7 @@ import ReportTab from "@components/journal/ReportTab";
 import { getDirections, paraphraseStep } from "@services/mapbox-service";
 import { getDistance, getGreatCircleBearing } from "geolib";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+import PrimaryButton from "@components/ui/PrimaryButton";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
@@ -147,7 +148,6 @@ export default function TransitJournal() {
             setShowNextSegmentModal(true); // User confirms before proceeding
           } else {
             setShowTripFinishedModal(true);
-            console.log("Trip finished!");
           }
         }
 
@@ -158,14 +158,12 @@ export default function TransitJournal() {
   );
 
   function goToNextSegment() {
-    console.log("setting to next");
     setCurrentSegmentIndex((prev) => prev + 1);
     setShowNextSegmentModal(false);
   }
 
   function handleNavigateToReview() {
     setShowTripFinishedModal(false);
-    console.log("Navigating to review");
     router.push({
       pathname: "/(journal)/journal-review",
       params: { trip: trip, segments: JSON.stringify(segmentData) },
@@ -225,9 +223,9 @@ export default function TransitJournal() {
       <Modal transparent={true} visible={showNextSegmentModal} animationType="slide">
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white p-6 rounded-lg shadow-lg">
-            <Text className="text-lg font-bold mb-4">Segment Completed!</Text>
-            <Text className="mb-4">You're done with this segment. Ready for the next one?</Text>
-            <Button title="Next Segment" onPress={goToNextSegment} />
+            <Text className="text-lg font-bold mb-4">Segment completed!</Text>
+            <Text className="mb-4">Transfer to the next ride.</Text>
+            <Button title="Next" onPress={goToNextSegment} />
           </View>
         </View>
       </Modal>
@@ -236,7 +234,7 @@ export default function TransitJournal() {
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white p-6 rounded-lg shadow-lg">
             <Text className="text-lg font-bold mb-4">Trip done!</Text>
-            <Text className="mb-4">Done with the trip</Text>
+            <Text className="mb-4">Great job! You've arrived at your destination.</Text>
             <Button title="Review trip" onPress={handleNavigateToReview} />
           </View>
         </View>
