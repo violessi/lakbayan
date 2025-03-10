@@ -16,7 +16,7 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TransitJournal() {
   const cameraRef = useRef<Camera>(null);
-  const { segments } = useLocalSearchParams();
+  const { trip, segments } = useLocalSearchParams();
   const router = useRouter();
 
   const segmentData = useMemo(() => {
@@ -165,7 +165,10 @@ export default function TransitJournal() {
   function handleNavigateToReview() {
     setShowTripFinishedModal(false);
     console.log("Navigating to review");
-    router.push("/(journal)/journal-review");
+    router.push({
+      pathname: "/(journal)/journal-review",
+      params: { trip: trip, segments: JSON.stringify(segmentData) },
+    });
   }
 
   return (

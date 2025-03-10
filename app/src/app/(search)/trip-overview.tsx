@@ -77,7 +77,7 @@ export default function TripOverview() {
   function handleStartPress() {
     router.push({
       pathname: "/(journal)/transit-journal",
-      params: { segments: JSON.stringify(segmentData) },
+      params: { trip: JSON.stringify(tripData), segments: JSON.stringify(segmentData) },
     });
   }
 
