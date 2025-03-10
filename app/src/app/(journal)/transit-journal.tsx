@@ -1,26 +1,25 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { SafeAreaView, View, ActivityIndicator, Text, Modal, Button } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import Mapbox, { MapView, Camera, UserLocation } from "@rnmapbox/maps";
-import * as Location from "expo-location";
+import Mapbox, { MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
+import * as ExpoLocation from "expo-location";
 
 import Header from "@components/ui/Header";
 import DirectionsLine from "@components/ui/DirectionsLine";
 import LocationMarker from "@components/ui/LocationMarker";
 import ReportTab from "@components/journal/ReportTab";
 
-import { getDirections, paraphraseStep } from "@services/mapbox-service";
-import { getDistance, getGreatCircleBearing } from "geolib";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-import PrimaryButton from "@components/ui/PrimaryButton";
+import { isNearLocation, computeHeading } from "@utils/map-utils";
+import { useSegmentDirections } from "@hooks/use-segment-directions";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TransitJournal() {
   const cameraRef = useRef<Camera>(null);
-  const { trip, segments } = useLocalSearchParams();
   const router = useRouter();
 
+  const { trip, segments } = useLocalSearchParams();
   const segmentData = useMemo(() => {
     if (!segments) return [];
     const segmentString = Array.isArray(segments) ? segments[0] : segments;
@@ -31,40 +30,27 @@ export default function TransitJournal() {
       return [];
     }
   }, [segments]);
-  const [segmentRoutes, setSegmentRoutes] = useState<Coordinates[][]>([]);
-
-  const [loading, setLoading] = useState(true);
 
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
-  const [steps, setSteps] = useState<{ instruction: string; location: [number, number] }[]>([]);
-  const [currentStepIndex, setCurrentStepIndex] = useState(-1);
-
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
 
-  function isNearLocation(userLoc: [number, number], stepLoc: [number, number], threshold = 3): boolean {
-    return (
-      getDistance({ latitude: userLoc[1], longitude: userLoc[0] }, { latitude: stepLoc[1], longitude: stepLoc[0] }) <=
-      threshold
-    );
-  }
-
-  const computeHeading = ([lon1, lat1]: [number, number], [lon2, lat2]: [number, number]): number => {
-    return getGreatCircleBearing({ latitude: lat1, longitude: lon1 }, { latitude: lat2, longitude: lon2 });
-  };
+  const { segmentRoutes, steps, loading } = useSegmentDirections(segmentData, currentSegmentIndex);
 
   // Request location permission and get initial location
   useEffect(() => {
     (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         console.warn("Permission to access location was denied");
         return;
       }
 
-      const location = await Location.getCurrentPositionAsync({});
+      const location = await ExpoLocation.getCurrentPositionAsync({});
       const newCoords: [number, number] = [location.coords.longitude, location.coords.latitude];
       setUserLocation(newCoords);
     })();
@@ -87,46 +73,8 @@ export default function TransitJournal() {
     });
   }, [userLocation, currentStepIndex, steps, segmentData, currentSegmentIndex]);
 
-  // Fetch directions and steps when segment changes
-  useEffect(() => {
-    async function fetchDirections() {
-      if (!segmentData.length || currentSegmentIndex >= segmentData.length) return;
-
-      setLoading(true);
-      try {
-        const segment = segmentData[currentSegmentIndex];
-        const { start_coords, end_coords, segment_mode, waypoints = [] } = segment;
-
-        console.log(`Fetching route for segment ${currentSegmentIndex + 1}:`, { start_coords, waypoints, end_coords });
-
-        const res = await getDirections(start_coords, waypoints, end_coords, segment_mode, true);
-        const routeCoordinates = res?.routes?.[0]?.geometry?.coordinates || [];
-        console.log(routeCoordinates);
-        setSegmentRoutes([routeCoordinates]);
-
-        const extractedSteps =
-          res?.routes?.[0]?.legs.flatMap((leg) =>
-            leg.steps.map((step) => ({
-              instruction: paraphraseStep(step.maneuver.instruction),
-              location: step.maneuver.location,
-            })),
-          ) || [];
-
-        setSteps(extractedSteps);
-        setCurrentStepIndex(0);
-        setShowNextSegmentModal(false);
-      } catch (error) {
-        console.error("Error fetching segment directions:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchDirections();
-  }, [currentSegmentIndex]);
-
   const handleUserLocationUpdate = useCallback(
-    (location: Location.LocationObject) => {
+    (location: Location) => {
       const newCoords: [number, number] = [location.coords.longitude, location.coords.latitude];
       setUserLocation(newCoords);
 
@@ -164,7 +112,7 @@ export default function TransitJournal() {
         return newStepIndex;
       });
     },
-    [steps, segmentData.length, currentSegmentIndex],
+    [steps, segmentData.length, currentSegmentIndex, currentStepIndex],
   );
 
   function goToNextSegment() {
@@ -213,7 +161,7 @@ export default function TransitJournal() {
               <DirectionsLine key={index} coordinates={coordinates} color="blue" />
             ))
           ) : (
-            <Text style={{ position: "absolute", top: "50%", left: "50%" }}>No route available</Text>
+            <Text style={{ position: "absolute", top: "50%", left: "50%" }}>No route available!</Text>
           )}
         </MapView>
 
@@ -221,10 +169,14 @@ export default function TransitJournal() {
           {steps.length > 0 && currentStepIndex >= 0 && currentStepIndex < steps.length ? (
             <Text className="font-bold text-lg mb-2">{steps[currentStepIndex].instruction}</Text>
           ) : (
-            <Text className="text-gray-500">No steps available.</Text>
+            <Text className="font-bold text-lg mb-2">Follow the map.</Text>
           )}
-          <Text>Landmark: {segmentData[currentSegmentIndex]?.landmark || ""}</Text>
-          <Text>Instruction: {segmentData[currentSegmentIndex]?.instruction || ""}</Text>
+          {segmentData[currentSegmentIndex].landmark && (
+            <Text className="text-sm mb-2">Landmark: {segmentData[currentSegmentIndex].landmark}</Text>
+          )}
+          {segmentData[currentSegmentIndex].instruction && (
+            <Text className="text-sm mb-2">Instruction: {segmentData[currentSegmentIndex].instruction}</Text>
+          )}
         </View>
       </View>
 
