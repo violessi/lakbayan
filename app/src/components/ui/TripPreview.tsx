@@ -1,13 +1,17 @@
-import React from "react";
-import { View, StyleSheet, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Text } from "react-native-paper";
+
+import { useSession } from "@contexts/SessionContext";
+import { getBookmarks, addBookmark, removeBookmark } from "@services/socials-service";
+
+import VotingBar from "@components/VotingBar";
 
 const verifiedMod = require("@assets/verified-mod.png");
 const verifiedGPS = require("@assets/verified-gps.png");
-const upvote = require("@assets/social-upvote.png");
-const downvote = require("@assets/social-downvote.png");
 const comment = require("@assets/social-comment.png");
-const bookmark = require("@assets/social-bookmark.png");
+const bookmarkIcon = require("@assets/social-bookmark.png");
+const bookmarkedIcon = require("@assets/social-bookmarked.png");
 
 const jeep = require("@assets/transpo-jeep.png");
 const bus = require("@assets/transpo-bus.png");
@@ -16,12 +20,7 @@ const tricycle = require("@assets/transpo-tricycle.png");
 const uv = require("@assets/transpo-uv.png");
 const walk = require("@assets/transpo-walk.png");
 
-interface TripPreviewProps {
-  trip: Trip;
-  segments: Segment[];
-}
-
-const getImageSource = (mode: string) => {
+const getImageSource = (mode: TransportationMode) => {
   switch (mode) {
     case "Jeep":
       return jeep;
@@ -40,14 +39,38 @@ const getImageSource = (mode: string) => {
   }
 };
 
+interface TripPreviewProps {
+  trip: Trip;
+  segments: Segment[];
+}
+
 export default function TripPreview({ trip, segments }: TripPreviewProps) {
-  segments.forEach((seg, index) => {
-    console.log(`Segment ${index + 1} duration:`, seg.duration);
-  });
+  const { userId } = useSession();
+
+  const [bookmarked, setBookmarked] = useState(false);
+
+  useEffect(() => {
+    async function fetchBookmarks() {
+      if (userId) {
+        const bookmarks = await getBookmarks(userId);
+        setBookmarked(bookmarks.includes(trip.id));
+      }
+    }
+    fetchBookmarks();
+  }, [userId, trip.id]);
+
+  const toggleBookmark = async () => {
+    if (!userId) return;
+
+    if (bookmarked) {
+      await removeBookmark(userId, trip.id);
+    } else {
+      await addBookmark(userId, trip.id);
+    }
+    setBookmarked(!bookmarked);
+  };
 
   const totalDuration = segments.reduce((sum, seg) => sum + seg.duration, 0);
-  console.log("Total duration:", totalDuration);
-
   const totalCost = segments.reduce((sum, seg) => sum + seg.cost, 0);
   const transportModes = segments.map((seg) => seg.segment_mode);
 
@@ -87,14 +110,7 @@ export default function TripPreview({ trip, segments }: TripPreviewProps) {
               </View>
             </View>
             <View className="flex flex-row gap-1">
-              <View className="flex flex-row gap-1 items-center">
-                <Image source={upvote} style={{ width: 12, height: 12 }} resizeMode="contain" />
-                <Text className="text-sm">0</Text>
-              </View>
-              <View className="flex flex-row gap-1 items-center">
-                <Image source={downvote} style={{ width: 12, height: 12 }} resizeMode="contain" />
-                <Text className="text-sm">0</Text>
-              </View>
+              {userId && <VotingBar tripId={trip.id} userId={userId} />}
               <View className="flex flex-row gap-1 items-center">
                 <Image source={comment} style={{ width: 11, height: 11 }} resizeMode="contain" />
                 <Text className="text-sm">0</Text>
@@ -103,7 +119,13 @@ export default function TripPreview({ trip, segments }: TripPreviewProps) {
           </View>
         </View>
         <View style={{ flex: 1, alignItems: "flex-end" }}>
-          <Image source={bookmark} style={{ width: 15, height: 15, tintColor: "#7F55D9" }} resizeMode="contain" />
+          <TouchableOpacity onPress={toggleBookmark}>
+            <Image
+              source={bookmarked ? bookmarkedIcon : bookmarkIcon}
+              style={{ width: 15, height: 15, tintColor: "#7F55D9" }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
         </View>
       </View>
     </View>
