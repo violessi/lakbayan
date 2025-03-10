@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { SafeAreaView, View, ActivityIndicator, Text, ScrollView, Modal, Button } from "react-native";
+import { SafeAreaView, View, ActivityIndicator, Text, Modal, Button } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Mapbox, { MapView, Camera, UserLocation } from "@rnmapbox/maps";
 import * as Location from "expo-location";
@@ -7,6 +7,7 @@ import * as Location from "expo-location";
 import Header from "@components/ui/Header";
 import DirectionsLine from "@components/ui/DirectionsLine";
 import LocationMarker from "@components/ui/LocationMarker";
+import ReportTab from "@components/journal/ReportTab";
 
 import { getDirections, paraphraseStep } from "@services/mapbox-service";
 import { getDistance, getGreatCircleBearing } from "geolib";
@@ -208,10 +209,9 @@ export default function TransitJournal() {
           )}
         </MapView>
 
-        <View className="absolute bottom-0 w-full bg-white p-4">
-          <Text className="font-bold text-lg mb-2">Current Step</Text>
+        <View className="absolute top-0 w-full bg-white p-4">
           {steps.length > 0 && currentStepIndex >= 0 && currentStepIndex < steps.length ? (
-            <Text className="text-gray-700">{steps[currentStepIndex].instruction}</Text>
+            <Text className="font-bold text-lg mb-2">{steps[currentStepIndex].instruction}</Text>
           ) : (
             <Text className="text-gray-500">No steps available.</Text>
           )}
@@ -219,6 +219,8 @@ export default function TransitJournal() {
           <Text>Instruction: {segmentData[currentSegmentIndex]?.instruction || ""}</Text>
         </View>
       </View>
+
+      <ReportTab />
 
       <Modal transparent={true} visible={showNextSegmentModal} animationType="slide">
         <View className="flex-1 justify-center items-center bg-black/50">
