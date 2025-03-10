@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, FlatList, Image, TouchableOpacity, TextInput } from "react-native";
+import { Text, View, Image, TouchableOpacity, TextInput, Alert } from "react-native";
+import { useRouter } from "expo-router";
 
-import { getUsername } from "@services/account-service";
 import { getPoints } from "@services/socials-service";
-import { getComments, addComment } from "@services/socials-service";
+import { addComment } from "@services/socials-service";
+import { insertJournalEntry } from "@services/journal-service";
 
 import VotingBar from "@components/VotingBar";
 import PrimaryButton from "@components/ui/PrimaryButton";
@@ -28,22 +29,12 @@ export default function JournalFeedback({
   currentUserId,
   onCommentPress,
 }: JournalFeedbackProps) {
-  const snapPoints = ["1%", "18%", "40%", "72%"];
+  const snapPoints = ["10%", "18%", "40%", "72%"];
+  const router = useRouter();
 
   const [points, setPoints] = useState<number>(0);
 
   const [newComment, setNewComment] = useState("");
-
-  const handleSubmit = async () => {
-    if (!newComment.trim()) return;
-
-    try {
-      await addComment(trip.id, currentUserId || "", newComment);
-      console.log("Comment added successfully");
-    } catch (error) {
-      console.error("Error adding comment:", error);
-    }
-  };
 
   useEffect(() => {
     async function fetchPoints() {
@@ -53,6 +44,42 @@ export default function JournalFeedback({
 
     fetchPoints();
   }, [trip.contributor_id, trip.id]);
+
+  const handleSubmit = async () => {
+    if (!newComment.trim()) return;
+
+    try {
+      await addComment(trip.id, currentUserId || "", newComment);
+      console.log("Comment added successfully");
+
+      for (const segment of segments) {
+        if (segment.id.startsWith("walk")) continue; // Skip generated walk segments
+
+        await insertJournalEntry(
+          segment.id,
+          currentUserId,
+          "2025-03-10T08:00:00Z", // FIXME Placeholder time_start
+          "2025-03-10T08:30:00Z", // FIXME Placeholder time_end
+          1800, // FIXME Placeholder duration
+          false,
+          false,
+        );
+      }
+
+      console.log("Journal entries added successfully");
+
+      Alert.alert("Success", "Your transit journal has been submitted!", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/(tabs)"),
+        },
+      ]);
+
+      setNewComment("");
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+    }
+  };
 
   return (
     <BottomSheet snapPoints={snapPoints} index={2}>

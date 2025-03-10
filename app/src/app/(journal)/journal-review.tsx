@@ -81,19 +81,12 @@ export default function JournalReview() {
     });
   }
 
-  function handleStartPress() {
-    router.push({
-      pathname: "/(journal)/transit-journal",
-      params: { segments: JSON.stringify(segmentData) },
-    });
-  }
-
   return (
     <SafeAreaView className="flex-1">
       <Header title="Journal Review" />
 
       <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12" projection="mercator">
-        <Camera ref={cameraRef} centerCoordinate={startCoordinates} animationMode="easeTo" zoomLevel={10} />
+        <Camera ref={cameraRef} centerCoordinate={endCoordinates} animationMode="easeTo" zoomLevel={10} />
 
         <LocationMarker coordinates={startCoordinates} label={startLocation} color="red" radius={8} />
         <LocationMarker coordinates={endCoordinates} label={endLocation} color="red" radius={8} />
