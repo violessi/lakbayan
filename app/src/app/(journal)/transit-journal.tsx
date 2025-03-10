@@ -44,7 +44,7 @@ export default function TransitJournal() {
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
 
-  function isNearLocation(userLoc: [number, number], stepLoc: [number, number], threshold = 20): boolean {
+  function isNearLocation(userLoc: [number, number], stepLoc: [number, number], threshold = 3): boolean {
     return (
       getDistance({ latitude: userLoc[1], longitude: userLoc[0] }, { latitude: stepLoc[1], longitude: stepLoc[0] }) <=
       threshold
@@ -76,7 +76,7 @@ export default function TransitJournal() {
 
     const nextLocation =
       currentStepIndex < steps.length ? steps[currentStepIndex].location : segmentData[currentSegmentIndex].end_coords;
-    const computedHeading = computeHeading(userLocation, nextLocation);
+    const computedHeading = computeHeading(nextLocation, userLocation);
 
     cameraRef.current?.setCamera({
       centerCoordinate: userLocation,
@@ -112,7 +112,7 @@ export default function TransitJournal() {
             })),
           ) || [];
 
-        setSteps([{ instruction: "Start following the route", location: start_coords }, ...extractedSteps]);
+        setSteps(extractedSteps);
         setCurrentStepIndex(0);
         setShowNextSegmentModal(false);
       } catch (error) {
@@ -130,25 +130,35 @@ export default function TransitJournal() {
       const newCoords: [number, number] = [location.coords.longitude, location.coords.latitude];
       setUserLocation(newCoords);
 
-      if (!steps.length) return;
+      if (!steps.length || currentStepIndex >= steps.length) return;
 
       setCurrentStepIndex((prevStepIndex) => {
         let newStepIndex = prevStepIndex;
 
-        // if the user is near the current step location, move to the next step
         for (let i = prevStepIndex; i < steps.length; i++) {
           if (isNearLocation(newCoords, steps[i].location)) {
-            newStepIndex = i + 1;
+            newStepIndex = i;
             break;
           }
         }
-        // If all steps are completed, show the modal for confirmation
-        if (newStepIndex >= steps.length && steps.length > 0) {
+
+        if (newStepIndex >= steps.length - 1) {
+          console.log("Last step reached!");
+
           if (currentSegmentIndex < segmentData.length - 1) {
-            setShowNextSegmentModal(true); // User confirms before proceeding
+            console.log("Showing next segment modal");
+            setShowNextSegmentModal(true);
           } else {
+            console.log("Trip finished! Showing trip finished modal");
             setShowTripFinishedModal(true);
           }
+
+          return steps.length - 1;
+        }
+
+        if (steps[newStepIndex].instruction === "You have arrived at your destination.") {
+          console.log("Trip finished! Showing trip finished modal");
+          setShowTripFinishedModal(true);
         }
 
         return newStepIndex;

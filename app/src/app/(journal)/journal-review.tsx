@@ -70,6 +70,7 @@ export default function JournalReview() {
 
   useEffect(() => {
     if (startCoordinates && endCoordinates && cameraRef.current) {
+      console.log("Fitting bounds");
       cameraRef.current.fitBounds(startCoordinates, endCoordinates, [150, 150, 250, 150]);
     }
   }, [segmentRoutes, startCoordinates, endCoordinates]);
