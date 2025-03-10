@@ -111,7 +111,7 @@ export default function TransitJournal() {
             })),
           ) || [];
 
-        setSteps(extractedSteps);
+        setSteps([{ instruction: "Start following the route", location: start_coords }, ...extractedSteps]);
         setCurrentStepIndex(0);
         setShowNextSegmentModal(false);
       } catch (error) {
