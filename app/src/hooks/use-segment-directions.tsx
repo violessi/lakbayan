@@ -6,13 +6,6 @@ interface Step {
   location: [number, number];
 }
 
-interface Segment {
-  start_coords: [number, number];
-  end_coords: [number, number];
-  segment_mode: string;
-  waypoints?: [number, number][];
-}
-
 export function useSegmentDirections(segmentData: Segment[], currentSegmentIndex: number) {
   const [segmentRoutes, setSegmentRoutes] = useState<Coordinates[][]>([]);
   const [steps, setSteps] = useState<Step[]>([]);

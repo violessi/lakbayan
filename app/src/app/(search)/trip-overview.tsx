@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState, useMemo, Fragment } from "react";
+import React, { useEffect, useRef, useMemo, Fragment } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { View, SafeAreaView, Text, ActivityIndicator } from "react-native";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
+
 import { useSession } from "@contexts/SessionContext";
+import { useFetchSegmentDirections } from "@hooks/use-fetch-segment-directions";
 
 import Header from "@components/ui/Header";
 import DirectionsLine from "@components/ui/DirectionsLine";
@@ -13,7 +15,6 @@ import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 
 import TripSummary from "@components/search/TripSummary";
 
-import { getDirections } from "@services/mapbox-service";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -22,44 +23,24 @@ export default function TripOverview() {
   const cameraRef = useRef<Camera>(null);
   const router = useRouter();
 
-  const { trip, segments } = useLocalSearchParams();
   const { userId } = useSession();
 
-  const tripData = useMemo(() => (trip ? JSON.parse(trip) : null), [trip]);
-  const segmentData = useMemo(() => (segments ? JSON.parse(segments) : []), [segments]);
+  const { trip, segments } = useLocalSearchParams();
+  const tripData: Trip = useMemo(() => {
+    const tripString = Array.isArray(trip) ? trip[0] : trip;
+    return tripString ? JSON.parse(tripString) : null;
+  }, [trip]);
+  const segmentData: Segment[] = useMemo(() => {
+    const segmentString = Array.isArray(segments) ? segments[0] : segments;
+    return segmentString ? JSON.parse(segmentString) : [];
+  }, [segments]);
 
   const startCoordinates = tripData?.start_coords || null;
   const endCoordinates = tripData?.end_coords || null;
   const startLocation = tripData?.start_location || "Start";
   const endLocation = tripData?.end_location || "End";
 
-  const [segmentRoutes, setSegmentRoutes] = useState<Coordinates[][]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchAllDirections() {
-      setLoading(true);
-      try {
-        const segmentPromises = segmentData.map(async (segment, index) => {
-          const { start_coords, end_coords, segment_mode } = segment;
-          const waypoints = Array.isArray(segment.waypoints) ? segment.waypoints : [];
-          console.log(`Fetching route for segment ${index + 1}:`, { start_coords, waypoints, end_coords });
-
-          const res = await getDirections(start_coords, waypoints, end_coords, segment_mode);
-          return res?.routes?.[0]?.geometry?.coordinates || [];
-        });
-
-        const segmentRoutes = await Promise.all(segmentPromises);
-        setSegmentRoutes(segmentRoutes);
-      } catch (error) {
-        console.error("Error fetching directions:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchAllDirections();
-  }, [segmentData]);
+  const { segmentRoutes, loading } = useFetchSegmentDirections(segmentData);
 
   useEffect(() => {
     if (startCoordinates && endCoordinates && cameraRef.current) {
@@ -127,6 +108,7 @@ export default function TripOverview() {
       <View className="px-10  z-10">
         <PrimaryButton label="Start" onPress={handleStartPress} />
       </View>
+
       {userId && (
         <TripSummary
           startLocation={startLocation}

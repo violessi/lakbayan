@@ -13,6 +13,8 @@ import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 import { isNearLocation, computeHeading } from "@utils/map-utils";
 import { useSegmentDirections } from "@hooks/use-segment-directions";
 
+import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
+
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TransitJournal() {
@@ -91,13 +93,9 @@ export default function TransitJournal() {
         }
 
         if (newStepIndex >= steps.length - 1) {
-          console.log("Last step reached!");
-
           if (currentSegmentIndex < segmentData.length - 1) {
-            console.log("Showing next segment modal");
             setShowNextSegmentModal(true);
           } else {
-            console.log("Trip finished! Showing trip finished modal");
             setShowTripFinishedModal(true);
           }
 
@@ -105,7 +103,6 @@ export default function TransitJournal() {
         }
 
         if (steps[newStepIndex].instruction === "You have arrived at your destination.") {
-          console.log("Trip finished! Showing trip finished modal");
           setShowTripFinishedModal(true);
         }
 
@@ -137,28 +134,29 @@ export default function TransitJournal() {
 
           <UserLocation visible={true} showsUserHeadingIndicator={true} onUpdate={handleUserLocationUpdate} />
 
-          {segmentData.length > 0 && (
-            <>
-              <LocationMarker
-                coordinates={segmentData[currentSegmentIndex].start_coords}
-                label="Start"
-                color="blue"
-                radius={6}
-              />
-              <LocationMarker
-                coordinates={segmentData[currentSegmentIndex].end_coords}
-                label="End"
-                color="blue"
-                radius={6}
-              />
-            </>
-          )}
+          <LocationMarker
+            coordinates={segmentData[currentSegmentIndex].start_coords}
+            label={segmentData[currentSegmentIndex].start_location}
+            color={TRANSPORTATION_COLORS[currentSegmentIndex % TRANSPORTATION_COLORS.length]}
+            radius={6}
+          />
+          <LocationMarker
+            coordinates={segmentData[currentSegmentIndex].end_coords}
+            label={segmentData[currentSegmentIndex].end_location}
+            color={TRANSPORTATION_COLORS[currentSegmentIndex % TRANSPORTATION_COLORS.length]}
+            radius={6}
+          />
 
           {loading ? (
-            <ActivityIndicator size="large" color="#0000ff" style={{ position: "absolute", top: "50%", left: "50%" }} />
+            <ActivityIndicator size="large" style={{ position: "absolute", top: "50%", left: "50%" }} />
           ) : segmentRoutes.length > 0 ? (
             segmentRoutes.map((coordinates, index) => (
-              <DirectionsLine key={index} coordinates={coordinates} color="blue" />
+              <DirectionsLine
+                key={index}
+                coordinates={coordinates}
+                color={TRANSPORTATION_COLORS[currentSegmentIndex % TRANSPORTATION_COLORS.length]}
+                width={5}
+              />
             ))
           ) : (
             <Text style={{ position: "absolute", top: "50%", left: "50%" }}>No route available!</Text>
@@ -169,7 +167,7 @@ export default function TransitJournal() {
           {steps.length > 0 && currentStepIndex >= 0 && currentStepIndex < steps.length ? (
             <Text className="font-bold text-lg mb-2">{steps[currentStepIndex].instruction}</Text>
           ) : (
-            <Text className="font-bold text-lg mb-2">Follow the map.</Text>
+            <Text className="font-bold text-lg mb-2">Follow the instructions on the map.</Text>
           )}
           {segmentData[currentSegmentIndex].landmark && (
             <Text className="text-sm mb-2">Landmark: {segmentData[currentSegmentIndex].landmark}</Text>
