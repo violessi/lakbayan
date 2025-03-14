@@ -37,28 +37,53 @@ export async function getDirections(
   waypoints: Coordinates[],
   end: Coordinates,
   transportationMode: string,
-): Promise<MapboxDirectionsResponse> {
-  let mode = "driving";
-  if (transportationMode === "Walk") {
-    mode = "walking";
-  }
+  includeSteps: boolean = false, // Default: false
+): Promise<{ routes: MapboxDirectionsResponse["routes"]; waypoints: any; steps?: string[] }> {
+  let mode = transportationMode === "Walk" ? "walking" : "driving"; // Mapbox only supports specific modes
   const coordinates = [
     `${start[0]},${start[1]}`,
     ...waypoints.map((point) => `${point[0]},${point[1]}`),
     `${end[0]},${end[1]}`,
   ].join(";");
 
-  console.log(
-    `${BASE_URL}/directions/v5/mapbox/${mode}/${encodeURIComponent(coordinates)}?alternatives=true&geometries=geojson&language=en&overview=full&steps=true&access_token=${MAPBOX_ACCESS_TOKEN}`,
-  );
   const response = await fetch(
-    `${BASE_URL}/directions/v5/mapbox/${mode}/${encodeURIComponent(coordinates)}?alternatives=true&geometries=geojson&language=en&overview=full&steps=true&access_token=${MAPBOX_ACCESS_TOKEN}`,
+    `${BASE_URL}/directions/v5/mapbox/${mode}/${encodeURIComponent(coordinates)}?alternatives=true&geometries=geojson&language=en&overview=full&steps=${includeSteps}&access_token=${MAPBOX_ACCESS_TOKEN}`,
   );
 
   const responseJSON = await response.json();
   console.log("Directions response:", responseJSON);
-  const directions: MapboxDirectionsResponse = { routes: responseJSON.routes, waypoints: responseJSON.waypoints };
-  return directions;
+
+  return { routes: responseJSON.routes, waypoints: responseJSON.waypoints };
+}
+
+export function paraphraseStep(instruction: string): string {
+  // Normalize input for case-insensitive matching
+  const lowercased = instruction.toLowerCase();
+
+  // Replace turn-based instructions with general commuting steps
+  if (lowercased.includes("turn right") || lowercased.includes("turn left")) {
+    return "Follow the route ahead.";
+  }
+  if (lowercased.includes("make a u-turn")) {
+    return "Stay on the same road.";
+  }
+  // if (
+  //   lowercased.includes("your destination is on the right") ||
+  //   lowercased.includes("your destination is on the left")
+  // ) {
+  //   return "You have arrived at your stop.";
+  // }
+  if (lowercased.includes("enter") || lowercased.includes("take the exit")) {
+    return "Proceed to the next stop.";
+  }
+  if (lowercased.includes("head") || lowercased.includes("drive")) {
+    return "Continue traveling along the route.";
+  }
+  if (lowercased.includes("stay on")) {
+    return "Remain on the current route.";
+  }
+
+  return instruction; // Fallback if no match
 }
 
 export async function getDistanceDuration(start: Coordinates, end: Coordinates) {
