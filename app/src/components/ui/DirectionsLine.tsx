@@ -4,9 +4,10 @@ import { ShapeSource, LineLayer } from "@rnmapbox/maps";
 interface DirectionsLineProps {
   coordinates: Coordinates[];
   color?: string;
+  width?: number;
 }
 
-export default function DirectionsLine({ coordinates, color = "red" }: DirectionsLineProps) {
+export default function DirectionsLine({ coordinates, color = "red", width = 3 }: DirectionsLineProps) {
   const lineId = `directions-line-${JSON.stringify(coordinates)}`;
 
   return (
@@ -30,7 +31,7 @@ export default function DirectionsLine({ coordinates, color = "red" }: Direction
         id={`directions-layer-${lineId}`}
         style={{
           lineColor: color,
-          lineWidth: 3,
+          lineWidth: width,
         }}
       />
     </ShapeSource>
