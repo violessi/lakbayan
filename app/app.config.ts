@@ -13,8 +13,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: "myapp",
   userInterfaceStyle: "automatic",
   splash: {
-    resizeMode: "contain",
-    backgroundColor: "#ffffff",
+    "image": "./src/assets/android/splashscreen_logo.png",
+    "resizeMode": "contain",
+    "backgroundColor": "#ffffff"
   },
   ios: {
     supportsTablet: true,

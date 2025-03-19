@@ -1,29 +1,25 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "../utils/supabase";
-import { Session } from "@supabase/supabase-js";
+import { router } from "expo-router";
 
 interface SessionContextType {
-  session: Session | null;
   userId: string | null;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<Session | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUserId(session?.user?.id || null);
-    });
-
-    // Listen for auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUserId(session?.user?.id || null);
+      if (session) {
+        setUserId(session.user.id);
+        router.replace("/(tabs)");
+      } else {
+        setUserId(null);
+        router.push("/(auth)/log-in");
+      }
     });
 
     return () => {
@@ -31,11 +27,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, []);
 
-  return (
-    <SessionContext.Provider value={{ session, userId }}>
-      {children}
-    </SessionContext.Provider>
-  );
+  return <SessionContext.Provider value={{ userId }}>{children}</SessionContext.Provider>;
 };
 
 // Custom hook to use session context

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { router } from "expo-router";
+import React, { useState, useRef } from "react";
 import { Button, TextInput } from "react-native-paper";
-import { Alert, View, AppState, SafeAreaView } from "react-native";
+import { Alert, View, AppState, SafeAreaView, TextInput as Text } from "react-native";
 
 import { supabase } from "@utils/supabase";
 import { useSession } from "@contexts/SessionContext";
 
+// TODO: move to higher-level component?
 AppState.addEventListener("change", (state) => {
   if (state === "active") {
     supabase.auth.startAutoRefresh();
@@ -15,39 +15,26 @@ AppState.addEventListener("change", (state) => {
 });
 
 export default function LogIn() {
-  const { userId } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const passwordInputRef = useRef<Text>(null);
 
+  //TODO: fix error handling
   async function signInWithEmail() {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      Alert.alert(error.message);
-    } else {
-      console.log("Logged in user ID:", userId);
-      router.replace("/(tabs)");
-    }
+    if (error) Alert.alert(error.message);
     setLoading(false);
   }
 
   async function signUpWithEmail() {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
+    const { error } = await supabase.auth.signUp({ email, password });
 
-    if (error) {
-      Alert.alert(error.message);
-    } else {
-      Alert.alert("Success! Please log in.");
-    }
+    if (error) Alert.alert(error.message);
+    else Alert.alert("Success! Please log in.");
     setLoading(false);
   }
 
@@ -60,6 +47,8 @@ export default function LogIn() {
           value={email}
           placeholder="email@address.com"
           autoCapitalize="none"
+          returnKeyType="next"
+          onSubmitEditing={() => passwordInputRef.current?.focus()}
         />
         <TextInput
           label="Password"
@@ -68,6 +57,8 @@ export default function LogIn() {
           secureTextEntry={true}
           placeholder="Password"
           autoCapitalize="none"
+          ref={passwordInputRef}
+          returnKeyType="done"
         />
       </View>
       <View className="flex flex-col w-full">

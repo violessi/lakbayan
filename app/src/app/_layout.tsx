@@ -11,6 +11,7 @@ export default function RootLayout() {
   const { colors } = useTheme();
   colors.background = "transparent";
 
+  // TODO: create private routes
   return (
     <SessionProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
