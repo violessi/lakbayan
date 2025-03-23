@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, View, FlatList, ActivityIndicator, Text } from "react-native";
+import { SafeAreaView, View, FlatList, ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 
 import { useSession } from "@contexts/SessionContext";
 import { getBookmarks } from "@services/socials-service";
@@ -11,8 +12,11 @@ import TripPreview from "@components/ui/TripPreview";
 export default function BookmarkedTrips() {
   const { userId } = useSession();
   const { tripData, segmentData, loading: tripsLoading } = useTripData();
+
   const [bookmarkedTrips, setBookmarkedTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchBookmarks = async () => {
@@ -32,6 +36,16 @@ export default function BookmarkedTrips() {
     }
   }, [userId, tripData, tripsLoading]);
 
+  function handleTripPress(trip: Trip) {
+    router.push({
+      pathname: "/trip-overview",
+      params: {
+        trip: JSON.stringify(trip),
+        segments: JSON.stringify(segmentData[trip.id] || []),
+      },
+    });
+  }
+
   return (
     <SafeAreaView className="flex-1">
       <Header title="Bookmarked Trips" />
@@ -44,7 +58,11 @@ export default function BookmarkedTrips() {
           <FlatList
             data={bookmarkedTrips}
             keyExtractor={(trip) => trip.id}
-            renderItem={({ item }) => <TripPreview trip={item} segments={segmentData[item.id] || []} />}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => handleTripPress(item)}>
+                <TripPreview trip={item} segments={segmentData[item.id] || []} />
+              </TouchableOpacity>
+            )}
           />
         )}
       </View>
