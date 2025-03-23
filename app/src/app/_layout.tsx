@@ -22,6 +22,8 @@ export default function RootLayout() {
             <Stack.Screen name="(contribute)" options={{ headerShown: false }} />
             <Stack.Screen name="(search)" options={{ headerShown: false }} />
             <Stack.Screen name="(journal)" options={{ headerShown: false }} />
+            <Stack.Screen name="(account)" options={{ headerShown: false }} />
+            <Stack.Screen name="(moderation)" options={{ headerShown: false }} />
           </Stack>
         </PaperProvider>
       </GestureHandlerRootView>

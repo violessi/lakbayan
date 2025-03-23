@@ -1,103 +1,44 @@
-import React, { useState, useEffect } from "react";
-import { useRouter } from "expo-router";
-
-import { supabase } from "../../utils/supabase";
-import { useSession } from "../../contexts/SessionContext";
-
-import { View, Alert, SafeAreaView } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import React from "react";
+import { Text, SafeAreaView, View } from "react-native";
+import Option from "../../components/ContributeOption";
 
 export default function Account() {
-  const { session } = useSession();
-  const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState("");
-  const router = useRouter();
-
-  useEffect(() => {
-    const getProfile = async () => {
-      try {
-        setLoading(true);
-        if (!session?.user) throw new Error("No user on the session!");
-
-        const { data, error, status } = await supabase
-          .from("profiles")
-          .select(`username`)
-          .eq("id", session?.user.id)
-          .single();
-        if (error && status !== 406) {
-          throw error;
-        }
-
-        if (data) {
-          setUsername(data.username);
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          Alert.alert(error.message);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (session) {
-      getProfile();
-    }
-  }, [session]);
-
-  async function updateProfile({ username }: { username: string }) {
-    try {
-      setLoading(true);
-      if (!session?.user) throw new Error("No user on the session!");
-
-      const updates = {
-        id: session?.user.id,
-        username,
-        updated_at: new Date(),
-      };
-
-      const { error } = await supabase.from("profiles").upsert(updates);
-
-      if (error) {
-        throw error;
-      } else {
-        Alert.alert("Profile updated successfully!");
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleLogout() {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      Alert.alert(error.message);
-    } else {
-      router.replace("/(auth)/onboarding");
-    }
-  }
-
   return (
-    <SafeAreaView>
-      <View>
-        <TextInput label="Email" value={session?.user?.email} disabled />
-      </View>
-      <View>
-        <TextInput label="Username" value={username || ""} onChangeText={(text) => setUsername(text)} />
-      </View>
-
-      <View>
-        <Button onPress={() => updateProfile({ username })} disabled={loading}>
-          {loading ? "Loading ..." : "Update"}
-        </Button>
+    <SafeAreaView className="flex-1">
+      <View className="h-32 bg-primary px-5 py-5">
+        <Text className="text-white text-lg font-bold">Contribute a route</Text>
+        <Text className="text-white text-sm">
+          Lakbayan depends on community contributions to ensure up-to-date and complete route information!
+        </Text>
       </View>
 
-      <View>
-        <Button onPress={handleLogout}>Log out</Button>
+      <View className="flex-1 p-4">
+        <View className="pb-10 border-b-1">
+          <Text className="text-black text-xl font-bold mb-4">My trips</Text>
+          <Option
+            title="Bookmarked Trips"
+            description="Take your favorite trips or the trips you have saved for later!"
+            link="/(account)/bookmarked-trips"
+          />
+          <Option
+            title="Submitted Trips"
+            description="View the trips you have shared with other users so far!"
+            link="/(account)/submitted-trips"
+          />
+          <Option
+            title="Account Settings"
+            description="Change your login credentials"
+            link="/(account)/account-settings"
+          />
+        </View>
+        <View>
+          <Text className="text-black text-xl font-bold mb-4">Moderation</Text>
+          <Option
+            title="Tag routes as verified"
+            description="Tag user-submitted routes as verified!"
+            link="/(moderation)/moderate-trips-list"
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
