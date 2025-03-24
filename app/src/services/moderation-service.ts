@@ -68,3 +68,16 @@ export async function addTripToModeration(tripId: string) {
     console.error("Error adding trip to moderation:", error);
   }
 }
+
+export async function updateModerationStatus(moderatorId: string, tripId: string, status: string) {
+  const { error } = await supabase
+    .from("moderation-reviews")
+    .update({ status })
+    .eq("moderator_id", moderatorId)
+    .eq("trip_id", tripId);
+
+  if (error) {
+    console.error("Error updating moderation status:", error);
+    throw error;
+  }
+}

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { SafeAreaView, View, FlatList, ActivityIndicator, Text, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 
 import { getPendingVerifications } from "@services/moderation-service";
 import { useSession } from "@contexts/SessionContext";
@@ -17,21 +17,23 @@ export default function ModerateTripsList() {
 
   const router = useRouter();
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!userId) return;
+  useFocusEffect(
+    useCallback(() => {
+      async function fetchData() {
+        if (!userId) return;
 
-      setLoading(true);
-      const trips = await getPendingVerifications(userId);
-      setPendingTrips(trips);
-      setLoading(false);
-    }
-    fetchData();
-  }, [userId]);
+        setLoading(true);
+        const trips = await getPendingVerifications(userId);
+        setPendingTrips(trips);
+        setLoading(false);
+      }
+      fetchData();
+    }, [userId]),
+  );
 
   function handleTripPress(trip) {
     router.push({
-      pathname: "/trip-overview",
+      pathname: "/(moderation)/moderate-trip-review",
       params: {
         trip: JSON.stringify(trip),
         segments: JSON.stringify(segmentData[trip.id] || []),
