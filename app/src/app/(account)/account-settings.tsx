@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useRouter } from "expo-router";
-
-import { useSession } from "@contexts/SessionContext";
 import { View, Alert, SafeAreaView } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 
-import Header from "@components/ui/Header";
+import { useSession } from "@contexts/SessionContext";
 import { fetchUserProfile, updateUserProfile } from "@services/account-service";
+
+import Header from "@components/ui/Header";
 
 export default function AccountSettings() {
   const { session } = useSession();
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
-  const router = useRouter();
 
   useEffect(() => {
     const loadProfile = async () => {

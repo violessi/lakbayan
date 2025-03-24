@@ -1,14 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Text, SafeAreaView, View, Alert } from "react-native";
-
 import { useRouter } from "expo-router";
+
 import { logoutUser } from "@services/account-service";
+import { getUsername, getUserRole, getUserDetails } from "@services/account-service";
+import { useSession } from "@contexts/SessionContext";
 
 import Option from "../../components/ContributeOption";
 import SecondaryButton from "@components/ui/SecondaryButton";
+import UserHeader from "@components/account/UserHeader";
 
 export default function Account() {
   const router = useRouter();
+  const { userId } = useSession();
+
+  const [username, setUsername] = useState<string>("");
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [points, setPoints] = useState<number>(0);
+  const [joinedDate, setJoinedDate] = useState<string>("");
+
+  useEffect(() => {
+    async function fetchUserDetails() {
+      if (userId) {
+        const role = await getUserRole(userId);
+        setUserRole(role || "User");
+
+        const username = await getUsername(userId);
+        setUsername(username || "User");
+
+        const { points, joinedDate } = await getUserDetails(userId);
+        setPoints(points);
+        setJoinedDate(joinedDate);
+      }
+    }
+    fetchUserDetails();
+  }, [userId]);
 
   async function handleLogout() {
     try {
@@ -21,12 +47,8 @@ export default function Account() {
 
   return (
     <SafeAreaView className="flex-1">
-      <View className="h-32 bg-primary px-5 py-5">
-        <Text className="text-white text-lg font-bold">Contribute a route</Text>
-        <Text className="text-white text-sm">
-          Lakbayan depends on community contributions to ensure up-to-date and complete route information!
-        </Text>
-      </View>
+      {/* User Header */}
+      <UserHeader username={username || "User"} role={userRole || "User"} points={points} joinedDate={joinedDate} />
 
       <View className="flex-1 p-4 justify-between">
         <View>
@@ -48,14 +70,16 @@ export default function Account() {
               link="/(account)/account-settings"
             />
           </View>
-          <View>
-            <Text className="text-black text-xl font-bold mb-4">Moderation</Text>
-            <Option
-              title="Tag routes as verified"
-              description="Tag user-submitted routes as verified!"
-              link="/(moderation)/moderate-trips-list"
-            />
-          </View>
+          {userRole === "moderator" && (
+            <View>
+              <Text className="text-black text-xl font-bold mb-4">Moderation</Text>
+              <Option
+                title="Tag routes as verified"
+                description="Tag user-submitted routes as verified!"
+                link="/(moderation)/moderate-trips-list"
+              />
+            </View>
+          )}
         </View>
         <SecondaryButton label="Log out" onPress={handleLogout} />
       </View>

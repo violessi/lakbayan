@@ -31,11 +31,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, []);
 
-  return (
-    <SessionContext.Provider value={{ session, userId }}>
-      {children}
-    </SessionContext.Provider>
-  );
+  return <SessionContext.Provider value={{ session, userId }}>{children}</SessionContext.Provider>;
 };
 
 // Custom hook to use session context
