@@ -16,7 +16,9 @@ import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
-import { insertTrip, insertTripSegments, insertSegmentsToTrips, insertTripAndRelated } from "@services/trip-service";
+import { insertTripAndRelated } from "@services/trip-service";
+import { addTripToModeration } from "@services/moderation-service";
+
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -72,7 +74,9 @@ export default function TripReview() {
     try {
       // Call the new helper function that performs sequential inserts.
       const result = await insertTripAndRelated(newTrip, segments, jointSegments);
-      console.log("Trip and related inserted:", result);
+      // console.log("Trip and related inserted:", result);
+
+      await addTripToModeration(tripId);
 
       // Alert the user and navigate to the desired page.
       Alert.alert(
