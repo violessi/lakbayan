@@ -20,7 +20,7 @@ import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteInput() {
-  const { userId } = useSession();
+  const { user } = useSession();
   const { addSegment, trip } = useTrip();
 
   const cameraRef = useRef<Camera>(null);
@@ -52,8 +52,7 @@ export default function RouteInput() {
 
   const transportationMode = transportationModeParams as TransportationMode;
 
-  const directionCoordinates: Coordinates[] =
-    directions?.routes?.[0]?.geometry.coordinates || [];
+  const directionCoordinates: Coordinates[] = directions?.routes?.[0]?.geometry.coordinates || [];
 
   const handleGetDirections = async () => {
     setLoadingDirections(true);
@@ -120,7 +119,7 @@ export default function RouteInput() {
 
     const newSegment: Segment = {
       id: uuid.v4(),
-      contributor_id: userId || "",
+      contributor_id: user?.id || "",
       segment_name: segmentName,
       segment_mode: transportationMode,
       directions: directions,
@@ -171,18 +170,8 @@ export default function RouteInput() {
           animationMode="easeTo"
         />
 
-        <LocationMarker
-          coordinates={startRouteCoordinates}
-          label={startRouteLocation}
-          color="red"
-          radius={8}
-        />
-        <LocationMarker
-          coordinates={endRouteCoordinates}
-          label={endRouteLocation}
-          color="red"
-          radius={8}
-        />
+        <LocationMarker coordinates={startRouteCoordinates} label={startRouteLocation} color="red" radius={8} />
+        <LocationMarker coordinates={endRouteCoordinates} label={endRouteLocation} color="red" radius={8} />
 
         {waypoints.map((waypoint, index) => (
           <LocationMarker
@@ -194,20 +183,15 @@ export default function RouteInput() {
           />
         ))}
 
-        {!loadingDirections &&
-          directionCoordinates.length > 0 &&
-          !isAddPointsMode && (
-            <DirectionsLine coordinates={directionCoordinates} />
-          )}
+        {!loadingDirections && directionCoordinates.length > 0 && !isAddPointsMode && (
+          <DirectionsLine coordinates={directionCoordinates} />
+        )}
       </MapView>
 
       <View className="absolute bottom-96 w-full flex flex-col gap-4">
         <View className="flex-row z-10">
           <View className="flex-1 pl-3 pr-[5px]">
-            <PrimaryButton
-              label={isAddPointsMode ? "Recalculate" : "Edit Route"}
-              onPress={handleToggleMode}
-            />
+            <PrimaryButton label={isAddPointsMode ? "Recalculate" : "Edit Route"} onPress={handleToggleMode} />
           </View>
 
           <View className="flex-1 pr-3 pl-[5px]">
@@ -220,16 +204,16 @@ export default function RouteInput() {
         </View>
       </View>
       <RouteInformation
-            onRouteNameChange={handleRouteNameChange}
-            onLandmarkChange={handleLandmarkChange}
-            onInstructionChange={handleInstructionChange}
-            onCostChange={handleCostChange}
-            routeName={segmentName}
-            landmark={landmark}
-            instruction={instruction}
-            cost={cost}
-            onSubmit={handleSubmit}
-          />
+        onRouteNameChange={handleRouteNameChange}
+        onLandmarkChange={handleLandmarkChange}
+        onInstructionChange={handleInstructionChange}
+        onCostChange={handleCostChange}
+        routeName={segmentName}
+        landmark={landmark}
+        instruction={instruction}
+        cost={cost}
+        onSubmit={handleSubmit}
+      />
     </SafeAreaView>
   );
 }

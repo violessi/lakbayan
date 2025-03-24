@@ -1,7 +1,10 @@
-import { Stack } from "expo-router";
+import { Stack, Redirect } from "expo-router";
 import { TripProvider } from "@contexts/TripContext";
+import { useSession } from "@contexts/SessionContext";
 
 export default function ContributeLayout() {
+  const { user } = useSession();
+  if (!user) return <Redirect href="/(auth)/log-in" />;
   return (
     <TripProvider>
       <Stack>

@@ -26,7 +26,7 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
 
-  const { userId } = useSession();
+  const { user } = useSession();
   const { trip, segments = [] } = useTrip();
 
   const segmentCoordinates = segments?.map((segment) => segment.directions.routes[0].geometry.coordinates) || [];
@@ -57,7 +57,7 @@ export default function TripReview() {
     const newTrip: Trip = {
       ...trip,
       id: tripId,
-      contributor_id: userId || "",
+      contributor_id: user?.id || "",
       name: `${trip.start_location} to ${trip.end_location}`,
       duration: segments.reduce((acc, segment) => acc + segment.duration, 0),
       cost: segments.reduce((acc, segment) => acc + segment.cost, 0),

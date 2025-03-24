@@ -21,7 +21,7 @@ export default function JournalReview() {
   const cameraRef = useRef<Camera>(null);
   const router = useRouter();
 
-  const { userId } = useSession();
+  const { user } = useSession();
 
   const { trip, segments } = useLocalSearchParams();
   const tripData: Trip = useMemo(() => {
@@ -96,13 +96,13 @@ export default function JournalReview() {
         )}
       </MapView>
 
-      {userId && (
+      {user && (
         <JournalFeedback
           startLocation={startLocation}
           endLocation={endLocation}
           trip={tripData}
           segments={segmentData}
-          currentUserId={userId}
+          currentUserId={user.id}
           onCommentPress={handleCommentPress}
         />
       )}

@@ -1,11 +1,10 @@
 import { Stack } from "expo-router";
+import { PaperProvider } from "react-native-paper";
 import { useTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import "@utils/global.css";
 import { SessionProvider } from "../contexts/SessionContext";
-
-import { PaperProvider } from "react-native-paper";
-import "../utils/global.css";
 
 export default function RootLayout() {
   const { colors } = useTheme();
