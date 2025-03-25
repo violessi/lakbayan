@@ -19,3 +19,13 @@ export const fetchStops = async () => {
 
   return data;
 };
+
+export const fetchStopDetails = async (id: string): Promise<StopData | null> => {
+  const { data, error } = await supabase.from("toda-stops").select().eq("id", id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data[0];
+};

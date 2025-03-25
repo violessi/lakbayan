@@ -5,6 +5,7 @@ import LocationSearchBar from "@components/LocationSearchBar";
 import Header from "@components/ui/Header";
 import TodaInformation from "@components/contribute/TodaInformation";
 import LocationMarker from "@components/ui/LocationMarker";
+import TodaMarker from "@components/map/TodaMarker";
 import pin from "@assets/pin-purple.png";
 
 import Mapbox, { MapView, Camera, ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
@@ -70,14 +71,7 @@ export default function TodaStops() {
         />
 
         {stops.map((stop) => (
-          <LocationMarker
-            key={stop.id}
-            id={stop.id}
-            coordinates={[stop.longitude, stop.latitude]}
-            label={stop.name}
-            color={stop.color.toLowerCase() === "none" ? "gray" : stop.color.toLowerCase()}
-            radius={5}
-          />
+          <TodaMarker key={stop.id} stop={stop} />
         ))}
 
         {coordinates && (
