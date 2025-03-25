@@ -44,7 +44,6 @@ export default function Account() {
   async function handleLogout() {
     try {
       await logoutUser();
-      router.replace("/(auth)/onboarding");
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(error.message);

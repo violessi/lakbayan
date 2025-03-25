@@ -1,35 +1,33 @@
 import React, { useState } from "react";
 import { Button, TextInput, Text } from "react-native-paper";
-import { Alert, View, AppState, SafeAreaView, TouchableOpacity } from "react-native";
+import { Alert, View, SafeAreaView, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 
 import { supabase } from "@utils/supabase";
 
-// FIXME: add cleanup to avoids potential memory leaks?
-AppState.addEventListener("change", (state) => {
-  if (state === "active") {
-    supabase.auth.startAutoRefresh();
-  } else {
-    supabase.auth.stopAutoRefresh();
-  }
-});
-
-export default function LogIn() {
+export default function SignUp() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function signInWithEmail() {
+  async function signUpWithEmail() {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) Alert.alert(error.message);
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      console.error("Sign up error", error);
+      Alert.alert(error.message);
+    } else {
+      Alert.alert("Sign-up successful!");
+    }
     setLoading(false);
   }
-
   return (
     <SafeAreaView className="flex h-full items-center justify-center">
+      <TouchableOpacity onPress={() => router.back()} className="absolute top-10 left-5">
+        <Text className="text-primary font-bold">← Back</Text>
+      </TouchableOpacity>
       <View className="flex flex-col w-full px-5 gap-3 mb-10">
         <TextInput
           label="Email"
@@ -48,15 +46,10 @@ export default function LogIn() {
           secureTextEntry
         />
       </View>
-      <View className="flex flex-col w-full items-center">
-        <Button disabled={loading} onPress={signInWithEmail}>
-          Log in
+      <View className="flex flex-col w-full">
+        <Button disabled={loading} onPress={signUpWithEmail}>
+          Sign up
         </Button>
-        <TouchableOpacity onPress={() => router.push("/(auth)/sign-up")}>
-          <Text className="text-primary mt-4 text-md">
-            No account yet? <Text className="font-bold">Sign up here.</Text>
-          </Text>
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
