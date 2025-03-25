@@ -6,6 +6,7 @@ export async function createUserProfile(userId: string, username: string, isComm
       id: userId,
       username,
       is_commuter: isCommuter,
+      updated_at: new Date(),
     },
   ]);
 
@@ -79,4 +80,15 @@ export async function updateUserProfile(userId: string, username: string) {
 export async function logoutUser() {
   const { error } = await supabase.auth.signOut();
   if (error) throw new Error(error.message);
+}
+
+export async function checkUsernameExists(username: string): Promise<boolean> {
+  const { data, error } = await supabase.from("profiles").select("id").eq("username", username).single();
+
+  if (error && error.code !== "PGRST116") {
+    console.error("Error checking username:", error);
+    throw error;
+  }
+
+  return !!data;
 }

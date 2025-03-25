@@ -6,10 +6,14 @@ import { Button, TextInput, Text, Switch } from "react-native-paper";
 import { Alert, View, SafeAreaView, TouchableOpacity } from "react-native";
 
 import { supabase } from "@utils/supabase";
-import { createUserProfile } from "@services/account-service";
+import { createUserProfile, checkUsernameExists } from "@services/account-service";
 
 const signUpSchema = z.object({
-  username: z.string().min(6, "Username must be at least 6 characters"),
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(15, "Username must be at most 15 characters")
+    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
@@ -24,25 +28,32 @@ export default function SignUp() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const validateInputs = () => {
+  const validateInputs = async (): Promise<boolean> => {
     const result = signUpSchema.safeParse(form);
     if (!result.success) {
       const messages = result.error.errors.map((err) => `• ${err.message}`).join("\n");
       Alert.alert("Invalid input!", messages);
       return false;
     }
+
+    const usernameExists = await checkUsernameExists(form.username);
+    if (usernameExists) {
+      Alert.alert("Username already taken. Please choose another.");
+      return false;
+    }
+
     return true;
   };
 
   async function signUpWithEmail() {
-    if (!validateInputs()) return;
+    const isValid = await validateInputs();
+    if (!isValid) return;
 
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({ email: form.email, password: form.password });
 
     if (error) {
       Alert.alert(error.message);
-      console.error("Sign-up error:", error);
       setLoading(false);
       return;
     }
