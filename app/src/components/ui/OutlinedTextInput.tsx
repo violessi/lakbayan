@@ -6,9 +6,21 @@ interface OutlinedTextInputProps {
   label: string;
   value: string;
   onChangeText: (text: string) => void;
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
+  secureTextEntry?: boolean;
+  placeholder?: string;
 }
 
-export default function OutlinedTextInput({ label, value, onChangeText }: OutlinedTextInputProps) {
+export default function OutlinedTextInput({
+  label,
+  value,
+  onChangeText,
+  autoCapitalize = "none",
+  keyboardType = "default",
+  secureTextEntry = false,
+  placeholder,
+}: OutlinedTextInputProps) {
   return (
     <TextInput
       mode="outlined"
@@ -18,6 +30,10 @@ export default function OutlinedTextInput({ label, value, onChangeText }: Outlin
       outlineColor="#7F7F7F"
       outlineStyle={{ borderWidth: 0.3 }}
       style={{ backgroundColor: "white", fontSize: 12 }}
+      autoCapitalize={autoCapitalize}
+      keyboardType={keyboardType}
+      secureTextEntry={secureTextEntry}
+      placeholder={placeholder}
     />
   );
 }

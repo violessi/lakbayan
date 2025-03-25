@@ -2,11 +2,15 @@ import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { z } from "zod";
 
-import { Button, TextInput, Text, Switch } from "react-native-paper";
-import { Alert, View, SafeAreaView, TouchableOpacity } from "react-native";
+import { Text, Switch } from "react-native-paper";
+import { Alert, View, SafeAreaView, TouchableOpacity, Image, StyleSheet } from "react-native";
+import OutlinedTextInput from "@components/ui/OutlinedTextInput";
+import PrimaryButton from "@components/ui/PrimaryButton";
 
 import { supabase } from "@utils/supabase";
 import { createUserProfile, checkUsernameExists } from "@services/account-service";
+
+const back = require("@assets/left-arrow.png");
 
 const signUpSchema = z.object({
   username: z
@@ -80,44 +84,63 @@ export default function SignUp() {
   }
 
   return (
-    <SafeAreaView className="flex h-full items-center justify-center">
-      <TouchableOpacity onPress={() => router.back()} className="absolute top-10 left-5">
-        <Text className="text-primary font-bold">← Back</Text>
-      </TouchableOpacity>
-      <View className="flex flex-col w-full px-5 gap-3 mb-10">
-        <TextInput
-          label="Username"
-          value={form.username}
-          onChangeText={(text) => handleChange("username", text)}
-          placeholder="Choose a username"
-          autoCapitalize="none"
-        />
-        <TextInput
-          label="Email"
-          value={form.email}
-          onChangeText={(text) => handleChange("email", text)}
-          placeholder="email@address.com"
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <TextInput
-          label="Password"
-          value={form.password}
-          onChangeText={(text) => handleChange("password", text)}
-          placeholder="Password"
-          autoCapitalize="none"
-          secureTextEntry
-        />
-        <View className="flex flex-row items-center justify-between">
-          <Text>Are you a commuter?</Text>
-          <Switch value={form.isCommuter} onValueChange={(value) => handleChange("isCommuter", value)} />
+    <View className="flex h-full">
+      <SafeAreaView className="h-1/3 bg-primary px-5 py-5 flex-col justify-between">
+        <TouchableOpacity onPress={() => router.back()}>
+          <View className="flex flex-row justify-start gap-2 px-5">
+            <Image source={back} className="w-5 h-5" style={{ tintColor: "white" }} />
+            <Text style={styles.whiteText}>Back</Text>
+          </View>
+        </TouchableOpacity>
+        <View className="flex flex-col gap-0 px-5 pb-5">
+          <Text style={styles.whiteText} className="text-4xl">
+            Welcome!
+          </Text>
+          <Text style={styles.whiteText} className="text-lg">
+            Create an account to get started.
+          </Text>
+        </View>
+      </SafeAreaView>
+      <View className="flex flex-col w-full px-5 gap-7 my-10">
+        <View className="flex flex-col w-full gap-2">
+          <OutlinedTextInput
+            label="Username"
+            value={form.username}
+            onChangeText={(text) => handleChange("username", text)}
+            placeholder="Choose a username"
+            autoCapitalize="none"
+          />
+          <OutlinedTextInput
+            label="Email"
+            value={form.email}
+            onChangeText={(text) => handleChange("email", text)}
+            placeholder="email@address.com"
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <OutlinedTextInput
+            label="Password"
+            value={form.password}
+            onChangeText={(text) => handleChange("password", text)}
+            placeholder="Password"
+            autoCapitalize="none"
+            secureTextEntry
+          />
+          <View className="flex flex-row items-center justify-center gap-5">
+            <Text className="text-md">Are you a commuter?</Text>
+            <Switch value={form.isCommuter} onValueChange={(value) => handleChange("isCommuter", value)} />
+          </View>
+        </View>
+        <View className="flex flex-col w-full">
+          <PrimaryButton label="Sign up" disabled={loading} onPress={signUpWithEmail} />
         </View>
       </View>
-      <View className="flex flex-col w-full">
-        <Button disabled={loading} onPress={signUpWithEmail}>
-          Sign up
-        </Button>
-      </View>
-    </SafeAreaView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  whiteText: {
+    color: "#ffffff",
+  },
+});
