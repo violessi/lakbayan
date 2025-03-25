@@ -9,7 +9,7 @@ import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
 
 export default function SubmittedTrips() {
-  const { userId } = useSession();
+  const { user } = useSession();
   const { tripData, segmentData, loading: tripsLoading } = useTripData();
 
   const [submittedTrips, setSubmittedTrips] = useState<Trip[]>([]);
@@ -18,16 +18,16 @@ export default function SubmittedTrips() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!userId || tripsLoading) return;
+    if (!user || tripsLoading) return;
 
     setLoading(true);
 
     // Filter trips where the user is the contributor
-    const userTrips = tripData.filter((trip) => trip.contributor_id === userId);
+    const userTrips = tripData.filter((trip) => trip.contributor_id === user.id);
     setSubmittedTrips(userTrips);
 
     setLoading(false);
-  }, [userId, tripData, tripsLoading]);
+  }, [user, tripData, tripsLoading]);
 
   function handleTripPress(trip: Trip) {
     router.push({

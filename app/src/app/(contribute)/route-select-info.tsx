@@ -1,87 +1,66 @@
-import React, { useRef, useState, useEffect } from "react";
 import { router } from "expo-router";
-import { useTrip } from "@contexts/TripContext";
-
+import { Button } from "react-native-paper";
 import { SafeAreaView, View, Alert } from "react-native";
+import React, { useRef, useState, useEffect } from "react";
+import Mapbox, { MapView, Camera, MarkerView } from "@rnmapbox/maps";
+
 import Header from "@components/ui/Header";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import LocationMarker from "@components/ui/LocationMarker";
+import CircleMarker from "@components/map/CircleMarker";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 import TransportationModeSelection from "@components/contribute/TransportationModeSelection";
 
-import Mapbox, { MapView, Camera, MarkerView } from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+
+import { useCreateTrip } from "@contexts/CreateTripContext";
 import { reverseGeocode } from "@services/mapbox-service";
-import { Button } from "react-native-paper";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteSelectInfo() {
   // Destructure both trip and segments from context
-  const { trip, segments } = useTrip();
+  const { trip, segments, route, updateRoute } = useCreateTrip();
   const cameraRef = useRef<Camera>(null);
 
-  const [transportationMode, setTransportationMode] = useState<TransportationMode | null>(null);
+  const len = segments.length;
+  route.startLocation = len > 0 ? segments[len - 1].endLocation : trip.startLocation;
+  route.startCoords = len > 0 ? segments[len - 1].endCoords : trip.startCoords;
 
-  // Default start location and coordinates come from the trip
-  let startRouteLocation = trip.start_location as string;
-  let startRouteCoordinates = trip.start_coords as Coordinates;
-
-  // If there are any segments, use the end of the last segment as the start for the new leg
-  if (segments.length > 0) {
-    startRouteLocation = segments[segments.length - 1].end_location;
-    startRouteCoordinates = segments[segments.length - 1].end_coords;
-  }
-
-  const [endRouteLocation, setEndRouteLocation] = useState<string | null>(null);
-  const [endRouteCoordinates, setEndRouteCoordinates] = useState<[number, number] | null>(null);
+  // When the user updates a location as "Destination", update the end values.
+  const handleEndChange = (location: string, coords: Coordinates) => {
+    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
+    updateRoute({ endLocation: location, endCoords: coords });
+  };
 
   const handleMapPress = async (event: any) => {
     const coordinates = event.geometry.coordinates as [number, number];
-    setEndRouteCoordinates(coordinates);
-
-    const locationName = await reverseGeocode(coordinates);
-    setEndRouteLocation(locationName);
+    const location = await reverseGeocode(coordinates);
+    updateRoute({ endLocation: location, endCoords: coordinates });
+    if (cameraRef.current) cameraRef.current.moveTo(coordinates, 1000);
   };
 
   // Update final route values using the trip's end_location and end_coords
   const handleLastRoute = () => {
-    setEndRouteLocation(trip.end_location);
-    setEndRouteCoordinates(trip.end_coords);
+    updateRoute({ endLocation: trip.endLocation, endCoords: trip.endCoords });
   };
 
   const handleTransportationModeChange = (mode: TransportationMode) => {
-    setTransportationMode(mode);
+    updateRoute({ segmentMode: mode });
   };
 
   const handleMapLoaded = () => {
-    if (startRouteCoordinates && trip.end_coords && cameraRef.current) {
-      cameraRef.current.fitBounds(startRouteCoordinates, trip.end_coords, [150, 150, 250, 150]);
+    if (cameraRef.current) {
+      cameraRef.current.fitBounds(route.startCoords, trip.endCoords, [150, 150, 250, 150]);
     }
   };
 
-  useEffect(() => {
-    setEndRouteLocation(null);
-    setEndRouteCoordinates(null);
-  }, []);
-
   // Once we have all necessary information, navigate to the next screen.
   const handleConfirmLocation = () => {
-    if (!startRouteLocation || !startRouteCoordinates || !endRouteLocation || !endRouteCoordinates || !transportationMode) {
+    if (!route.startLocation || !route.endLocation || !route.segmentMode) {
       Alert.alert("Missing Information", "Please fill in all fields to proceed.");
       return;
     }
-
-    router.push({
-      pathname: "/route-input",
-      params: {
-        startRouteLocationParams: startRouteLocation,
-        startRouteCoordinatesParams: JSON.stringify(startRouteCoordinates),
-        endRouteLocationParams: endRouteLocation,
-        endRouteCoordinatesParams: JSON.stringify(endRouteCoordinates),
-        transportationModeParams: transportationMode,
-      },
-    });
+    router.push({ pathname: "/route-input" });
   };
 
   return (
@@ -90,13 +69,10 @@ export default function RouteSelectInfo() {
 
       <View>
         <StartEndSearchBar
-          onEndChange={(location, coordinates) => {
-            setEndRouteLocation(location);
-            setEndRouteCoordinates(coordinates);
-          }}
-          defaultStart={startRouteLocation}
+          onEndChange={handleEndChange}
+          defaultStart={route.startLocation}
           isStartActive={false}
-          defaultEnd={endRouteLocation}
+          defaultEnd={route.endLocation}
         />
       </View>
 
@@ -107,18 +83,26 @@ export default function RouteSelectInfo() {
         onDidFinishLoadingMap={handleMapLoaded}
         onPress={handleMapPress}
       >
-        <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} zoomLevel={10} animationMode="easeTo" />
-        {endRouteCoordinates && (
-          <MarkerView coordinate={endRouteCoordinates}>
-            <View style={{ backgroundColor: "white", borderRadius: 5, padding: 5 }}>
-              <Button mode="text">{endRouteLocation || "Pinned Location"}</Button>
-            </View>
-          </MarkerView>
-        )}
-        <LocationMarker
-          coordinates={startRouteCoordinates}
-          label={startRouteLocation}
+        <Camera ref={cameraRef} zoomLevel={10} animationMode="easeTo" />
+        <CircleMarker
+          id="start-location"
+          coordinates={route.startCoords}
+          label={route.startLocation}
           color="red"
+          radius={8}
+        />
+        <CircleMarker
+          id="next-location"
+          coordinates={route.endCoords}
+          label={route.endLocation}
+          color="blue"
+          radius={8}
+        />
+        <CircleMarker
+          id="end-location"
+          coordinates={trip.endCoords}
+          label={trip.endLocation}
+          color="green"
           radius={8}
         />
       </MapView>

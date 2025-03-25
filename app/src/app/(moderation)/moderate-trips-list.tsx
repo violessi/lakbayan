@@ -10,7 +10,7 @@ import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
 
 export default function ModerateTripsList() {
-  const { userId } = useSession();
+  const { user } = useSession();
   const { segmentData, loading: tripsLoading } = useTripData();
   const [pendingTrips, setPendingTrips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,15 +20,15 @@ export default function ModerateTripsList() {
   useFocusEffect(
     useCallback(() => {
       async function fetchData() {
-        if (!userId) return;
+        if (!user) return;
 
         setLoading(true);
-        const trips = await getPendingVerifications(userId);
+        const trips = await getPendingVerifications(user.id);
         setPendingTrips(trips);
         setLoading(false);
       }
       fetchData();
-    }, [userId]),
+    }, [user]),
   );
 
   function handleTripPress(trip) {

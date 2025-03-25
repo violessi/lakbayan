@@ -16,7 +16,7 @@ interface Comment {
 }
 
 export default function CommentsList() {
-  const { userId } = useSession();
+  const { user } = useSession();
   const params = useLocalSearchParams();
   const tripId = Array.isArray(params.tripId) ? params.tripId[0] : params.tripId;
 
@@ -44,7 +44,7 @@ export default function CommentsList() {
     if (!newComment.trim()) return;
 
     try {
-      await addComment(tripId, userId || "", newComment);
+      await addComment(tripId, user?.id || "", newComment);
       const updatedComments = await getComments(tripId);
       setComments(updatedComments || []);
       setNewComment("");

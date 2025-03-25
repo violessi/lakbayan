@@ -13,6 +13,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: "myapp",
   userInterfaceStyle: "automatic",
   splash: {
+    image: "./src/assets/splashscreen_logo.png",
     resizeMode: "contain",
     backgroundColor: "#ffffff",
   },

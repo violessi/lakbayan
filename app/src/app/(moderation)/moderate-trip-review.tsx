@@ -25,7 +25,7 @@ export default function TripOverview() {
   const cameraRef = useRef<Camera>(null);
   const router = useRouter();
 
-  const { userId } = useSession();
+  const { user } = useSession();
 
   const { trip, segments } = useLocalSearchParams();
   const tripData: Trip = useMemo(() => {
@@ -68,7 +68,7 @@ export default function TripOverview() {
           text: "OK",
           onPress: async () => {
             try {
-              await updateModerationStatus(userId || "", tripData.id, status);
+              await updateModerationStatus(user?.id || "", tripData.id, status);
               Alert.alert("Success", `Trip has been marked as ${status}.`, [
                 { text: "OK", onPress: () => router.back() },
               ]);
@@ -124,18 +124,18 @@ export default function TripOverview() {
         )}
       </MapView>
 
-      {userId && (
+      {user && (
         <TripSummary
           startLocation={startLocation}
           endLocation={endLocation}
           trip={tripData}
           segments={segmentData}
-          currentUserId={userId}
+          currentUserId={user.id}
           onCommentPress={handleCommentPress}
         />
       )}
 
-      {userId && (
+      {user && (
         <View className="flex-row justify-center gap-5 p-4">
           <SecondaryButton label="Dismiss" onPress={() => handleModeration("dismissed")} />
           <PrimaryButton label="Verify" onPress={() => handleModeration("verified")} />

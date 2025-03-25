@@ -12,7 +12,7 @@ import UserHeader from "@components/account/UserHeader";
 
 export default function Account() {
   const router = useRouter();
-  const { userId } = useSession();
+  const { user } = useSession();
 
   const [username, setUsername] = useState<string>("");
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -21,26 +21,25 @@ export default function Account() {
 
   useEffect(() => {
     async function fetchUserDetails() {
-      if (userId) {
-        const role = await getUserRole(userId);
+      if (user) {
+        const role = await getUserRole(user.id);
         setUserRole(role || "User");
 
-        const username = await getUsername(userId);
+        const username = await getUsername(user.id);
         setUsername(username || "User");
 
-        const { points, joinedDate } = await getUserDetails(userId);
+        const { points, joinedDate } = await getUserDetails(user.id);
         setPoints(points);
         setJoinedDate(joinedDate);
       }
     }
     fetchUserDetails();
-  }, [userId]);
+  }, [user]);
 
   async function handleLogout() {
     try {
       await logoutUser();
-      router.replace("/(auth)/onboarding");
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert(error.message);
     }
   }

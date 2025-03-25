@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { router } from "expo-router";
 import { Button, TextInput } from "react-native-paper";
 import { Alert, View, AppState, SafeAreaView } from "react-native";
 
 import { supabase } from "@utils/supabase";
-import { useSession } from "@contexts/SessionContext";
 
+// FIXME: add cleanup to avoids potential memory leaks?
 AppState.addEventListener("change", (state) => {
   if (state === "active") {
     supabase.auth.startAutoRefresh();
@@ -15,39 +14,21 @@ AppState.addEventListener("change", (state) => {
 });
 
 export default function LogIn() {
-  const { userId } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function signInWithEmail() {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
-
-    if (error) {
-      Alert.alert(error.message);
-    } else {
-      console.log("Logged in user ID:", userId);
-      router.replace("/(tabs)");
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) Alert.alert(error.message);
     setLoading(false);
   }
 
   async function signUpWithEmail() {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
-
-    if (error) {
-      Alert.alert(error.message);
-    } else {
-      Alert.alert("Success! Please log in.");
-    }
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) Alert.alert(error.message);
     setLoading(false);
   }
 
@@ -56,18 +37,19 @@ export default function LogIn() {
       <View className="flex flex-col w-full px-5 gap-3 mb-10">
         <TextInput
           label="Email"
-          onChangeText={(text) => setEmail(text)}
           value={email}
+          onChangeText={setEmail}
           placeholder="email@address.com"
           autoCapitalize="none"
+          keyboardType="email-address"
         />
         <TextInput
           label="Password"
-          onChangeText={(text) => setPassword(text)}
           value={password}
-          secureTextEntry={true}
+          onChangeText={setPassword}
           placeholder="Password"
           autoCapitalize="none"
+          secureTextEntry
         />
       </View>
       <View className="flex flex-col w-full">
