@@ -29,6 +29,11 @@ declare global {
     contributor_id: string;
   }
 
+  export interface LiveStatus {
+    type: string;
+    coordinates: Coordinates;
+  }
+
   export interface Trip {
     id: string;
     contributor_id: string;
@@ -70,4 +75,67 @@ declare global {
     segment_id: string;
     segment_order: number;
   }
+
+  // ==================== V2 ====================
+
+  export interface TripV2 {
+    id: string;
+    contributorId: string;
+    name: string;
+    gpsVerified: number;
+    modVerified: number;
+    startLocation: string;
+    startCoords: Coordinates;
+    endLocation: string;
+    endCoords: Coordinates;
+    duration: number;
+    cost: number;
+    upvotes: number;
+    downvotes: number;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+  }
+  export type CreateTripV2 = Omit<TripV2, "id" | "createdAt" | "updatedAt">;
+
+  export interface SegmentV2 {
+    id: string;
+    contributorId: string;
+    segmentName: string;
+    segmentMode: TransportationMode;
+    landmark: string;
+    instruction: string;
+    gpsVerified: number;
+    modVerified: number;
+    duration: number;
+    cost: number;
+    liveStatus: LiveStatus[];
+    waypoints: Coordinates[];
+    directions: MapboxDirectionsResponse;
+    startLocation: string;
+    startCoords: Coordinates;
+    endLocation: string;
+    endCoords: Coordinates;
+    createdAt: Timestamp;
+    lastUpdated: Date;
+  }
+  export type CreateSegmentV2 = Omit<SegmentV2, "id" | "createdAt" | "lastUpdated">;
+
+  export interface CreateRouteV2 {
+    startLocation: string;
+    startCoords: Coordinates;
+    endLocation: string;
+    endCoords: Coordinates;
+    segmentMode: TransportationMode;
+  }
+
+  export interface TripSegmentLinkV2 {
+    id: string;
+    tripId: string;
+    segmentId: string;
+    segmentOrder: number;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+  }
+
+  export type CreateTripSegmentLinkV2 = Omit<TripSegmentLink, "id" | "createdAt" | "updatedAt">;
 }
