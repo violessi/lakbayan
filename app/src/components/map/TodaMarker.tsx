@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ActivityIndicator, StyleSheet, Modal, TouchableOpacity } from "react-native";
 import { ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
 import { point, featureCollection } from "@turf/helpers";
+import { getUsername } from "@services/account-service";
 
 const iconMap: Record<string, any> = {
   none: require("@assets/toda-none.png"),
@@ -16,9 +17,16 @@ const iconMap: Record<string, any> = {
 export default function TodaMarker({ stop }: { stop: StopData }) {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [username, setUsername] = useState("");
 
   const iconKey = stop.color?.toLowerCase() || "none";
   const iconImage = iconMap[iconKey] || iconMap["none"];
+
+  useEffect(() => {
+    getUsername(stop.contributor_id).then((username) => {
+      setUsername(username ?? "Anonymous");
+    });
+  }, [stop.contributor_id]);
 
   const handleMarkerPress = async () => {
     setLoading(true);
@@ -47,8 +55,11 @@ export default function TodaMarker({ stop }: { stop: StopData }) {
             ) : (
               <View className="flex items-center gap-3">
                 <Text className="text-lg font-bold">{stop.name} TODA</Text>
-                <View className="flex items-center ">
-                  <Text className="text-md">Designated Color: {stop.color}</Text>
+                <View className="flex items-center">
+                  <Text className="text-md">Contributor: {username}</Text>
+                  <Text className="text-md">
+                    Designated Color: {stop.color.charAt(0).toUpperCase() + stop.color.slice(1)}
+                  </Text>
                   <Text className="text-sm text-gray-600">{stop.landmark || "No additional info"}</Text>
                 </View>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
