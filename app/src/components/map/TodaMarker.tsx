@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, ActivityIndicator, StyleSheet, Modal, TouchableOpacity } from "react-native";
-import Mapbox, { ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
+import { ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
 import { point, featureCollection } from "@turf/helpers";
 
 const iconMap: Record<string, any> = {

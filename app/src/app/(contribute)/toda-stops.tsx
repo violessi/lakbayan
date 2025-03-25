@@ -4,7 +4,6 @@ import { SafeAreaView, View, Platform } from "react-native";
 import LocationSearchBar from "@components/LocationSearchBar";
 import Header from "@components/ui/Header";
 import TodaInformation from "@components/contribute/TodaInformation";
-import LocationMarker from "@components/ui/LocationMarker";
 import TodaMarker from "@components/map/TodaMarker";
 import pin from "@assets/pin-purple.png";
 
