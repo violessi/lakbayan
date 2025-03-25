@@ -4,24 +4,25 @@ import { point } from "@turf/helpers";
 import { ShapeSource, CircleLayer, SymbolLayer } from "@rnmapbox/maps";
 
 interface LocationMarkerProps {
+  id: string;
   coordinates: Coordinates;
   label: string;
   color: string;
   radius: number;
 }
 
-export default function LocationMarker({ coordinates, label, color, radius }: LocationMarkerProps) {
+export default function LocationMarker({ id, coordinates, label, color, radius }: LocationMarkerProps) {
   return (
-    <ShapeSource id={label} shape={point(coordinates)}>
+    <ShapeSource id={id} shape={point(coordinates)}>
       <CircleLayer
-        id={`${label}-circle`}
+        id={`${id}-circle`}
         style={{
           circleRadius: radius,
           circleColor: color,
         }}
       />
       <SymbolLayer
-        id={`${label}-label`}
+        id={`${id}-label`}
         style={{
           textField: label.split(",")[0],
           textSize: 11,
