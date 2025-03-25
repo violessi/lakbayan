@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import { SafeAreaView, View } from "react-native";
 
-import LocationSearchBar from "../../components/LocationSearchBar";
-import Header from "../../components/ui/Header";
+import LocationSearchBar from "@components/LocationSearchBar";
+import Header from "@components/ui/Header";
 import TodaInformation from "@components/contribute/TodaInformation";
 import LocationMarker from "@components/ui/LocationMarker";
 import pin from "@assets/pin-purple.png";
@@ -11,6 +11,7 @@ import Mapbox, { MapView, Camera, ShapeSource, SymbolLayer, Images } from "@rnma
 import { featureCollection, point } from "@turf/helpers";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 import { fetchStops } from "@services/toda-stop-service";
+
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TodaStops() {
@@ -20,31 +21,31 @@ export default function TodaStops() {
 
   const [stops, setStops] = useState<StopData[]>([]);
 
+  const loadStops = async () => {
+    const result = await fetchStops();
+    if (result) setStops(result);
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      const result = await fetchStops();
-      if (result) {
-        setStops(result);
-      }
-    };
-    fetchData();
+    loadStops();
   }, []);
 
-  const handleMapPress = (event: any) => {
-    const { geometry } = event;
-    const { coordinates } = geometry;
+  const handleMapPress = (feature: MapPressFeature) => {
+    if (!feature.geometry || feature.geometry.type !== "Point") return;
+    const coordinates = feature.geometry.coordinates as Coordinates;
     setCoordinates(coordinates);
-    setZoomLevel(16);
+    setZoomLevel(15);
   };
 
   const handleSuggestionSelect = (longitude: number, latitude: number) => {
     const newCoordinates: [number, number] = [longitude, latitude];
     setCoordinates(newCoordinates);
+    setZoomLevel(16);
   };
 
-  const handleZoomChange = (event: any) => {
-    console.log(event.properties);
-    const { zoom } = event.properties;
+  const handleClear = () => {
+    setCoordinates(null);
+    setZoomLevel(12);
   };
 
   return (
@@ -52,7 +53,7 @@ export default function TodaStops() {
       <Header title="Pin Toda Stops" />
 
       <View>
-        <LocationSearchBar onSuggestionSelect={handleSuggestionSelect} onClear={() => setCoordinates(null)} />
+        <LocationSearchBar onSuggestionSelect={handleSuggestionSelect} onClear={handleClear} />
       </View>
 
       <MapView
@@ -71,21 +72,23 @@ export default function TodaStops() {
         {stops.map((stop) => (
           <LocationMarker
             key={stop.id}
+            id={stop.id}
             coordinates={[stop.longitude, stop.latitude]}
             label={stop.name}
-            color={stop.color}
-            radius={8}
+            color={stop.color.toLowerCase() === "none" ? "purple" : stop.color.toLowerCase()}
+            radius={5}
           />
         ))}
 
         {coordinates && (
-          <ShapeSource id="todas" shape={featureCollection([point(coordinates)])}>
+          <ShapeSource id="todas" existing shape={featureCollection([point(coordinates)])}>
             <SymbolLayer
               id="toda-icons"
               style={{
                 iconImage: "pin",
                 iconSize: 0.1,
               }}
+              existing
             />
           </ShapeSource>
         )}
@@ -93,7 +96,7 @@ export default function TodaStops() {
         <Images images={{ pin }} />
       </MapView>
 
-      <TodaInformation coordinates={coordinates} />
+      <TodaInformation coordinates={coordinates} onNewStopAdded={loadStops} />
     </SafeAreaView>
   );
 }

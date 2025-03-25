@@ -1,3 +1,4 @@
+import type { Feature, Geometry, GeoJsonProperties } from "geojson";
 declare global {
   export interface Suggestion {
     id: string;
@@ -53,6 +54,8 @@ declare global {
     distance: number; // Meters
     name: string;
   }
+
+  export type MapPressFeature = Feature<Geometry, GeoJsonProperties>;
 }
 
 export {};
