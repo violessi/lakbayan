@@ -1,12 +1,24 @@
 import React, { useState } from "react";
 import { View, Text, ActivityIndicator, StyleSheet, Modal, TouchableOpacity } from "react-native";
-import Mapbox, { ShapeSource, SymbolLayer } from "@rnmapbox/maps";
+import Mapbox, { ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
 import { point, featureCollection } from "@turf/helpers";
-import pinPurple from "@assets/pin-purple.png";
+
+const iconMap: Record<string, any> = {
+  none: require("@assets/toda-none.png"),
+  black: require("@assets/toda-black.png"),
+  white: require("@assets/toda-white.png"),
+  yellow: require("@assets/toda-yellow.png"),
+  blue: require("@assets/toda-blue.png"),
+  red: require("@assets/toda-red.png"),
+  green: require("@assets/toda-green.png"),
+};
 
 export default function TodaMarker({ stop }: { stop: StopData }) {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const iconKey = stop.color?.toLowerCase() || "none";
+  const iconImage = iconMap[iconKey] || iconMap["none"];
 
   const handleMarkerPress = async () => {
     setLoading(true);
@@ -22,7 +34,7 @@ export default function TodaMarker({ stop }: { stop: StopData }) {
         <SymbolLayer
           id={`marker-${stop.id}`}
           style={{
-            iconImage: "pinPurple",
+            iconImage: iconKey,
             iconSize: 0.05,
           }}
         />
@@ -47,7 +59,7 @@ export default function TodaMarker({ stop }: { stop: StopData }) {
           </View>
         </View>
       </Modal>
-      <Mapbox.Images images={{ pinPurple: pinPurple }} />
+      <Images images={{ [iconKey]: iconImage }} />
     </>
   );
 }
