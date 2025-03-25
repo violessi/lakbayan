@@ -3,6 +3,8 @@ import { Text, View, Alert, Keyboard } from "react-native";
 import { Dialog, Portal, Button } from "react-native-paper";
 import { z } from "zod";
 
+import uuid from "react-native-uuid";
+
 import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import SecondaryButton from "@components/ui/SecondaryButton";
@@ -49,6 +51,7 @@ export default function TodaStops({ coordinates, onNewStopAdded }: TodaStopsProp
     }
 
     const stopData = {
+      id: uuid.v4(),
       name: form.todaName.trim(),
       color: form.color.trim(),
       landmark: form.landmark.trim() || "",

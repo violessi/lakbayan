@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { SafeAreaView, View } from "react-native";
+import { SafeAreaView, View, Platform } from "react-native";
 
 import LocationSearchBar from "@components/LocationSearchBar";
 import Header from "@components/ui/Header";
@@ -66,7 +66,7 @@ export default function TodaStops() {
           ref={cameraRef}
           centerCoordinate={coordinates || [121.05, 14.63]}
           zoomLevel={zoomLevel}
-          animationMode="easeTo"
+          animationMode={Platform.OS === "android" ? "none" : "easeTo"}
         />
 
         {stops.map((stop) => (
@@ -75,7 +75,7 @@ export default function TodaStops() {
             id={stop.id}
             coordinates={[stop.longitude, stop.latitude]}
             label={stop.name}
-            color={stop.color.toLowerCase() === "none" ? "purple" : stop.color.toLowerCase()}
+            color={stop.color.toLowerCase() === "none" ? "gray" : stop.color.toLowerCase()}
             radius={5}
           />
         ))}
