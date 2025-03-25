@@ -65,7 +65,7 @@ export default function StartEndSearch({
   };
 
   return (
-    <View className="absolute top-0 left-0 z-40 flex flex-col bg-white rounded-[8]" style={{ width: "100%" }}>
+    <View>
       <View className="absolute top-0 left-0 z-50 m-5 flex-row items-center bg-white rounded-[8]">
         <TextInput
           placeholder={defaultStart || "Starting location"}
