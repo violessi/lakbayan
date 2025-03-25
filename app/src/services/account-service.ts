@@ -1,5 +1,20 @@
 import { supabase } from "@utils/supabase";
 
+export async function createUserProfile(userId: string, username: string, isCommuter: boolean) {
+  const { error } = await supabase.from("profiles").upsert([
+    {
+      id: userId,
+      username,
+      is_commuter: isCommuter,
+    },
+  ]);
+
+  if (error) {
+    console.error("Profile insert error:", error);
+    throw new Error(error.message);
+  }
+}
+
 export async function getUsername(contributorId: string): Promise<string | null> {
   const { data, error } = await supabase.from("profiles").select("username").eq("id", contributorId).single();
 
