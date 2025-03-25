@@ -1,12 +1,13 @@
 import { Stack, Redirect } from "expo-router";
-import { TripProvider } from "@contexts/TripContext";
+import { CreateTripProvider } from "@contexts/CreateTripContext";
 import { useSession } from "@contexts/SessionContext";
 
 export default function ContributeLayout() {
   const { user } = useSession();
   if (!user) return <Redirect href="/(auth)/log-in" />;
+
   return (
-    <TripProvider>
+    <CreateTripProvider>
       <Stack>
         <Stack.Screen name="custom-trip" options={{ headerShown: false }} />
         <Stack.Screen name="toda-stops" options={{ headerShown: false }} />
@@ -16,6 +17,6 @@ export default function ContributeLayout() {
         {/* FIXME: temporary location */}
         <Stack.Screen name="jeepney-routes" options={{ headerShown: false }} />
       </Stack>
-    </TripProvider>
+    </CreateTripProvider>
   );
 }

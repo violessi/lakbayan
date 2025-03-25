@@ -8,7 +8,7 @@ import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 interface TripSummaryProps {
   startLocation: string;
   endLocation: string;
-  segments: Segment[];
+  segments: CreateSegmentV2[];
 }
 
 export default function TripSummary({ startLocation, endLocation, segments }: TripSummaryProps) {
@@ -26,7 +26,7 @@ export default function TripSummary({ startLocation, endLocation, segments }: Tr
               renderItem={({ item, index }) => (
                 <RouteItem segment={item} color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]} />
               )}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item.segmentName}
             />
           )}
         </View>

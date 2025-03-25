@@ -1,83 +1,65 @@
-import React, { useRef, useState, useEffect } from "react";
-import { SafeAreaView, View, Alert } from "react-native";
 import { router } from "expo-router";
-import { useTrip } from "@contexts/TripContext"; 
-import StartEndSearchBar from "../../components/StartEndSearchBar";
-import Header from "../../components/ui/Header";
-import PrimaryButton from "@components/ui/PrimaryButton";
-import { reverseGeocode } from "@services/mapbox-service";
+import React, { useRef, useState } from "react";
+import { SafeAreaView, View, Alert } from "react-native";
+import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
 
 import pin from "@assets/pin-purple.png";
+import Header from "@components/ui/Header";
+import PrimaryButton from "@components/ui/PrimaryButton";
+import StartEndSearchBar from "@components/StartEndSearchBar";
+import SymbolMarker from "@components/map/SymbolMarker";
 
-import Mapbox, { MapView, Camera, ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
-import { featureCollection, point } from "@turf/helpers";
+import { useCreateTrip } from "@contexts/CreateTripContext";
+import { reverseGeocode } from "@services/mapbox-service";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
+// TODO: set initial camera to current location
+const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
+
+// TODO: create a hook for map attributes to have single source for all pages
 export default function CustomTrip() {
-  // Get trip and the function to update its start/end values from context.
-  const { trip, setStartEndLocations } = useTrip();
   const cameraRef = useRef<Camera>(null);
-
+  const { trip, updateTrip } = useCreateTrip();
+  const [zoomLevel, setZoomLevel] = useState(32);
   const [mapCoordinates, setMapCoordinates] = useState<Coordinates | null>(null);
-  const [zoomLevel, setZoomLevel] = useState(12);
 
-  const [startTripLocation, setStartTripLocation] = useState<string | null>(trip.start_location || null);
-  const [startTripCoordinates, setStartTripCoordinates] = useState<Coordinates | null>(trip.start_coords || null);
-  const [endTripLocation, setEndTripLocation] = useState<string | null>(trip.end_location || null);
-  const [endTripCoordinates, setEndTripCoordinates] = useState<Coordinates | null>(trip.end_coords || null);
-
-  // When the user confirms a location as "Source", update the start values.
+  // When the user updates a location as "Source".
   const handleStartChange = (location: string, coords: Coordinates) => {
-    setStartTripLocation(location);
-    setStartTripCoordinates(coords);
-    // Update the context: new start values; keep the current destination values.
-    setStartEndLocations(location, coords, trip.end_location, trip.end_coords || [0, 0]);
+    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
+    setMapCoordinates(null);
+    updateTrip({ startLocation: location, startCoords: coords });
   };
 
-  // When the user confirms a location as "Destination", update the end values.
+  // When the user updates a location as "Destination".
   const handleEndChange = (location: string, coords: Coordinates) => {
-    setEndTripLocation(location);
-    setEndTripCoordinates(coords);
-    // Update the context: keep the current start values; update end values.
-    setStartEndLocations(trip.start_location, trip.start_coords || [0, 0], location, coords);
+    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
+    setMapCoordinates(null);
+    updateTrip({ endLocation: location, endCoords: coords });
+  };
+
+  // When the user presses the map.
+  const handleMapPress = async (event: any) => {
+    const coords = event.geometry.coordinates as Coordinates;
+    const locationName = await reverseGeocode(coords);
+    setMapCoordinates(coords);
+    confirmationAlert(coords, locationName);
+    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
   };
 
   // Alert asking if the location is Source or Destination.
   const confirmationAlert = (coords: Coordinates, location: string) => {
-    Alert.alert(
-      "Confirm Location",
-      `Do you want to set ${location} as your source or destination?`,
-      [
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel",
-        },
-        {
-          text: "Source",
-          onPress: () => handleStartChange(location, coords),
-        },
-        {
-          text: "Destination",
-          onPress: () => handleEndChange(location, coords),
-        },
-      ]
-    );
-  };
-
-  // When the user presses the map, get the coordinates and reverse-geocode the location name.
-  const handleMapPress = async (event: any) => {
-    const coords = event.geometry.coordinates as Coordinates;
-    setMapCoordinates(coords);
-    const locationName = await reverseGeocode(coords);
-    confirmationAlert(coords, locationName);
+    Alert.alert("Confirm Location", `Do you want to set ${location} as your source or destination?`, [
+      { text: "Cancel", onPress: () => setMapCoordinates(null) },
+      { text: "Source", onPress: () => handleStartChange(location, coords) },
+      { text: "Destination", onPress: () => handleEndChange(location, coords) },
+    ]);
   };
 
   // When the user presses Confirm, navigate to the next screen if both locations are set.
   const handleConfirmLocation = () => {
-    if (trip.start_location && trip.end_location) {
+    if (trip.startLocation && trip.endLocation) {
       router.push("/(contribute)/trip-review");
     } else {
       Alert.alert("Please select both a source and destination.");
@@ -85,34 +67,22 @@ export default function CustomTrip() {
   };
 
   // Update zoom level when region changes.
+  // FIXME: translation of device zoom tp map zoom level
   const handleZoomChange = (event: any) => {
-    const { zoom } = event.properties;
-    setZoomLevel(zoom);
+    setZoomLevel(event.properties.zoom);
   };
-
-  // Optionally, clear any temporary mapCoordinates on mount.
-  useEffect(() => {
-    setMapCoordinates(null);
-  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Custom Trips" />
 
       <View>
+        {/*​FIXME: This is not being overwritten by the map. */}
         <StartEndSearchBar
-          defaultStart={startTripLocation || "Starting location"}
-          defaultEnd={endTripLocation || "Destination"}
-          onStartChange={(location, coords) => {
-            setStartTripLocation(location);
-            setStartTripCoordinates(coords);
-            handleStartChange(location, coords);
-          }}
-          onEndChange={(location, coords) => {
-            setEndTripLocation(location);
-            setEndTripCoordinates(coords);
-            handleEndChange(location, coords);
-          }}
+          defaultStart={trip.startLocation || "Starting location"}
+          defaultEnd={trip.endLocation || "Destination"}
+          onStartChange={handleStartChange}
+          onEndChange={handleEndChange}
         />
       </View>
 
@@ -123,66 +93,10 @@ export default function CustomTrip() {
         onRegionDidChange={handleZoomChange}
         projection="mercator"
       >
-        <Camera
-          ref={cameraRef}
-          centerCoordinate={mapCoordinates || [121.05, 14.63]}
-          zoomLevel={zoomLevel}
-          animationMode="easeTo"
-        />
-
-        {trip.start_coords && (
-          <ShapeSource id="start-location" shape={featureCollection([point(trip.start_coords)])}>
-            <SymbolLayer
-              id="start-location-icon"
-              style={{
-                iconImage: "pin",
-                iconSize: 0.1,
-              }}
-            />
-            <SymbolLayer
-              id="start-location-label"
-              style={{
-                textField: trip.start_location.split(",")[0],
-                textSize: 11,
-                textOffset: [0, 3],
-              }}
-            />
-          </ShapeSource>
-        )}
-
-        {trip.end_coords && (
-          <ShapeSource id="end-location" shape={featureCollection([point(trip.end_coords)])}>
-            <SymbolLayer
-              id="end-location-icon"
-              style={{
-                iconImage: "pin",
-                iconSize: 0.1,
-              }}
-            />
-            <SymbolLayer
-              id="end-location-label"
-              style={{
-                textField: trip.end_location.split(",")[0],
-                textSize: 11,
-                textOffset: [0, 3],
-              }}
-            />
-          </ShapeSource>
-        )}
-
-        {/* Optionally, show a marker at the pressed location */}
-        {mapCoordinates && (
-          <ShapeSource id="temp-location" shape={featureCollection([point(mapCoordinates)])}>
-            <SymbolLayer
-              id="temp-location-icon"
-              style={{
-                iconImage: "pin",
-                iconSize: 0.1,
-              }}
-            />
-          </ShapeSource>
-        )}
-
+        <Camera ref={cameraRef} centerCoordinate={INITIAL_CENTER} zoomLevel={zoomLevel} animationMode="easeTo" />
+        <SymbolMarker id="map-onclick-location-c1" coordinates={mapCoordinates} />
+        <SymbolMarker id="start-location-c1" label={trip.startLocation.split(",")[0]} coordinates={trip.startCoords} />
+        <SymbolMarker id="end-location-c1" label={trip.endLocation.split(",")[0]} coordinates={trip.endCoords} />
         <Images images={{ pin }} />
       </MapView>
 

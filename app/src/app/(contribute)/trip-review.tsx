@@ -1,92 +1,52 @@
-import React, { useRef } from "react";
 import { router } from "expo-router";
-import { useTrip } from "@contexts/TripContext";
-import { useSession } from "@contexts/SessionContext";
+import React, { useRef } from "react";
 import { SafeAreaView, View, Alert } from "react-native";
-import uuid from "react-native-uuid";
+import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
 
+import pin from "@assets/pin-purple.png";
 import Header from "@components/ui/Header";
+import TripTitle from "@components/contribute/TripTitle";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import TripSummary from "@components/contribute/TripSummary";
 import DirectionsLine from "@components/ui/DirectionsLine";
-import LocationMarker from "@components/ui/LocationMarker";
-import TripTitle from "@components/contribute/TripTitle";
+import SymbolMarker from "@components/map/SymbolMarker";
 
+import { useCreateTrip } from "@contexts/CreateTripContext";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
-
-import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
-
-import { insertTripAndRelated } from "@services/trip-service";
 import { addTripToModeration } from "@services/moderation-service";
-
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
+// TODO: set initial camera to current location
+const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
+
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
+  const { trip, segments, submitTrip } = useCreateTrip();
 
-  const { user } = useSession();
-  const { trip, segments = [] } = useTrip();
+  // transformation/calculations we need
+  const segmentCoordinates = segments.map(({ directions }) => directions.routes[0].geometry.coordinates) || [];
+  const isSameEndLocation = segments.length > 0 && trip.endLocation === segments[segments.length - 1].endLocation;
 
-  const segmentCoordinates = segments?.map((segment) => segment.directions.routes[0].geometry.coordinates) || [];
-  const startCoordinates = trip.start_coords;
-  const endCoordinates = trip.end_coords;
-  const startLocation = trip.start_location;
-  const endLocation = trip.end_location;
-
+  // When the map is loaded, fit the camera to the pins
   const handleMapLoaded = () => {
-    if (startCoordinates && endCoordinates && cameraRef.current) {
-      cameraRef.current.fitBounds(startCoordinates, endCoordinates, [150, 150, 250, 150]);
-    }
+    if (cameraRef.current) cameraRef.current.fitBounds(trip.startCoords, trip.endCoords, [150, 150, 150, 150]);
   };
 
   const handleNavigateToRouteInput = () => {
     router.push("/(contribute)/route-select-info");
   };
 
-  // Check if there is at least one segment and if the trip's end_location
-  // matches the last segment's end_location.
-  const isSameEndLocation = segments.length > 0 && trip.end_location === segments[segments.length - 1].end_location;
-
   const handleSubmitTrip = async () => {
-    // Generate a new trip id.
-    const tripId = uuid.v4();
-
-    // Build the new trip object.
-    const newTrip: Trip = {
-      ...trip,
-      id: tripId,
-      contributor_id: user?.id || "",
-      name: `${trip.start_location} to ${trip.end_location}`,
-      duration: segments.reduce((acc, segment) => acc + segment.duration, 0),
-      cost: segments.reduce((acc, segment) => acc + segment.cost, 0),
-    };
-
-    // Build the joint segments array as an array of objects
-    // that conform to the SegmentsToTrips interface.
-    const jointSegments: SegmentsToTrips[] = segments.map((segment, index) => ({
-      trip_id: tripId,
-      segment_id: segment.id,
-      segment_order: index,
-    }));
-
     try {
-      // Call the new helper function that performs sequential inserts.
-      const result = await insertTripAndRelated(newTrip, segments, jointSegments);
-      // console.log("Trip and related inserted:", result);
-
-      await addTripToModeration(tripId);
-
-      // Alert the user and navigate to the desired page.
-      Alert.alert(
-        "Trip Submitted",
-        "Your custom route has been submitted. Do you want to transit journal it for GPS verification?",
-      );
+      const { tripData } = await submitTrip();
+      await addTripToModeration(tripData[0].id);
+      Alert.alert("Trip Submitted");
       router.replace("/(tabs)");
     } catch (error) {
-      console.error("Error inserting trip and related:", error);
-      Alert.alert("Error", "There was an error submitting your trip. Please try again.");
+      console.log("Error submitting trip", error);
+      Alert.alert("Error submitting trip");
     }
   };
 
@@ -95,7 +55,7 @@ export default function TripReview() {
       <Header title="Trip Review" />
 
       <View className="flex justify-center items-center">
-        <TripTitle startLocation={trip.start_location} endLocation={trip.end_location} />
+        <TripTitle startLocation={trip.startLocation} endLocation={trip.endLocation} />
       </View>
 
       <MapView
@@ -104,10 +64,12 @@ export default function TripReview() {
         projection="mercator"
         onDidFinishLoadingMap={handleMapLoaded}
       >
-        <Camera ref={cameraRef} centerCoordinate={[121.05, 14.63]} animationMode="easeTo" zoomLevel={10} />
-
-        <LocationMarker coordinates={startCoordinates} label={startLocation} color="red" radius={8} />
-        <LocationMarker coordinates={endCoordinates} label={endLocation} color="red" radius={8} />
+        {/* FIXME: initial camera center */}
+        {/* TODO: add markers on transfer locations */}
+        <Camera ref={cameraRef} centerCoordinate={INITIAL_CENTER} animationMode="easeTo" />
+        <SymbolMarker id="start-location-c2" label={trip.startLocation} coordinates={trip.startCoords} />
+        <SymbolMarker id="end-location-c2" label={trip.endLocation} coordinates={trip.endCoords} />
+        <Images images={{ pin }} />
 
         {segmentCoordinates.map((coordinates, index) => (
           <DirectionsLine
@@ -125,7 +87,7 @@ export default function TripReview() {
         />
       </View>
 
-      <TripSummary startLocation={trip.start_location} endLocation={trip.end_location} segments={segments} />
+      <TripSummary startLocation={trip.startLocation} endLocation={trip.endLocation} segments={segments} />
     </SafeAreaView>
   );
 }
