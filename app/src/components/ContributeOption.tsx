@@ -27,7 +27,7 @@ const Option = ({ title, description, link, icon }: OptionProps) => {
             <Text className="text-md text-[#474747]">{description}</Text>
           </View>
         </View>
-        <Image source={nextIcon} className="w-8 h-8" resizeMode="contain" />
+        <Image source={nextIcon} className="w-7 h-7" resizeMode="contain" />
       </View>
     </TouchableOpacity>
   );
