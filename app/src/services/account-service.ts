@@ -1,5 +1,21 @@
 import { supabase } from "@utils/supabase";
 
+export async function createUserProfile(userId: string, username: string, isCommuter: boolean) {
+  const { error } = await supabase.from("profiles").upsert([
+    {
+      id: userId,
+      username,
+      is_commuter: isCommuter,
+      updated_at: new Date(),
+    },
+  ]);
+
+  if (error) {
+    console.error("Profile insert error:", error);
+    throw new Error(error.message);
+  }
+}
+
 export async function getUsername(contributorId: string): Promise<string | null> {
   const { data, error } = await supabase.from("profiles").select("username").eq("id", contributorId).single();
 
@@ -64,4 +80,15 @@ export async function updateUserProfile(userId: string, username: string) {
 export async function logoutUser() {
   const { error } = await supabase.auth.signOut();
   if (error) throw new Error(error.message);
+}
+
+export async function checkUsernameExists(username: string): Promise<boolean> {
+  const { data, error } = await supabase.from("profiles").select("id").eq("username", username).single();
+
+  if (error && error.code !== "PGRST116") {
+    console.error("Error checking username:", error);
+    throw error;
+  }
+
+  return !!data;
 }
