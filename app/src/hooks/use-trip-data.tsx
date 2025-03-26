@@ -18,7 +18,6 @@ export function useTripData() {
 
         if (tripError) throw tripError;
         setTripData(trips);
-        console.log("Trips data:", trips);
 
         // Fetch all segments related to these trips
         const { data: segments, error: segmentsError } = await supabase
@@ -57,7 +56,6 @@ export function useTripData() {
           try {
             parsedWaypoints = segment.waypoints ? JSON.parse(segment.waypoints) : [];
           } catch (err) {
-            console.error("Error parsing waypoints:", err);
           }
 
           if (!segmentMap[item.trip_id]) segmentMap[item.trip_id] = [];
@@ -70,10 +68,8 @@ export function useTripData() {
         });
 
         setSegmentData(segmentMap);
-        console.log("Segment data:", segmentMap);
       } catch (err: any) {
         setError(err.message);
-        console.error("Error fetching trips:", err);
       } finally {
         setLoading(false);
       }
