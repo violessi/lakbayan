@@ -39,7 +39,7 @@ export default function RouteItem({ segment, color }: RouteItemProps) {
           </View>
           <View className="w-6/12 flex-col justify-end gap-3">
             <View className="flex flex-col gap-1">
-              <Text className="font-medium text-sm">{segment.startLocation.split(",")[0]}</Text>
+              <Text className="font-medium text-sm">{segment.startLocation}</Text>
             </View>
           </View>
           <View className="w-3/12 flex-row items-center"></View>
@@ -55,7 +55,7 @@ export default function RouteItem({ segment, color }: RouteItemProps) {
           </View>
           <View className="w-6/12 flex-col justify-end gap-3">
             <View className="flex flex-col gap-1">
-              <Text className="font-medium text-sm">{segment.endLocation.split(",")[0]}</Text>
+              <Text className="font-medium text-sm">{segment.endLocation}</Text>
             </View>
           </View>
           <View className="w-3/12 flex-row items-center"></View>
