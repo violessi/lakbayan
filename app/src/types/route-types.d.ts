@@ -102,6 +102,7 @@ declare global {
     updatedAt: Timestamp;
   }
   export type CreateTripV2 = Omit<TripV2, "id" | "createdAt" | "updatedAt">;
+  export type FullTripV2 = TripV2 & { segments: Parital<SegmentV2>[] };
 
   export interface SegmentV2 {
     id: string;
@@ -145,4 +146,13 @@ declare global {
   }
 
   export type CreateTripSegmentLinkV2 = Omit<TripSegmentLink, "id" | "createdAt" | "updatedAt">;
+
+  
+  export interface TripDetails {
+    startLocation: string;
+    endLocation: string;
+    startCoords: Coordinates;
+    endCoords: Coordinates;
+  };
 }
+
