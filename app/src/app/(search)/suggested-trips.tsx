@@ -2,135 +2,161 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Text, SafeAreaView, View, Pressable, ActivityIndicator } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
-import { useTripData } from "@hooks/use-trip-data";
-
 import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import FilterSearch from "@components/search/FilterSearch";
 
-const haversineDistance = (coord1: [number, number], coord2: [number, number]) => {
-  const [lat1, lon1] = coord1;
-  const [lat2, lon2] = coord2;
-  const R = 6371;
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
+import { supabase } from "@utils/supabase";
 
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+// const haversineDistance = (coord1: [number, number], coord2: [number, number]) => {
+//   const [lat1, lon1] = coord1;
+//   const [lat2, lon2] = coord2;
+//   const R = 6371;
+//   const toRad = (deg: number) => (deg * Math.PI) / 180;
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c * 1000;
-};
+//   const dLat = toRad(lat2 - lat1);
+//   const dLon = toRad(lon2 - lon1);
+//   const a =
+//     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+//     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+//   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+//   return R * c * 1000;
+// };
+
+async function fetchTripData(tripDetails: TripDetails, radius: number) {
+  try{
+    console.log("FETCHING DATA: ",tripDetails);
+    const {data, error} = await supabase.rpc("get_nearby_trips", {
+      start_lat: tripDetails.startCoords[1],
+      start_lon: tripDetails.startCoords[0],
+      end_lat: tripDetails.endCoords[1],
+      end_lon: tripDetails.endCoords[0],
+      radius,
+    });
+  
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log("FETCHED DATA: ",data);
+    console.log("Segments:", JSON.stringify(data[0].segments, null, 2));
+    return data;
+
+  } catch (error) {
+    return { error };
+  }
+}
+
+function generateWalkingSegment(startLoc: string, startCoords: Coordinates, endLoc: string, endCoords: Coordinates){ 
+  const walkingSegment = startCoords === endCoords ? null : {
+    id: `walk-${startLoc}-${endLoc}`,
+    segmentMode: "Walk",
+    startLocation: startLoc,
+    startCoords: startCoords,
+    endLocation: endLoc,
+    endCoords: endCoords,
+    duration: 0,
+  };
+  return walkingSegment;
+}
 
 export default function SuggestedTrips() {
   const router = useRouter();
-  const { startLocation, endLocation, startCoords, endCoords } = useLocalSearchParams();
-  const { tripData, segmentData, loading, error } = useTripData();
+  const { startLocation, endLocation, startCoords, endCoords } : {
+    startLocation: string;
+    endLocation: string;
+    startCoords: string;
+    endCoords: string;
+  } = useLocalSearchParams();
 
+  const [fullTrips, setFullTrips] = useState<FullTripV2[]>([]);
+  const [filteredTrips, setFilteredTrips] = useState<FullTripV2[]>([]);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [filters, setFilters] = useState({
     sortBy: "Verified by moderators",
     transportModes: ["Train", "Bus", "Jeep", "UV", "Tricycle"],
   });
 
-  const [filteredTrips, setFilteredTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const startCoordinates = useMemo(() => (startCoords ? JSON.parse(startCoords) : [0, 0]), [startCoords]);
-  const endCoordinates = useMemo(() => (endCoords ? JSON.parse(endCoords) : [0, 0]), [endCoords]);
-
-  const tripsWithSegments = useMemo(() => {
-    return tripData.map((trip) => ({
-      ...trip,
-      segments: segmentData[trip.id] || [],
-    }));
-  }, [tripData, segmentData]);
+  const tripDetails = {
+    startCoords: startCoords ? JSON.parse(startCoords) : [0, 0],
+    endCoords: endCoords ? JSON.parse(endCoords) : [0, 0],
+    startLocation,
+    endLocation,
+  } as TripDetails;
 
   useEffect(() => {
-    let updatedTrips = tripsWithSegments
-      .map((trip) => {
-        if (!trip.segments || trip.segments.length === 0) return null;
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
 
-        const firstSegment = trip.segments[0];
-        const lastSegment = trip.segments[trip.segments.length - 1];
+      try {
+        const data = await fetchTripData(tripDetails, 1500);
+        if (data.error) {
+          throw new Error(data.error.message);
+        }
 
-        const startDist = haversineDistance(startCoordinates, firstSegment.start_coords);
-        const endDist = haversineDistance(endCoordinates, lastSegment.end_coords);
+        const nearbyTrips: FullTripV2[] = data;
 
-        const walkingToStartSegment =
-          startDist > 0 && startLocation !== firstSegment.start_location
-            ? {
-                id: `walk-start-${trip.id}`,
-                segment_mode: "Walk",
-                waypoints: [startCoordinates, firstSegment.start_coords],
-                start_location: startLocation,
-                start_coords: startCoordinates,
-                end_location: firstSegment.start_location,
-                end_coords: firstSegment.start_coords,
-                duration: (startDist / 80) * 60,
-              }
-            : null;
+        const fullTrips: FullTripV2[] = nearbyTrips.map((trip) => {
+          const startSegment = generateWalkingSegment(startLocation, tripDetails.startCoords, trip.startLocation, trip.startCoords);
+          const endSegment = generateWalkingSegment(trip.endLocation, trip.endCoords, endLocation, tripDetails.endCoords);
+          return {
+            ...trip,
+            segments: [startSegment, ...trip.segments, endSegment].filter((segment) => segment),
+          };
+        });
 
-        const walkingToEndSegment =
-          endDist > 0 && endLocation !== lastSegment.end_location
-            ? {
-                id: `walk-end-${trip.id}`,
-                segment_mode: "Walk",
-                waypoints: [lastSegment.end_coords, endCoordinates],
-                start_location: lastSegment.end_location,
-                start_coords: lastSegment.end_coords,
-                end_location: endLocation,
-                end_coords: endCoordinates,
-                duration: (endDist / 80) * 60,
-              }
-            : null;
+        setFullTrips(fullTrips);
+      } catch (err: any) {
+        setError(err.message || "Something went wrong while fetching trips.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        const updatedSegments = [
-          ...(walkingToStartSegment ? [walkingToStartSegment] : []),
-          ...trip.segments,
-          ...(walkingToEndSegment ? [walkingToEndSegment] : []),
-        ];
+    fetchData();
+  }, []);
 
-        return {
-          ...trip,
-          segments: updatedSegments,
-          isWithinStartRange: startDist <= 1500,
-          isWithinEndRange: endDist <= 1500,
-        };
-      })
-      .filter((trip) => trip && trip.isWithinStartRange && trip.isWithinEndRange);
+  console.log("FULL TRIPS: ", fullTrips);
+  console.log("SEGMENTS: ", fullTrips.map(trip => trip.segments));
 
-    updatedTrips = updatedTrips.filter((trip) =>
-      trip.segments.every(
-        (segment) => segment.segment_mode === "Walk" || filters.transportModes.includes(segment.segment_mode),
-      ),
-    );
+  useEffect(() => {
+    const filteredTrips: FullTripV2[] = fullTrips.filter((trip) => {
+      return trip.segments.every((segment) => {
+        const mode = segment.segment_mode || segment.segmentMode;
+        return mode === "Walk" || filters.transportModes.includes(mode);
+      });
+    });
 
     switch (filters.sortBy) {
       case "Verified by moderators":
-        updatedTrips.sort((a, b) => (b.mod_verified || 0) - (a.mod_verified || 0));
+        filteredTrips.sort((a, b) => (b.modVerified || 0) - (a.modVerified || 0));
         break;
       case "Verified by GPS":
-        updatedTrips.sort((a, b) => (b.gps_verified || 0) - (a.gps_verified || 0));
+        filteredTrips.sort((a, b) => (b.gpsVerified || 0) - (a.gpsVerified || 0));
         break;
       case "Votes":
-        updatedTrips.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+        filteredTrips.sort((a, b) => ((b.upvotes || 0) - (b.downvotes || 0)) - ((a.upvotes || 0) - (a.downvotes || 0)));
         break;
       case "Duration":
-        updatedTrips.sort((a, b) => {
+        filteredTrips.sort((a, b) => {
           const durationA = a.segments?.reduce((acc, seg) => acc + (seg.duration || 0), 0) ?? Infinity;
           const durationB = b.segments?.reduce((acc, seg) => acc + (seg.duration || 0), 0) ?? Infinity;
           return durationA - durationB;
         });
         break;
     }
+    setFilteredTrips(filteredTrips);
+  }, [fullTrips, filters]);
 
-    setFilteredTrips(updatedTrips);
-  }, [tripsWithSegments, filters, startCoordinates, endCoordinates, startLocation, endLocation]);
+  console.log("FILTERED TRIPS: ", filteredTrips);
 
-  const handlePress = (trip: Trip) => {
+  const handlePress = (trip: FullTripV2) => {
     router.push({
       pathname: "/(search)/trip-overview",
       params: {
@@ -151,7 +177,7 @@ export default function SuggestedTrips() {
   if (error) {
     return (
       <SafeAreaView className="flex-1 justify-center items-center">
-        <Text>Error fetching trips: {error}</Text>
+        <Text className="text-red-500">Error fetching trips: {error}</Text>
       </SafeAreaView>
     );
   }
@@ -175,7 +201,7 @@ export default function SuggestedTrips() {
         <View className="flex-1 p-4">
           {filteredTrips.map((trip) => (
             <Pressable key={trip.id} onPress={() => handlePress(trip)}>
-              <TripPreview trip={trip} segments={trip.segments} />
+              <TripPreview trip={trip} />
             </Pressable>
           ))}
         </View>

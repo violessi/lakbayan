@@ -23,7 +23,7 @@ export default function TripOverview() {
   const cameraRef = useRef<Camera>(null);
   const router = useRouter();
 
-  const { userId } = useSession();
+  const { user } = useSession();
 
   const { trip, segments } = useLocalSearchParams();
   const tripData: Trip = useMemo(() => {
@@ -70,18 +70,18 @@ export default function TripOverview() {
         <Camera ref={cameraRef} centerCoordinate={startCoordinates} animationMode="easeTo" zoomLevel={10} />
 
         {/* Overall Start and End Markers */}
-        <LocationMarker coordinates={startCoordinates} label={startLocation} color="red" radius={8} />
-        <LocationMarker coordinates={endCoordinates} label={endLocation} color="red" radius={8} />
+        <LocationMarker id="start" coordinates={startCoordinates} label={startLocation} color="red" radius={8} />
+        <LocationMarker id="end" coordinates={endCoordinates} label={endLocation} color="red" radius={8} />
 
         {segmentData.map((segment, index) => (
           <Fragment key={`segment-markers-${index}`}>
-            <LocationMarker
+            <LocationMarker id="start-seg"
               coordinates={segment.start_coords}
               label={segment.start_location}
               color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
               radius={6}
             />
-            <LocationMarker
+            <LocationMarker id="end-seg"
               coordinates={segment.end_coords}
               label={segment.end_location}
               color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
@@ -109,13 +109,13 @@ export default function TripOverview() {
         <PrimaryButton label="Start" onPress={handleStartPress} />
       </View>
 
-      {userId && (
+      {user && (
         <TripSummary
           startLocation={startLocation}
           endLocation={endLocation}
           trip={tripData}
           segments={segmentData}
-          currentUserId={userId}
+          currentUserId={user.id}
           onCommentPress={handleCommentPress}
         />
       )}
