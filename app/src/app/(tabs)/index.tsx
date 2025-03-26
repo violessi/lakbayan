@@ -15,7 +15,7 @@ export default function Index() {
   const router = useRouter();
 
   const handleTextInputFocus = () => {
-    router.push("/(search)/location-input");
+    router.push("/(search)/1-search-trip");
   };
 
   return (

@@ -26,45 +26,57 @@ import { supabase } from "@utils/supabase";
 // };
 
 async function fetchTripData(tripDetails: TripDetails, radius: number) {
-  try{
-    console.log("FETCHING DATA: ",tripDetails);
-    const {data, error} = await supabase.rpc("get_nearby_trips", {
+  try {
+    console.log("FETCHING DATA: ", tripDetails);
+    const { data, error } = await supabase.rpc("get_nearby_trips", {
       start_lat: tripDetails.startCoords[1],
       start_lon: tripDetails.startCoords[0],
       end_lat: tripDetails.endCoords[1],
       end_lon: tripDetails.endCoords[0],
       radius,
     });
-  
+
     if (error) {
       throw new Error(error.message);
     }
 
-    console.log("FETCHED DATA: ",data);
+    console.log("FETCHED DATA: ", data);
     console.log("Segments:", JSON.stringify(data[0].segments, null, 2));
     return data;
-
   } catch (error) {
     return { error };
   }
 }
 
-function generateWalkingSegment(startLoc: string, startCoords: Coordinates, endLoc: string, endCoords: Coordinates){ 
-  const walkingSegment = startCoords === endCoords ? null : {
-    id: `walk-${startLoc}-${endLoc}`,
-    segmentMode: "Walk",
-    startLocation: startLoc,
-    startCoords: startCoords,
-    endLocation: endLoc,
-    endCoords: endCoords,
-    duration: 0,
-  };
+function generateWalkingSegment(
+  startLoc: string,
+  startCoords: Coordinates,
+  endLoc: string,
+  endCoords: Coordinates,
+) {
+  const walkingSegment =
+    startCoords === endCoords
+      ? null
+      : {
+          id: `walk-${startLoc}-${endLoc}`,
+          segmentMode: "Walk",
+          startLocation: startLoc,
+          startCoords: startCoords,
+          endLocation: endLoc,
+          endCoords: endCoords,
+          duration: 0,
+        };
   return walkingSegment;
 }
 
 export default function SuggestedTrips() {
   const router = useRouter();
-  const { startLocation, endLocation, startCoords, endCoords } : {
+  const {
+    startLocation,
+    endLocation,
+    startCoords,
+    endCoords,
+  }: {
     startLocation: string;
     endLocation: string;
     startCoords: string;
@@ -103,8 +115,18 @@ export default function SuggestedTrips() {
         const nearbyTrips: FullTripV2[] = data;
 
         const fullTrips: FullTripV2[] = nearbyTrips.map((trip) => {
-          const startSegment = generateWalkingSegment(startLocation, tripDetails.startCoords, trip.startLocation, trip.startCoords);
-          const endSegment = generateWalkingSegment(trip.endLocation, trip.endCoords, endLocation, tripDetails.endCoords);
+          const startSegment = generateWalkingSegment(
+            startLocation,
+            tripDetails.startCoords,
+            trip.startLocation,
+            trip.startCoords,
+          );
+          const endSegment = generateWalkingSegment(
+            trip.endLocation,
+            trip.endCoords,
+            endLocation,
+            tripDetails.endCoords,
+          );
           return {
             ...trip,
             segments: [startSegment, ...trip.segments, endSegment].filter((segment) => segment),
@@ -123,7 +145,10 @@ export default function SuggestedTrips() {
   }, []);
 
   console.log("FULL TRIPS: ", fullTrips);
-  console.log("SEGMENTS: ", fullTrips.map(trip => trip.segments));
+  console.log(
+    "SEGMENTS: ",
+    fullTrips.map((trip) => trip.segments),
+  );
 
   useEffect(() => {
     const filteredTrips: FullTripV2[] = fullTrips.filter((trip) => {
@@ -141,12 +166,16 @@ export default function SuggestedTrips() {
         filteredTrips.sort((a, b) => (b.gpsVerified || 0) - (a.gpsVerified || 0));
         break;
       case "Votes":
-        filteredTrips.sort((a, b) => ((b.upvotes || 0) - (b.downvotes || 0)) - ((a.upvotes || 0) - (a.downvotes || 0)));
+        filteredTrips.sort(
+          (a, b) => (b.upvotes || 0) - (b.downvotes || 0) - ((a.upvotes || 0) - (a.downvotes || 0)),
+        );
         break;
       case "Duration":
         filteredTrips.sort((a, b) => {
-          const durationA = a.segments?.reduce((acc, seg) => acc + (seg.duration || 0), 0) ?? Infinity;
-          const durationB = b.segments?.reduce((acc, seg) => acc + (seg.duration || 0), 0) ?? Infinity;
+          const durationA =
+            a.segments?.reduce((acc, seg) => acc + (seg.duration || 0), 0) ?? Infinity;
+          const durationB =
+            b.segments?.reduce((acc, seg) => acc + (seg.duration || 0), 0) ?? Infinity;
           return durationA - durationB;
         });
         break;
@@ -158,7 +187,7 @@ export default function SuggestedTrips() {
 
   const handlePress = (trip: FullTripV2) => {
     router.push({
-      pathname: "/(search)/trip-overview",
+      pathname: "/(search)/3-trip-overview",
       params: {
         trip: JSON.stringify(trip),
         segments: JSON.stringify(trip.segments),
@@ -212,7 +241,11 @@ export default function SuggestedTrips() {
       </View>
 
       {isFilterVisible && (
-        <FilterSearch onClose={() => setIsFilterVisible(false)} filters={filters} setFilters={setFilters} />
+        <FilterSearch
+          onClose={() => setIsFilterVisible(false)}
+          filters={filters}
+          setFilters={setFilters}
+        />
       )}
     </SafeAreaView>
   );

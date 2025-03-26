@@ -66,22 +66,45 @@ export default function TripOverview() {
     <SafeAreaView className="flex-1">
       <Header title="Trip Overview" />
 
-      <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12" projection="mercator">
-        <Camera ref={cameraRef} centerCoordinate={startCoordinates} animationMode="easeTo" zoomLevel={10} />
+      <MapView
+        style={{ flex: 1 }}
+        styleURL="mapbox://styles/mapbox/streets-v12"
+        projection="mercator"
+      >
+        <Camera
+          ref={cameraRef}
+          centerCoordinate={startCoordinates}
+          animationMode="easeTo"
+          zoomLevel={10}
+        />
 
         {/* Overall Start and End Markers */}
-        <LocationMarker id="start" coordinates={startCoordinates} label={startLocation} color="red" radius={8} />
-        <LocationMarker id="end" coordinates={endCoordinates} label={endLocation} color="red" radius={8} />
+        <LocationMarker
+          id="start"
+          coordinates={startCoordinates}
+          label={startLocation}
+          color="red"
+          radius={8}
+        />
+        <LocationMarker
+          id="end"
+          coordinates={endCoordinates}
+          label={endLocation}
+          color="red"
+          radius={8}
+        />
 
         {segmentData.map((segment, index) => (
           <Fragment key={`segment-markers-${index}`}>
-            <LocationMarker id="start-seg"
+            <LocationMarker
+              id="start-seg"
               coordinates={segment.start_coords}
               label={segment.start_location}
               color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
               radius={6}
             />
-            <LocationMarker id="end-seg"
+            <LocationMarker
+              id="end-seg"
               coordinates={segment.end_coords}
               label={segment.end_location}
               color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
@@ -91,7 +114,11 @@ export default function TripOverview() {
         ))}
 
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" style={{ position: "absolute", top: "50%", left: "50%" }} />
+          <ActivityIndicator
+            size="large"
+            color="#0000ff"
+            style={{ position: "absolute", top: "50%", left: "50%" }}
+          />
         ) : segmentRoutes.length > 0 ? (
           segmentRoutes.map((coordinates, index) => (
             <DirectionsLine
