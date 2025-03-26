@@ -116,7 +116,7 @@ declare global {
     endLocation: string;
     endCoords: Coordinates;
     createdAt: Timestamp;
-    lastUpdated: Date;
+    updatedAt: Date;
   }
   export type CreateSegmentV2 = Omit<SegmentV2, "id" | "createdAt" | "lastUpdated">;
 
