@@ -3,7 +3,6 @@ import React, { useRef } from "react";
 import { SafeAreaView, View, Alert } from "react-native";
 import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
 
-import pin from "@assets/pin-purple.png";
 import Header from "@components/ui/Header";
 import TripTitle from "@components/contribute/TripTitle";
 import PrimaryButton from "@components/ui/PrimaryButton";
@@ -11,11 +10,11 @@ import TripSummary from "@components/contribute/TripSummary";
 import DirectionsLine from "@components/ui/DirectionsLine";
 import SymbolMarker from "@components/map/SymbolMarker";
 
-import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
-import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
-import { addTripToModeration } from "@services/moderation-service";
+import pin from "@assets/pin-purple.png";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-import { assert } from "@utils/utils";
+import { addTripToModeration } from "@services/moderation-service";
+import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
+import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, SafeAreaView, View, Pressable, ActivityIndicator } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
@@ -8,22 +8,6 @@ import PrimaryButton from "@components/ui/PrimaryButton";
 import FilterSearch from "@components/search/FilterSearch";
 
 import { supabase } from "@utils/supabase";
-
-// const haversineDistance = (coord1: [number, number], coord2: [number, number]) => {
-//   const [lat1, lon1] = coord1;
-//   const [lat2, lon2] = coord2;
-//   const R = 6371;
-//   const toRad = (deg: number) => (deg * Math.PI) / 180;
-
-//   const dLat = toRad(lat2 - lat1);
-//   const dLon = toRad(lon2 - lon1);
-//   const a =
-//     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-//     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-//   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-//   return R * c * 1000;
-// };
 
 async function fetchTripData(tripDetails: TripDetails, radius: number) {
   try {

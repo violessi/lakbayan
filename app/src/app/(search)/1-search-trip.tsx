@@ -1,7 +1,7 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { useRouter } from "expo-router";
 
-import { Alert, Text, SafeAreaView, View } from "react-native";
+import { Alert, SafeAreaView, View } from "react-native";
 
 import Header from "@components/ui/Header";
 import SymbolMarker from "@components/map/SymbolMarker";

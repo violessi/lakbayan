@@ -1,8 +1,7 @@
 import { router } from "expo-router";
-import { Button } from "react-native-paper";
+import React, { useRef } from "react";
 import { SafeAreaView, View, Alert } from "react-native";
-import React, { useRef, useState, useEffect } from "react";
-import Mapbox, { MapView, Camera, MarkerView } from "@rnmapbox/maps";
+import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
 import Header from "@components/ui/Header";
 import PrimaryButton from "@components/ui/PrimaryButton";
@@ -11,9 +10,8 @@ import StartEndSearchBar from "@components/StartEndSearchBar";
 import TransportationModeSelection from "@components/contribute/TransportationModeSelection";
 
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-
-import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 import { reverseGeocode } from "@services/mapbox-service";
+import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 

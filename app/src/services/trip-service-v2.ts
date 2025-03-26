@@ -26,8 +26,7 @@ export async function insertTrip(trip: CreateTripV2): Promise<TripV2[]> {
 // Function to insert multiple segments into the database
 export async function insertSegments(segments: CreateSegmentV2[]): Promise<SegmentV2[]> {
   try {
-    const finalSegments = segments.map(({ directions, ...rest }) => rest);
-    const payload = finalSegments.map((segment) => convertKeysToSnakeCase(segment));
+    const payload = segments.map((segment) => convertKeysToSnakeCase(segment));
 
     const insertData = payload.map((segment) => ({
       ...segment,
@@ -57,7 +56,10 @@ export async function insertTripSegmentLinks(
       segment_order: index,
     }));
 
-    const { data, error } = await supabase.from("trip_segment_links_v2").insert(tripSegmentLinks).select();
+    const { data, error } = await supabase
+      .from("trip_segment_links_v2")
+      .insert(tripSegmentLinks)
+      .select();
     if (error) throw new Error(`Error inserting trip-segment links: ${error.message}`);
 
     return data.map((link: any) => convertKeysToCamelCase(link)) as TripSegmentLinkV2[];
