@@ -11,7 +11,13 @@ interface SymbolMarkerProps {
 }
 
 // FIXME: duplicate source layers
-function SymbolMarker({ id, label, coordinates, iconImage = "pin", iconSize = 0.1 }: SymbolMarkerProps) {
+function SymbolMarker({
+  id,
+  label,
+  coordinates,
+  iconImage = "pin",
+  iconSize = 0.1,
+}: SymbolMarkerProps) {
   if (!coordinates) return null;
 
   return (
