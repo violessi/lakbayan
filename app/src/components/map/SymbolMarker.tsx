@@ -4,8 +4,8 @@ import { ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
 
 interface SymbolMarkerProps {
   id: string;
-  label?: string;
-  coordinates: Coordinates | null;
+  label?: string | null | undefined;
+  coordinates: Coordinates | null | undefined;
   iconImage?: string;
   iconSize?: number;
 }

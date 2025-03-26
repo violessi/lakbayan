@@ -13,10 +13,21 @@ export const TRIP_INITIAL_STATE: CreateTripV2 = {
   endCoords: [0, 0],
 };
 
-export const ROUTE_INITIAL_STATE: CreateRouteV2 = {
+export const SEGMENT_INITIAL_STATE: CreateSegmentV2 = {
+  contributorId: "",
+  segmentName: "",
+  segmentMode: "Walk",
+  landmark: "",
+  instruction: "",
+  gpsVerified: 0,
+  modVerified: 0,
+  duration: 0,
+  cost: 0,
+  liveStatus: [],
+  waypoints: [],
+  navigationSteps: [],
   startLocation: "",
   startCoords: [0, 0],
   endLocation: "",
   endCoords: [0, 0],
-  segmentMode: "Walk",
 };

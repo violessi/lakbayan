@@ -1,5 +1,5 @@
 import { Stack, Redirect } from "expo-router";
-import { CreateTripProvider } from "@contexts/CreateTripContext";
+import { TripCreatorProvider } from "@contexts/TripCreator/TripCreatorContext";
 import { useSession } from "@contexts/SessionContext";
 
 export default function ContributeLayout() {
@@ -7,16 +7,16 @@ export default function ContributeLayout() {
   if (!user) return <Redirect href="/(auth)/log-in" />;
 
   return (
-    <CreateTripProvider>
+    <TripCreatorProvider>
       <Stack>
-        <Stack.Screen name="custom-trip" options={{ headerShown: false }} />
-        <Stack.Screen name="toda-stops" options={{ headerShown: false }} />
-        <Stack.Screen name="trip-review" options={{ headerShown: false }} />
-        <Stack.Screen name="route-select-info" options={{ headerShown: false }} />
-        <Stack.Screen name="route-input" options={{ headerShown: false }} />
+        <Stack.Screen name="1-create-trip" options={{ headerShown: false }} />
+        <Stack.Screen name="2-review-trip" options={{ headerShown: false }} />
+        <Stack.Screen name="3-add-transfer" options={{ headerShown: false }} />
+        <Stack.Screen name="4-edit-transfer" options={{ headerShown: false }} />
         {/* FIXME: temporary location */}
         <Stack.Screen name="jeepney-routes" options={{ headerShown: false }} />
+        <Stack.Screen name="toda-stop" options={{ headerShown: false }} />
       </Stack>
-    </CreateTripProvider>
+    </TripCreatorProvider>
   );
 }

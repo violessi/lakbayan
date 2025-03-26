@@ -16,7 +16,7 @@ export default function Contribute() {
         <Option
           title="Add custom trip"
           description="Help users discover ways to get from starting point to their destination!"
-          link="/(contribute)/custom-trip"
+          link="/(contribute)/1-create-trip"
           icon={customTripIcon}
         />
         <Option

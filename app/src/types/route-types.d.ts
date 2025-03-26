@@ -34,6 +34,11 @@ declare global {
     coordinates: Coordinates;
   }
 
+  export interface NavigationSteps {
+    instruction: string;
+    location: Coordinates;
+  }
+
   export interface Trip {
     id: string;
     contributor_id: string;
@@ -89,6 +94,7 @@ declare global {
     endLocation: string;
     endCoords: Coordinates;
     duration: number;
+    distance: number;
     cost: number;
     upvotes: number;
     downvotes: number;
@@ -107,10 +113,11 @@ declare global {
     gpsVerified: number;
     modVerified: number;
     duration: number;
+    distance: number;
     cost: number;
     liveStatus: LiveStatus[];
     waypoints: Coordinates[];
-    directions: MapboxDirectionsResponse;
+    navigationSteps: NavigationSteps[];
     startLocation: string;
     startCoords: Coordinates;
     endLocation: string;
@@ -118,7 +125,7 @@ declare global {
     createdAt: Timestamp;
     updatedAt: Date;
   }
-  export type CreateSegmentV2 = Omit<SegmentV2, "id" | "createdAt" | "lastUpdated">;
+  export type CreateSegmentV2 = Omit<SegmentV2, "id" | "createdAt" | "updatedAt">;
 
   export interface CreateRouteV2 {
     startLocation: string;
