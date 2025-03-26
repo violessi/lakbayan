@@ -3,6 +3,8 @@ import { Text, View, Alert, Keyboard } from "react-native";
 import { Dialog, Portal, Button } from "react-native-paper";
 import { z } from "zod";
 
+import uuid from "react-native-uuid";
+
 import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import SecondaryButton from "@components/ui/SecondaryButton";
@@ -22,7 +24,6 @@ const todaStopSchema = z.object({
 });
 
 const TODA_COLORS = ["Red", "Blue", "Green", "Yellow", "Black", "White", "None"];
-const SNAP_POINTS = [70, 270];
 
 interface TodaStopsProps {
   coordinates: Coordinates | null;
@@ -30,7 +31,7 @@ interface TodaStopsProps {
 }
 
 export default function TodaStops({ coordinates, onNewStopAdded }: TodaStopsProps) {
-  const { userId } = useSession();
+  const { user } = useSession();
   const [form, setForm] = useState({ todaName: "", color: "", landmark: "" });
   const [dialogVisible, setDialogVisible] = useState(false);
 
@@ -50,13 +51,14 @@ export default function TodaStops({ coordinates, onNewStopAdded }: TodaStopsProp
     }
 
     const stopData = {
+      id: uuid.v4(),
       name: form.todaName.trim(),
       color: form.color.trim(),
       landmark: form.landmark.trim() || "",
       latitude: coordinates[1],
       longitude: coordinates[0],
       transpo_mode: "tricycle",
-      contributor_id: userId || "",
+      contributor_id: user?.id || "",
     };
 
     const validation = todaStopSchema.safeParse(stopData);
@@ -78,28 +80,33 @@ export default function TodaStops({ coordinates, onNewStopAdded }: TodaStopsProp
   };
 
   return (
-    <BottomSheet snapPoints={SNAP_POINTS} index={1}>
-      <BottomSheetView className="flex flex-col px-5 gap-2">
-        <Text className="text-xl font-bold">More information</Text>
-        <View className="flex flex-row gap-4 justify-center items-center">
-          <View className="flex-[3]">
-            <OutlinedTextInput
-              label="Name of TODA"
-              value={form.todaName}
-              onChangeText={(text) => updateForm("todaName", text)}
-            />
+    <BottomSheet maxDynamicContentSize={500}>
+      <BottomSheetView className="flex flex-col px-5">
+        <View className="flex flex-col gap-5 mb-5">
+          <View>
+            <Text className="text-xl font-bold mb-2">More information</Text>
+            <View className="flex flex-row gap-4 justify-center items-center">
+              <View className="flex-[3]">
+                <OutlinedTextInput
+                  label="Name of TODA"
+                  value={form.todaName}
+                  onChangeText={(text) => updateForm("todaName", text)}
+                />
+              </View>
+              <View className="flex-[2]">
+                <SecondaryButton label={form.color || "Select Color"} onPress={() => setDialogVisible(true)} />
+              </View>
+            </View>
+            <View>
+              <OutlinedTextInput
+                label="Landmark Information"
+                value={form.landmark}
+                onChangeText={(text) => updateForm("landmark", text)}
+              />
+            </View>
           </View>
-          <View className="flex-[2]">
-            <SecondaryButton label={form.color || "Select Color"} onPress={() => setDialogVisible(true)} />
-          </View>
+          <PrimaryButton label="Submit" onPress={handleSubmit} />
         </View>
-        <OutlinedTextInput
-          label="Landmark Information"
-          value={form.landmark}
-          onChangeText={(text) => updateForm("landmark", text)}
-        />
-        <PrimaryButton label="Submit" onPress={handleSubmit} />
-
         <Portal>
           <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)}>
             <Dialog.Title>Select TODA Color</Dialog.Title>
