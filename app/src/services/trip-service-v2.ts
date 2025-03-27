@@ -67,3 +67,26 @@ export async function insertTripSegmentLinks(
     throw new Error(`Error inserting trip-segment links: ${error}`);
   }
 }
+
+export async function fetchTripData(
+  tripDetails: TripDetails,
+  radius: number,
+): Promise<{ data: FullTripV2[] | null; error: Error | null }> {
+  try {
+    // console.log("[LOGS] Fetching nearby trips:\n", tripDetails);
+    const { data, error } = await supabase.rpc("get_nearby_trips", {
+      start_lat: tripDetails.startCoords[1],
+      start_lon: tripDetails.startCoords[0],
+      end_lat: tripDetails.endCoords[1],
+      end_lon: tripDetails.endCoords[0],
+      radius,
+    });
+
+    if (error) throw new Error(`Supabase RPC Error: ${error.message}`);
+
+    // console.log("[LOGS] Fetched nearby trips:\n", data);
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: error instanceof Error ? error : new Error(String(error)) };
+  }
+}

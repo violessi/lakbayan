@@ -6,84 +6,77 @@ import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import FilterSearch from "@components/search/FilterSearch";
+import { fetchTripData } from "@services/trip-service-v2";
+import { getDirections, paraphraseStep } from "@services/mapbox-service";
+import { isNearLocation } from "@utils/map-utils";
 
-import { supabase } from "@utils/supabase";
-
-async function fetchTripData(tripDetails: TripDetails, radius: number) {
-  try {
-    console.log("FETCHING DATA: ", tripDetails);
-    const { data, error } = await supabase.rpc("get_nearby_trips", {
-      start_lat: tripDetails.startCoords[1],
-      start_lon: tripDetails.startCoords[0],
-      end_lat: tripDetails.endCoords[1],
-      end_lon: tripDetails.endCoords[0],
-      radius,
-    });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    console.log("FETCHED DATA: ", data);
-    console.log("Segments:", JSON.stringify(data[0].segments, null, 2));
-    return data;
-  } catch (error) {
-    return { error };
-  }
-}
-
-function generateWalkingSegment(
+// TODO: move this somewhere else
+// Generates a walking segment if the start and end coordinates are different
+async function generateWalkingSegment(
   startLoc: string,
   startCoords: Coordinates,
   endLoc: string,
   endCoords: Coordinates,
-) {
-  const walkingSegment =
-    startCoords === endCoords
-      ? null
-      : {
-          id: `walk-${startLoc}-${endLoc}`,
-          segmentMode: "Walk",
-          startLocation: startLoc,
-          startCoords: startCoords,
-          endLocation: endLoc,
-          endCoords: endCoords,
-          duration: 0,
-        };
-  return walkingSegment;
+): Promise<SegmentV2 | null> {
+  // if the distance between the current and start location < 100 meters
+  // then no need to add a walking segment
+  if (isNearLocation(startCoords, endCoords, 100)) return null;
+
+  const data = await getDirections(startCoords, [], endCoords, "Walk", true);
+  const directions = data.routes[0];
+  const waypoints = directions.geometry.coordinates ?? [];
+  const duration = directions.duration;
+  const distance = directions.distance;
+  const navigationSteps = directions.legs.flatMap(({ steps }) =>
+    steps.map(({ maneuver }) => ({
+      instruction: paraphraseStep(maneuver.instruction),
+      location: maneuver.location,
+    })),
+  );
+
+  const segment: SegmentV2 = {
+    id: `walk-${startLoc}-${endLoc}`,
+    contributorId: "system",
+    segmentName: `Walk from ${startLoc} to ${endLoc}`,
+    segmentMode: "Walk",
+    landmark: "",
+    instruction: `Walk from ${startLoc} to ${endLoc}`,
+    gpsVerified: 0,
+    modVerified: 0,
+    duration,
+    distance,
+    cost: 0,
+    liveStatus: [],
+    waypoints,
+    navigationSteps,
+    startLocation: startLoc,
+    startCoords,
+    endLocation: endLoc,
+    endCoords,
+    createdAt: new Date().getTime(),
+    updatedAt: new Date().getTime(),
+  };
+
+  return segment;
 }
+
+const FILTER_INITIAL_STATE = {
+  sortBy: "Verified by moderators",
+  transportModes: ["Train", "Bus", "Jeep", "UV", "Tricycle"],
+};
 
 export default function SuggestedTrips() {
   const router = useRouter();
-  const {
-    startLocation,
-    endLocation,
-    startCoords,
-    endCoords,
-  }: {
-    startLocation: string;
-    endLocation: string;
-    startCoords: string;
-    endCoords: string;
-  } = useLocalSearchParams();
+  const { params } = useLocalSearchParams();
+  const tripDetails = JSON.parse(params as string) as TripDetails;
 
   const [fullTrips, setFullTrips] = useState<FullTripV2[]>([]);
   const [filteredTrips, setFilteredTrips] = useState<FullTripV2[]>([]);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
-  const [filters, setFilters] = useState({
-    sortBy: "Verified by moderators",
-    transportModes: ["Train", "Bus", "Jeep", "UV", "Tricycle"],
-  });
+  const [filters, setFilters] = useState(FILTER_INITIAL_STATE);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const tripDetails = {
-    startCoords: startCoords ? JSON.parse(startCoords) : [0, 0],
-    endCoords: endCoords ? JSON.parse(endCoords) : [0, 0],
-    startLocation,
-    endLocation,
-  } as TripDetails;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,31 +84,40 @@ export default function SuggestedTrips() {
       setError(null);
 
       try {
-        const data = await fetchTripData(tripDetails, 1500);
-        if (data.error) {
-          throw new Error(data.error.message);
-        }
+        const { data, error } = await fetchTripData(tripDetails, 1500);
+        if (error) throw new Error(`Error fetching trips: ${error}`);
+        if (!data) throw new Error("No trips found.");
 
-        const nearbyTrips: FullTripV2[] = data;
+        // FIXME: append correct pre and post segments
+        const fullTrips: FullTripV2[] = await Promise.all(
+          data.map(async (trip) => {
+            const start = await generateWalkingSegment(
+              tripDetails.startLocation,
+              tripDetails.startCoords,
+              trip.startLocation,
+              trip.startCoords,
+            );
+            const end = await generateWalkingSegment(
+              trip.endLocation,
+              trip.endCoords,
+              tripDetails.endLocation,
+              tripDetails.endCoords,
+            );
 
-        const fullTrips: FullTripV2[] = nearbyTrips.map((trip) => {
-          const startSegment = generateWalkingSegment(
-            startLocation,
-            tripDetails.startCoords,
-            trip.startLocation,
-            trip.startCoords,
-          );
-          const endSegment = generateWalkingSegment(
-            trip.endLocation,
-            trip.endCoords,
-            endLocation,
-            tripDetails.endCoords,
-          );
-          return {
-            ...trip,
-            segments: [startSegment, ...trip.segments, endSegment].filter((segment) => segment),
-          };
-        });
+            if (start) {
+              trip.startLocation = tripDetails.startLocation;
+              trip.startCoords = tripDetails.startCoords;
+              trip.segments.unshift(start);
+            }
+            if (end) {
+              trip.endLocation = tripDetails.endLocation;
+              trip.endCoords = tripDetails.endCoords;
+              trip.segments.push(end);
+            }
+
+            return trip;
+          }),
+        );
 
         setFullTrips(fullTrips);
       } catch (err: any) {
@@ -128,16 +130,10 @@ export default function SuggestedTrips() {
     fetchData();
   }, []);
 
-  console.log("FULL TRIPS: ", fullTrips);
-  console.log(
-    "SEGMENTS: ",
-    fullTrips.map((trip) => trip.segments),
-  );
-
   useEffect(() => {
     const filteredTrips: FullTripV2[] = fullTrips.filter((trip) => {
       return trip.segments.every((segment) => {
-        const mode = segment.segment_mode || segment.segmentMode;
+        const mode = segment.segmentMode || segment.segmentMode;
         return mode === "Walk" || filters.transportModes.includes(mode);
       });
     });
@@ -167,15 +163,10 @@ export default function SuggestedTrips() {
     setFilteredTrips(filteredTrips);
   }, [fullTrips, filters]);
 
-  console.log("FILTERED TRIPS: ", filteredTrips);
-
   const handlePress = (trip: FullTripV2) => {
     router.push({
       pathname: "/(search)/3-trip-overview",
-      params: {
-        trip: JSON.stringify(trip),
-        segments: JSON.stringify(trip.segments),
-      },
+      params: { params: JSON.stringify(trip) },
     });
   };
 
@@ -202,8 +193,8 @@ export default function SuggestedTrips() {
       </View>
 
       <View className="p-4">
-        <Text className="text-lg font-bold">From: {startLocation}</Text>
-        <Text className="text-lg font-bold">To: {endLocation}</Text>
+        <Text className="text-lg font-bold">From: {tripDetails.startLocation}</Text>
+        <Text className="text-lg font-bold">To: {tripDetails.endLocation}</Text>
       </View>
 
       {filteredTrips.length === 0 ? (

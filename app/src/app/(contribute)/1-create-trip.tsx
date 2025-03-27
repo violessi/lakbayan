@@ -21,22 +21,23 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 // TODO: create a hook for map attributes to have single source for all pages
 export default function CustomTrip() {
   const cameraRef = useRef<Camera>(null);
-  const { trip, updateTrip } = useTripCreator();
   const [zoomLevel, setZoomLevel] = useState(15);
+
+  const { trip, updateTrip } = useTripCreator();
   const [mapCoordinates, setMapCoordinates] = useState<Coordinates | null>(null);
 
   // When the user updates a location as "Source".
   const handleStartChange = (location: string, coords: Coordinates) => {
-    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
     setMapCoordinates(null);
     updateTrip({ startLocation: location, startCoords: coords });
+    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
   };
 
   // When the user updates a location as "Destination".
   const handleEndChange = (location: string, coords: Coordinates) => {
-    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
     setMapCoordinates(null);
     updateTrip({ endLocation: location, endCoords: coords });
+    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
   };
 
   // When the user presses the map.
@@ -54,9 +55,9 @@ export default function CustomTrip() {
       "Confirm Location",
       `Do you want to set ${location} as your source or destination?`,
       [
-        { text: "Cancel", onPress: () => setMapCoordinates(null) },
         { text: "Source", onPress: () => handleStartChange(location, coords) },
         { text: "Destination", onPress: () => handleEndChange(location, coords) },
+        { text: "Cancel", onPress: () => setMapCoordinates(null) },
       ],
     );
   };

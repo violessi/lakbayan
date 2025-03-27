@@ -19,21 +19,24 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 // TODO: set initial camera to current location
 const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 
-export default function Contribute() {
+export default function SearchTrip() {
+  const router = useRouter();
   const cameraRef = useRef<Camera>(null);
+  const [zoomLevel, setZoomLevel] = useState(15);
+
   const [tripDetails, setTripDetails] = useState<Partial<TripDetails> | null>(null);
   const [mapCoordinates, setMapCoordinates] = useState<Coordinates | null>(null);
-  const [zoomLevel, setZoomLevel] = useState(32);
-  const router = useRouter();
 
   const handleStartChange = (startLocation: string, startCoords: Coordinates) => {
-    if (cameraRef.current) cameraRef.current.moveTo(startCoords, 1000);
+    setMapCoordinates(null);
     setTripDetails((prev) => ({ ...prev, startLocation, startCoords }));
+    if (cameraRef.current) cameraRef.current.moveTo(startCoords, 1000);
   };
 
   const handleEndChange = (endLocation: string, endCoords: Coordinates) => {
-    if (cameraRef.current) cameraRef.current.moveTo(endCoords, 1000);
+    setMapCoordinates(null);
     setTripDetails((prev) => ({ ...prev, endLocation, endCoords }));
+    if (cameraRef.current) cameraRef.current.moveTo(endCoords, 1000);
   };
 
   const handleMapPress = async (event: any) => {
@@ -49,31 +52,26 @@ export default function Contribute() {
       "Confirm Location",
       `Do you want to set ${location} as your source or destination?`,
       [
-        { text: "Cancel", onPress: () => setMapCoordinates(null) },
         { text: "Source", onPress: () => handleStartChange(location, coords) },
         { text: "Destination", onPress: () => handleEndChange(location, coords) },
+        { text: "Cancel", onPress: () => setMapCoordinates(null) },
       ],
     );
-  };
-
-  const handleZoomChange = (event: any) => {
-    setZoomLevel(event.properties.zoom);
   };
 
   const handleConfirmLocation = () => {
     if (tripDetails?.startLocation && tripDetails?.endLocation) {
       router.push({
         pathname: "/(search)/2-trip-suggestions",
-        params: {
-          startLocation: tripDetails.startLocation,
-          endLocation: tripDetails.endLocation,
-          startCoords: JSON.stringify(tripDetails.startCoords),
-          endCoords: JSON.stringify(tripDetails.endCoords),
-        },
+        params: { params: JSON.stringify(tripDetails) },
       });
     } else {
       Alert.alert("Please select both a source and destination.");
     }
+  };
+
+  const handleZoomChange = (event: any) => {
+    setZoomLevel(event.properties.zoom);
   };
 
   return (

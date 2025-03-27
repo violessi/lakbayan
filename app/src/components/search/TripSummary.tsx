@@ -15,8 +15,8 @@ const comment = require("@assets/social-comment.png");
 interface TripSummaryProps {
   startLocation: string;
   endLocation: string;
-  trip: Trip;
-  segments: Segment[];
+  trip: TripV2;
+  segments: SegmentV2[];
   currentUserId: string;
   onCommentPress: (tripId: string) => void;
 }
@@ -36,7 +36,7 @@ export default function TripSummary({
 
   useEffect(() => {
     async function fetchContributor() {
-      const username = await getUsername(trip.contributor_id);
+      const username = await getUsername(trip.contributorId);
       setContributor(username);
     }
 
@@ -47,7 +47,7 @@ export default function TripSummary({
 
     fetchContributor();
     fetchPoints();
-  }, [trip.contributor_id, trip.id]);
+  }, [trip.contributorId, trip.id]);
 
   return (
     <BottomSheet snapPoints={snapPoints} index={2}>
@@ -71,7 +71,10 @@ export default function TripSummary({
             <FlatList
               data={segments}
               renderItem={({ item, index }) => (
-                <RouteItem segment={item} color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]} />
+                <RouteItem
+                  segment={item}
+                  color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
+                />
               )}
               keyExtractor={(item) => item.id}
             />
