@@ -3,7 +3,6 @@ import React, { useRef } from "react";
 import { SafeAreaView, View, Alert } from "react-native";
 import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
 
-import pin from "@assets/pin-purple.png";
 import Header from "@components/ui/Header";
 import TripTitle from "@components/contribute/TripTitle";
 import PrimaryButton from "@components/ui/PrimaryButton";
@@ -11,10 +10,11 @@ import TripSummary from "@components/contribute/TripSummary";
 import DirectionsLine from "@components/ui/DirectionsLine";
 import SymbolMarker from "@components/map/SymbolMarker";
 
-import { useCreateTrip } from "@contexts/CreateTripContext";
-import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
-import { addTripToModeration } from "@services/moderation-service";
+import pin from "@assets/pin-purple.png";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+import { addTripToModeration } from "@services/moderation-service";
+import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
+import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
@@ -23,19 +23,21 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
-  const { trip, segments, submitTrip } = useCreateTrip();
+  const { trip, segments, submitTrip } = useTripCreator();
 
   // transformation/calculations we need
-  const segmentCoordinates = segments.map(({ directions }) => directions.routes[0].geometry.coordinates) || [];
-  const isSameEndLocation = segments.length > 0 && trip.endLocation === segments[segments.length - 1].endLocation;
+  const segmentCoordinates = segments.map(({ waypoints }) => waypoints);
+  const isSameEndLocation =
+    segments.length > 0 && trip.endLocation === segments[segments.length - 1].endLocation;
 
   // When the map is loaded, fit the camera to the pins
   const handleMapLoaded = () => {
-    if (cameraRef.current) cameraRef.current.fitBounds(trip.startCoords, trip.endCoords, [150, 150, 150, 150]);
+    if (cameraRef.current)
+      cameraRef.current.fitBounds(trip.startCoords, trip.endCoords, [150, 150, 150, 150]);
   };
 
   const handleNavigateToRouteInput = () => {
-    router.push("/(contribute)/route-select-info");
+    router.push("/(contribute)/3-add-transfer");
   };
 
   const handleSubmitTrip = async () => {
@@ -67,7 +69,11 @@ export default function TripReview() {
         {/* FIXME: initial camera center */}
         {/* TODO: add markers on transfer locations */}
         <Camera ref={cameraRef} centerCoordinate={INITIAL_CENTER} animationMode="easeTo" />
-        <SymbolMarker id="start-location-c2" label={trip.startLocation} coordinates={trip.startCoords} />
+        <SymbolMarker
+          id="start-location-c2"
+          label={trip.startLocation}
+          coordinates={trip.startCoords}
+        />
         <SymbolMarker id="end-location-c2" label={trip.endLocation} coordinates={trip.endCoords} />
         <Images images={{ pin }} />
 
@@ -87,7 +93,11 @@ export default function TripReview() {
         />
       </View>
 
-      <TripSummary startLocation={trip.startLocation} endLocation={trip.endLocation} segments={segments} />
+      <TripSummary
+        startLocation={trip.startLocation}
+        endLocation={trip.endLocation}
+        segments={segments}
+      />
     </SafeAreaView>
   );
 }

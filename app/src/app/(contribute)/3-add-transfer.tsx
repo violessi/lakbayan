@@ -1,8 +1,7 @@
 import { router } from "expo-router";
-import { Button } from "react-native-paper";
+import React, { useRef } from "react";
 import { SafeAreaView, View, Alert } from "react-native";
-import React, { useRef, useState, useEffect } from "react";
-import Mapbox, { MapView, Camera, MarkerView } from "@rnmapbox/maps";
+import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
 import Header from "@components/ui/Header";
 import PrimaryButton from "@components/ui/PrimaryButton";
@@ -11,27 +10,23 @@ import StartEndSearchBar from "@components/StartEndSearchBar";
 import TransportationModeSelection from "@components/contribute/TransportationModeSelection";
 
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-
-import { useCreateTrip } from "@contexts/CreateTripContext";
 import { reverseGeocode } from "@services/mapbox-service";
+import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteSelectInfo() {
   // Destructure both trip and segments from context
-  const { trip, segments, route, updateRoute } = useCreateTrip();
+  const { trip, route, updateRoute } = useTripCreator();
   const cameraRef = useRef<Camera>(null);
 
-  const len = segments.length;
-  route.startLocation = len > 0 ? segments[len - 1].endLocation : trip.startLocation;
-  route.startCoords = len > 0 ? segments[len - 1].endCoords : trip.startCoords;
-
-  // When the user updates a location as "Destination", update the end values.
-  const handleEndChange = (location: string, coords: Coordinates) => {
-    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
-    updateRoute({ endLocation: location, endCoords: coords });
+  // When user updates the destination using search bar
+  const handleDestinationSearch = (endLocation: string, endCoords: Coordinates) => {
+    updateRoute({ endLocation, endCoords });
+    if (cameraRef.current) cameraRef.current.moveTo(endCoords, 1000);
   };
 
+  // When user updates the destination by pressing the map
   const handleMapPress = async (event: any) => {
     const coordinates = event.geometry.coordinates as [number, number];
     const location = await reverseGeocode(coordinates);
@@ -39,13 +34,23 @@ export default function RouteSelectInfo() {
     if (cameraRef.current) cameraRef.current.moveTo(coordinates, 1000);
   };
 
-  // Update final route values using the trip's end_location and end_coords
-  const handleLastRoute = () => {
+  // Prefill the final segment with the trip's end location
+  const handleFinalTransfer = () => {
     updateRoute({ endLocation: trip.endLocation, endCoords: trip.endCoords });
+    if (!route.segmentMode) {
+      Alert.alert("Missing Information", "Please fill in all fields to proceed.");
+      return;
+    }
+    router.push("/(contribute)/4-edit-transfer");
   };
 
-  const handleTransportationModeChange = (mode: TransportationMode) => {
-    updateRoute({ segmentMode: mode });
+  // Once we have all necessary information, navigate to the next screen.
+  const handleAddTransfer = () => {
+    if (!route.endLocation || !route.endCoords || !route.segmentMode) {
+      Alert.alert("Missing Information", "Please fill in all fields to proceed.");
+      return;
+    }
+    router.push("/(contribute)/4-edit-transfer");
   };
 
   const handleMapLoaded = () => {
@@ -54,22 +59,13 @@ export default function RouteSelectInfo() {
     }
   };
 
-  // Once we have all necessary information, navigate to the next screen.
-  const handleConfirmLocation = () => {
-    if (!route.startLocation || !route.endLocation || !route.segmentMode) {
-      Alert.alert("Missing Information", "Please fill in all fields to proceed.");
-      return;
-    }
-    router.push({ pathname: "/route-input" });
-  };
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Route Information" />
 
       <View>
         <StartEndSearchBar
-          onEndChange={handleEndChange}
+          onEndChange={handleDestinationSearch}
           defaultStart={route.startLocation}
           isStartActive={false}
           defaultEnd={route.endLocation}
@@ -107,11 +103,13 @@ export default function RouteSelectInfo() {
         />
       </MapView>
 
-      <TransportationModeSelection onTransportationModeChange={handleTransportationModeChange} />
+      <TransportationModeSelection
+        onTransportationModeChange={(segmentMode) => updateRoute({ segmentMode })}
+      />
 
       <View className="z-50 flex flex-row gap-4 p-5 justify-center">
-        <PrimaryButton label="Final Location" onPress={handleLastRoute} />
-        <PrimaryButton label="Confirm" onPress={handleConfirmLocation} />
+        <PrimaryButton label="Final Location" onPress={handleFinalTransfer} />
+        <PrimaryButton label="Add Transfer" onPress={handleAddTransfer} />
       </View>
     </SafeAreaView>
   );

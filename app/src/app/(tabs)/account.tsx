@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Text, SafeAreaView, View, Alert } from "react-native";
-import { useRouter } from "expo-router";
 
 import { logoutUser } from "@services/account-service";
 import { getUsername, getUserRole, getUserDetails } from "@services/account-service";
@@ -16,7 +15,6 @@ const accountIcon = require("@assets/option-account.png");
 const tagIcon = require("@assets/option-tag.png");
 
 export default function Account() {
-  const router = useRouter();
   const { user } = useSession();
 
   const [username, setUsername] = useState<string>("");
@@ -55,7 +53,12 @@ export default function Account() {
 
   return (
     <SafeAreaView className="flex-1">
-      <UserHeader username={username || "User"} role={userRole || "User"} points={points} joinedDate={joinedDate} />
+      <UserHeader
+        username={username || "User"}
+        role={userRole || "User"}
+        points={points}
+        joinedDate={joinedDate}
+      />
 
       <View className="flex-1 p-4 justify-between">
         <View>

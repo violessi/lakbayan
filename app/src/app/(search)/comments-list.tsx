@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, FlatList, Button, SafeAreaView } from "react-native";
+import { View, Text, TextInput, FlatList, SafeAreaView } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useSession } from "@contexts/SessionContext";
 import { getComments, addComment } from "@services/socials-service";
@@ -65,7 +65,11 @@ export default function CommentsList() {
             data={comments}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <CommentItem userId={item.user_id} content={item.content} createdAt={item.created_at} />
+              <CommentItem
+                userId={item.user_id}
+                content={item.content}
+                createdAt={item.created_at}
+              />
             )}
           />
         )}

@@ -5,7 +5,7 @@ import { ShapeSource, SymbolLayer, CircleLayer } from "@rnmapbox/maps";
 interface CircleMarkerProps {
   id: string;
   label?: string | null;
-  coordinates: Coordinates | null;
+  coordinates: Coordinates | null | undefined;
   color?: string;
   radius?: number;
 }

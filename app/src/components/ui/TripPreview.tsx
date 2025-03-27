@@ -39,40 +39,36 @@ const getImageSource = (mode: TransportationMode) => {
   }
 };
 
-interface TripPreviewProps {
-  trip: Trip;
-  segments: Segment[];
-}
-
-export default function TripPreview({ trip, segments }: TripPreviewProps) {
-  const { userId } = useSession();
+export default function TripPreview({ trip }: { trip: FullTripV2 }) {
+  const { user } = useSession();
 
   const [bookmarked, setBookmarked] = useState(false);
 
   useEffect(() => {
     async function fetchBookmarks() {
-      if (userId) {
-        const bookmarks = await getBookmarks(userId);
+      if (user) {
+        const bookmarks = await getBookmarks(user.id);
         setBookmarked(bookmarks.includes(trip.id));
       }
     }
     fetchBookmarks();
-  }, [userId, trip.id]);
+  }, [user, trip.id]);
 
   const toggleBookmark = async () => {
-    if (!userId) return;
+    if (!user) return;
 
     if (bookmarked) {
-      await removeBookmark(userId, trip.id);
+      await removeBookmark(user.id, trip.id);
     } else {
-      await addBookmark(userId, trip.id);
+      await addBookmark(user.id, trip.id);
     }
     setBookmarked(!bookmarked);
   };
 
-  const totalDuration = segments.reduce((sum, seg) => sum + seg.duration, 0);
-  const totalCost = segments.reduce((sum, seg) => sum + seg.cost, 0);
-  const transportModes = segments.map((seg) => seg.segment_mode);
+  const totalDuration = trip.segments.reduce((sum, seg) => sum + seg.duration, 0);
+  const totalCost = trip.segments.reduce((sum, seg) => sum + seg.cost, 0);
+  const transportModes = trip.segments.map((seg) => seg.segmentMode);
+  console.log("Transport Modes: ", transportModes);
 
   return (
     <View className="w-full border-b border-gray-200 py-6 px-2">
@@ -102,15 +98,15 @@ export default function TripPreview({ trip, segments }: TripPreviewProps) {
             <View className="flex flex-row gap-2">
               <View className="flex flex-row gap-1 items-center">
                 <Image source={verifiedMod} style={{ width: 16, height: 16 }} resizeMode="contain" />
-                <Text className="text-sm">{trip.mod_verified}</Text>
+                <Text className="text-sm">{trip.modVerified}</Text>
               </View>
               <View className="flex flex-row gap-1 items-center">
                 <Image source={verifiedGPS} style={{ width: 16, height: 16 }} resizeMode="contain" />
-                <Text className="text-sm">{trip.gps_verified}</Text>
+                <Text className="text-sm">{trip.gpsVerified}</Text>
               </View>
             </View>
             <View className="flex flex-row gap-1">
-              {userId && <VotingBar tripId={trip.id} userId={userId} />}
+              {user && <VotingBar tripId={trip.id} userId={user.id} />}
               <View className="flex flex-row gap-1 items-center">
                 <Image source={comment} style={{ width: 11, height: 11 }} resizeMode="contain" />
                 <Text className="text-sm">0</Text>

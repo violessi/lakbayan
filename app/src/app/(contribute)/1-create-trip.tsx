@@ -9,7 +9,7 @@ import PrimaryButton from "@components/ui/PrimaryButton";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 import SymbolMarker from "@components/map/SymbolMarker";
 
-import { useCreateTrip } from "@contexts/CreateTripContext";
+import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 import { reverseGeocode } from "@services/mapbox-service";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
@@ -21,22 +21,23 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 // TODO: create a hook for map attributes to have single source for all pages
 export default function CustomTrip() {
   const cameraRef = useRef<Camera>(null);
-  const { trip, updateTrip } = useCreateTrip();
-  const [zoomLevel, setZoomLevel] = useState(32);
+  const [zoomLevel, setZoomLevel] = useState(15);
+
+  const { trip, updateTrip } = useTripCreator();
   const [mapCoordinates, setMapCoordinates] = useState<Coordinates | null>(null);
 
   // When the user updates a location as "Source".
   const handleStartChange = (location: string, coords: Coordinates) => {
-    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
     setMapCoordinates(null);
     updateTrip({ startLocation: location, startCoords: coords });
+    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
   };
 
   // When the user updates a location as "Destination".
   const handleEndChange = (location: string, coords: Coordinates) => {
-    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
     setMapCoordinates(null);
     updateTrip({ endLocation: location, endCoords: coords });
+    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
   };
 
   // When the user presses the map.
@@ -50,17 +51,21 @@ export default function CustomTrip() {
 
   // Alert asking if the location is Source or Destination.
   const confirmationAlert = (coords: Coordinates, location: string) => {
-    Alert.alert("Confirm Location", `Do you want to set ${location} as your source or destination?`, [
-      { text: "Cancel", onPress: () => setMapCoordinates(null) },
-      { text: "Source", onPress: () => handleStartChange(location, coords) },
-      { text: "Destination", onPress: () => handleEndChange(location, coords) },
-    ]);
+    Alert.alert(
+      "Confirm Location",
+      `Do you want to set ${location} as your source or destination?`,
+      [
+        { text: "Source", onPress: () => handleStartChange(location, coords) },
+        { text: "Destination", onPress: () => handleEndChange(location, coords) },
+        { text: "Cancel", onPress: () => setMapCoordinates(null) },
+      ],
+    );
   };
 
   // When the user presses Confirm, navigate to the next screen if both locations are set.
   const handleConfirmLocation = () => {
     if (trip.startLocation && trip.endLocation) {
-      router.push("/(contribute)/trip-review");
+      router.push("/(contribute)/2-review-trip");
     } else {
       Alert.alert("Please select both a source and destination.");
     }
@@ -93,10 +98,23 @@ export default function CustomTrip() {
         onRegionDidChange={handleZoomChange}
         projection="mercator"
       >
-        <Camera ref={cameraRef} centerCoordinate={INITIAL_CENTER} zoomLevel={zoomLevel} animationMode="easeTo" />
+        <Camera
+          ref={cameraRef}
+          centerCoordinate={INITIAL_CENTER}
+          zoomLevel={zoomLevel}
+          animationMode="easeTo"
+        />
         <SymbolMarker id="map-onclick-location-c1" coordinates={mapCoordinates} />
-        <SymbolMarker id="start-location-c1" label={trip.startLocation.split(",")[0]} coordinates={trip.startCoords} />
-        <SymbolMarker id="end-location-c1" label={trip.endLocation.split(",")[0]} coordinates={trip.endCoords} />
+        <SymbolMarker
+          id="start-location-c1"
+          label={trip.startLocation.split(",")[0]}
+          coordinates={trip.startCoords}
+        />
+        <SymbolMarker
+          id="end-location-c1"
+          label={trip.endLocation.split(",")[0]}
+          coordinates={trip.endCoords}
+        />
         <Images images={{ pin }} />
       </MapView>
 

@@ -26,8 +26,7 @@ export async function insertTrip(trip: CreateTripV2): Promise<TripV2[]> {
 // Function to insert multiple segments into the database
 export async function insertSegments(segments: CreateSegmentV2[]): Promise<SegmentV2[]> {
   try {
-    const finalSegments = segments.map(({ directions, ...rest }) => rest);
-    const payload = finalSegments.map((segment) => convertKeysToSnakeCase(segment));
+    const payload = segments.map((segment) => convertKeysToSnakeCase(segment));
 
     const insertData = payload.map((segment) => ({
       ...segment,
@@ -57,11 +56,37 @@ export async function insertTripSegmentLinks(
       segment_order: index,
     }));
 
-    const { data, error } = await supabase.from("trip_segment_links_v2").insert(tripSegmentLinks).select();
+    const { data, error } = await supabase
+      .from("trip_segment_links_v2")
+      .insert(tripSegmentLinks)
+      .select();
     if (error) throw new Error(`Error inserting trip-segment links: ${error.message}`);
 
     return data.map((link: any) => convertKeysToCamelCase(link)) as TripSegmentLinkV2[];
   } catch (error) {
     throw new Error(`Error inserting trip-segment links: ${error}`);
+  }
+}
+
+export async function fetchTripData(
+  tripDetails: TripDetails,
+  radius: number,
+): Promise<{ data: FullTripV2[] | null; error: Error | null }> {
+  try {
+    // console.log("[LOGS] Fetching nearby trips:\n", tripDetails);
+    const { data, error } = await supabase.rpc("get_nearby_trips", {
+      start_lat: tripDetails.startCoords[1],
+      start_lon: tripDetails.startCoords[0],
+      end_lat: tripDetails.endCoords[1],
+      end_lon: tripDetails.endCoords[0],
+      radius,
+    });
+
+    if (error) throw new Error(`Supabase RPC Error: ${error.message}`);
+
+    // console.log("[LOGS] Fetched nearby trips:\n", data);
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: error instanceof Error ? error : new Error(String(error)) };
   }
 }

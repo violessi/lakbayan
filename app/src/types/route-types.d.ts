@@ -34,6 +34,11 @@ declare global {
     coordinates: Coordinates;
   }
 
+  export interface NavigationSteps {
+    instruction: string;
+    location: Coordinates;
+  }
+
   export interface Trip {
     id: string;
     contributor_id: string;
@@ -89,6 +94,7 @@ declare global {
     endLocation: string;
     endCoords: Coordinates;
     duration: number;
+    distance: number;
     cost: number;
     upvotes: number;
     downvotes: number;
@@ -96,6 +102,7 @@ declare global {
     updatedAt: Timestamp;
   }
   export type CreateTripV2 = Omit<TripV2, "id" | "createdAt" | "updatedAt">;
+  export type FullTripV2 = TripV2 & { segments: SegmentV2[] };
 
   export interface SegmentV2 {
     id: string;
@@ -107,18 +114,30 @@ declare global {
     gpsVerified: number;
     modVerified: number;
     duration: number;
+    distance: number;
     cost: number;
     liveStatus: LiveStatus[];
     waypoints: Coordinates[];
-    directions: MapboxDirectionsResponse;
+    navigationSteps: NavigationSteps[];
     startLocation: string;
     startCoords: Coordinates;
     endLocation: string;
     endCoords: Coordinates;
     createdAt: Timestamp;
-    lastUpdated: Date;
+    updatedAt: Timestamp;
   }
-  export type CreateSegmentV2 = Omit<SegmentV2, "id" | "createdAt" | "lastUpdated">;
+  export type CreateSegmentV2 = Omit<SegmentV2, "id" | "createdAt" | "updatedAt">;
+
+  export type WalkingSegment = Pick<
+    SegmentV2,
+    | "id"
+    | "segmentMode"
+    | "startLocation"
+    | "startCoords"
+    | "endLocation"
+    | "endCoords"
+    | "duration"
+  >;
 
   export interface CreateRouteV2 {
     startLocation: string;
@@ -138,4 +157,11 @@ declare global {
   }
 
   export type CreateTripSegmentLinkV2 = Omit<TripSegmentLink, "id" | "createdAt" | "updatedAt">;
+
+  export interface TripDetails {
+    startLocation: string;
+    endLocation: string;
+    startCoords: Coordinates;
+    endCoords: Coordinates;
+  }
 }
