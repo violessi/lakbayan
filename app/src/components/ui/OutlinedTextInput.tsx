@@ -5,11 +5,12 @@ import { TextInput } from "react-native-paper";
 interface OutlinedTextInputProps {
   label: string;
   value: string;
-  onChangeText: (text: string) => void;
+  onChangeText?: (text: string) => void;
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
   secureTextEntry?: boolean;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export default function OutlinedTextInput({
@@ -20,6 +21,7 @@ export default function OutlinedTextInput({
   keyboardType = "default",
   secureTextEntry = false,
   placeholder,
+  disabled = false,
 }: OutlinedTextInputProps) {
   return (
     <TextInput
@@ -34,6 +36,7 @@ export default function OutlinedTextInput({
       keyboardType={keyboardType}
       secureTextEntry={secureTextEntry}
       placeholder={placeholder}
+      disabled={disabled}
     />
   );
 }
