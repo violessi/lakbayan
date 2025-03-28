@@ -10,7 +10,6 @@ export default function ContributeLayout() {
       <Stack.Screen name="1-search-input" options={{ headerShown: false }} />
       <Stack.Screen name="2-trip-suggestions" options={{ headerShown: false }} />
       <Stack.Screen name="3-trip-overview" options={{ headerShown: false }} />
-      <Stack.Screen name="comments-list" options={{ headerShown: false }} />
     </Stack>
   );
 }

@@ -49,7 +49,7 @@ export default function JournalReview() {
 
   function handleCommentPress(tripId: string) {
     router.push({
-      pathname: "/(search)/comments-list",
+      pathname: "/(social)/comments-list",
       params: { tripId },
     });
   }
@@ -58,10 +58,24 @@ export default function JournalReview() {
     <SafeAreaView className="flex-1">
       <Header title="Journal Review" />
 
-      <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12" projection="mercator">
-        <Camera ref={cameraRef} centerCoordinate={endCoordinates} animationMode="easeTo" zoomLevel={10} />
+      <MapView
+        style={{ flex: 1 }}
+        styleURL="mapbox://styles/mapbox/streets-v12"
+        projection="mercator"
+      >
+        <Camera
+          ref={cameraRef}
+          centerCoordinate={endCoordinates}
+          animationMode="easeTo"
+          zoomLevel={10}
+        />
 
-        <LocationMarker coordinates={startCoordinates} label={startLocation} color="red" radius={8} />
+        <LocationMarker
+          coordinates={startCoordinates}
+          label={startLocation}
+          color="red"
+          radius={8}
+        />
         <LocationMarker coordinates={endCoordinates} label={endLocation} color="red" radius={8} />
 
         {segmentData.map((segment, index) => (
@@ -82,7 +96,11 @@ export default function JournalReview() {
         ))}
 
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" style={{ position: "absolute", top: "50%", left: "50%" }} />
+          <ActivityIndicator
+            size="large"
+            color="#0000ff"
+            style={{ position: "absolute", top: "50%", left: "50%" }}
+          />
         ) : segmentRoutes.length > 0 ? (
           segmentRoutes.map((coordinates, index) => (
             <DirectionsLine
