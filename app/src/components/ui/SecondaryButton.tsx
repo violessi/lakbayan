@@ -5,9 +5,14 @@ import { Button } from "react-native-paper";
 interface SecondaryButtonProps {
   label: string;
   onPress?: () => void;
+  disabled?: boolean;
 }
 
-export default function SecondaryButton({ label, onPress }: SecondaryButtonProps) {
+export default function SecondaryButton({
+  label,
+  onPress,
+  disabled = false,
+}: SecondaryButtonProps) {
   return (
     <Button
       mode="outlined"
@@ -19,6 +24,7 @@ export default function SecondaryButton({ label, onPress }: SecondaryButtonProps
         borderRadius: 12,
       }}
       onPress={onPress}
+      disabled={disabled}
     >
       {label}
     </Button>

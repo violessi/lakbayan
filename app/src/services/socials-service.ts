@@ -10,7 +10,10 @@ interface Comment {
 // Votes
 
 export async function getPoints(tripId: string): Promise<number> {
-  const { data, error } = await supabase.from("votes").select("vote_type", { count: "exact" }).eq("trip_id", tripId);
+  const { data, error } = await supabase
+    .from("votes")
+    .select("vote_type", { count: "exact" })
+    .eq("trip_id", tripId);
 
   if (error) throw error;
 
@@ -20,7 +23,11 @@ export async function getPoints(tripId: string): Promise<number> {
   return upvotes - downvotes;
 }
 
-export async function updateVotes(tripId: string, userId: string, voteType: "upvote" | "downvote" | null) {
+export async function updateVotes(
+  tripId: string,
+  userId: string,
+  voteType: "upvote" | "downvote" | null,
+) {
   try {
     // Fetch existing vote
     const { data: existingVote, error: fetchError } = await supabase
@@ -36,7 +43,10 @@ export async function updateVotes(tripId: string, userId: string, voteType: "upv
     if (existingVote) {
       if (voteType === null) {
         // User is removing their vote
-        const { error: deleteError } = await supabase.from("votes").delete().eq("id", existingVote.id);
+        const { error: deleteError } = await supabase
+          .from("votes")
+          .delete()
+          .eq("id", existingVote.id);
         if (deleteError) throw deleteError;
       } else {
         // User is changing their vote
@@ -59,7 +69,10 @@ export async function updateVotes(tripId: string, userId: string, voteType: "upv
   }
 }
 
-export async function getUserVote(tripId: string, userId: string | null): Promise<"upvote" | "downvote" | null> {
+export async function getUserVote(
+  tripId: string,
+  userId: string | null,
+): Promise<"upvote" | "downvote" | null> {
   const { data, error } = await supabase
     .from("votes")
     .select("vote_type")
@@ -92,7 +105,11 @@ export async function getComments(tripId: string): Promise<Comment[] | null> {
   return data;
 }
 
-export async function addComment(tripId: string, userId: string, content: string): Promise<boolean> {
+export async function addComment(
+  tripId: string,
+  userId: string,
+  content: string,
+): Promise<boolean> {
   const { error } = await supabase.from("comments").insert([
     {
       trip_id: tripId,
@@ -134,7 +151,11 @@ export async function addBookmark(userId: string, tripId: string) {
 }
 
 export async function removeBookmark(userId: string, tripId: string) {
-  const { error } = await supabase.from("bookmarks").delete().eq("user_id", userId).eq("trip_id", tripId);
+  const { error } = await supabase
+    .from("bookmarks")
+    .delete()
+    .eq("user_id", userId)
+    .eq("trip_id", tripId);
 
   if (error) {
     console.error("Error removing bookmark:", error);

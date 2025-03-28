@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, View, FlatList, ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import {
+  SafeAreaView,
+  View,
+  FlatList,
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { useRouter } from "expo-router";
 
 import { useSession } from "@contexts/SessionContext";
@@ -10,7 +17,7 @@ import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
 
 export default function BookmarkedTrips() {
-  const { userId } = useSession();
+  const { user } = useSession();
   const { tripData, segmentData, loading: tripsLoading } = useTripData();
 
   const [bookmarkedTrips, setBookmarkedTrips] = useState<Trip[]>([]);
@@ -20,10 +27,10 @@ export default function BookmarkedTrips() {
 
   useEffect(() => {
     const fetchBookmarks = async () => {
-      if (!userId) return;
+      if (!user) return;
 
       setLoading(true);
-      const tripIds = await getBookmarks(userId);
+      const tripIds = await getBookmarks(user.id);
 
       const filteredTrips = tripData.filter((trip) => tripIds.includes(trip.id));
       setBookmarkedTrips(filteredTrips);
@@ -34,11 +41,11 @@ export default function BookmarkedTrips() {
     if (!tripsLoading) {
       fetchBookmarks();
     }
-  }, [userId, tripData, tripsLoading]);
+  }, [user, tripData, tripsLoading]);
 
   function handleTripPress(trip: Trip) {
     router.push({
-      pathname: "/trip-overview",
+      pathname: "/(search)/3-trip-overview",
       params: {
         trip: JSON.stringify(trip),
         segments: JSON.stringify(segmentData[trip.id] || []),
