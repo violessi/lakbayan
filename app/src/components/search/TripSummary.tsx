@@ -15,8 +15,8 @@ const comment = require("@assets/social-comment.png");
 interface TripSummaryProps {
   startLocation: string;
   endLocation: string;
-  trip: TripV2;
-  segments: SegmentV2[];
+  trip: Trip;
+  segments: Segment[];
   currentUserId: string;
   onCommentPress: (tripId: string) => void;
 }

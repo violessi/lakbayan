@@ -5,13 +5,13 @@ import { insertTrip, insertSegments, insertTripSegmentLinks } from "@services/tr
 import { TRIP_INITIAL_STATE, SEGMENT_INITIAL_STATE } from "@contexts/TripCreator/initialValues";
 
 interface TripCreatorContextType {
-  trip: CreateTripV2;
-  route: CreateSegmentV2;
-  segments: CreateSegmentV2[];
+  trip: CreateTrip;
+  route: CreateSegment;
+  segments: CreateSegment[];
   addSegment: () => void;
-  updateRoute: (updates: Partial<CreateSegmentV2>) => void;
-  updateTrip: (updates: Partial<CreateTripV2>) => void;
-  submitTrip: () => Promise<{ tripData: TripV2[]; segmentData: SegmentV2[] }>;
+  updateRoute: (updates: Partial<CreateSegment>) => void;
+  updateTrip: (updates: Partial<CreateTrip>) => void;
+  submitTrip: () => Promise<{ tripData: Trip[]; segmentData: Segment[] }>;
 }
 
 interface TripCreatorProviderProps {
@@ -27,15 +27,15 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
   if (!user) throw new Error("User must be logged in to create a trip");
 
   // Routes are temporary and are used for segment creation
-  const [trip, setTrip] = useState<CreateTripV2>(TRIP_INITIAL_STATE);
-  const [route, setRoute] = useState<CreateSegmentV2>(SEGMENT_INITIAL_STATE);
-  const [segments, setSegments] = useState<CreateSegmentV2[]>([]);
+  const [trip, setTrip] = useState<CreateTrip>(TRIP_INITIAL_STATE);
+  const [route, setRoute] = useState<CreateSegment>(SEGMENT_INITIAL_STATE);
+  const [segments, setSegments] = useState<CreateSegment[]>([]);
 
-  const updateRoute = (updates: Partial<CreateSegmentV2>) => {
+  const updateRoute = (updates: Partial<CreateSegment>) => {
     setRoute((prevRoute) => ({ ...prevRoute, ...updates }));
   };
 
-  const updateTrip = (updates: Partial<CreateTripV2>) => {
+  const updateTrip = (updates: Partial<CreateTrip>) => {
     setTrip((prevTrip) => ({ ...prevTrip, ...updates }));
   };
 
@@ -47,7 +47,7 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
 
   // Handles the submission of the trip, segments, and junction table
   const submitTrip = async () => {
-    const newTrip: CreateTripV2 = {
+    const newTrip: CreateTrip = {
       ...trip,
       contributorId: user.id,
       name: `${trip.startLocation} to ${trip.endLocation}`,

@@ -37,3 +37,86 @@ export const GtfsRoute = z.object({
 export type GtfsShape = z.infer<typeof GtfsShape>;
 export type GtfsTrip = z.infer<typeof GtfsTrip>;
 export type GtfsRoute = z.infer<typeof GtfsRoute>;
+
+// ================== DATABASE ==================
+
+export const TransportationMode = z.enum(["Train", "Bus", "Jeep", "UV", "Tricycle", "Walk"]);
+
+export const TransitJournalStatus = z.enum(["Success", "Cancelled", "Ongoing"]);
+
+export const Coordinates = z.tuple([z.number(), z.number()]);
+
+export const LiveStatus = z.object({ type: z.string(), coordinates: Coordinates });
+
+export const NavigationSteps = z.object({ instruction: z.string(), location: Coordinates });
+
+export const TripDetails = z.object({
+  startLocation: z.string(),
+  endLocation: z.string(),
+  startCoords: Coordinates,
+  endCoords: Coordinates,
+});
+
+export const Trip = z.object({
+  id: z.string(),
+  contributorId: z.string(),
+  name: z.string(),
+  gpsVerified: z.number(),
+  modVerified: z.number(),
+  startLocation: z.string(),
+  startCoords: Coordinates,
+  endLocation: z.string(),
+  endCoords: Coordinates,
+  duration: z.number(),
+  distance: z.number(),
+  cost: z.number(),
+  upvotes: z.number(),
+  downvotes: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const Segment = z.object({
+  id: z.string(),
+  contributorId: z.string(),
+  segmentName: z.string(),
+  segmentMode: TransportationMode,
+  landmark: z.string(),
+  instruction: z.string(),
+  gpsVerified: z.number(),
+  modVerified: z.number(),
+  duration: z.number(),
+  distance: z.number(),
+  cost: z.number(),
+  liveStatus: z.array(LiveStatus),
+  waypoints: z.array(Coordinates),
+  navigationSteps: z.array(NavigationSteps),
+  startLocation: z.string(),
+  startCoords: Coordinates,
+  endLocation: z.string(),
+  endCoords: Coordinates,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const TripSegmentLink = z.object({
+  id: z.string(),
+  tripId: z.string(),
+  segmentId: z.string(),
+  segmentOrder: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const TransitJournal = z.object({
+  id: z.string(),
+  userId: z.string(),
+  tripId: z.string(),
+  preSegment: Segment.nullable(),
+  postSegment: Segment.nullable(),
+  startTime: z.string(),
+  endTime: z.string().nullable(),
+  status: TransitJournalStatus,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});

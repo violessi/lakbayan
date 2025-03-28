@@ -3,7 +3,7 @@ import { View } from "react-native";
 import { Text } from "react-native-paper";
 
 interface RouteItemProps {
-  segment: CreateSegmentV2;
+  segment: CreateSegment;
   color: string;
 }
 
