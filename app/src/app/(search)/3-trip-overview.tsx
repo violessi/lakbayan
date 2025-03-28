@@ -26,7 +26,7 @@ export default function TripOverview() {
   const cameraRef = useRef<Camera>(null);
 
   const { params } = useLocalSearchParams();
-  const trip = JSON.parse(params as string) as FullTripV2;
+  const trip = JSON.parse(params as string) as FullTrip;
   const segments = trip.segments;
   console.log("Trip Overview", trip);
   console.log("Trip Segments", segments);

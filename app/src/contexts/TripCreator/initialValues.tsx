@@ -1,7 +1,8 @@
-export const TRIP_INITIAL_STATE: CreateTripV2 = {
+export const TRIP_INITIAL_STATE: CreateTrip = {
   contributorId: "",
   name: "",
   duration: 0,
+  distance: 0,
   cost: 0,
   gpsVerified: 0,
   modVerified: 0,
@@ -13,7 +14,7 @@ export const TRIP_INITIAL_STATE: CreateTripV2 = {
   endCoords: [0, 0],
 };
 
-export const SEGMENT_INITIAL_STATE: CreateSegmentV2 = {
+export const SEGMENT_INITIAL_STATE: CreateSegment = {
   contributorId: "",
   segmentName: "",
   segmentMode: "Walk",
@@ -22,6 +23,7 @@ export const SEGMENT_INITIAL_STATE: CreateSegmentV2 = {
   gpsVerified: 0,
   modVerified: 0,
   duration: 0,
+  distance: 0,
   cost: 0,
   liveStatus: [],
   waypoints: [],

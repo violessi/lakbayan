@@ -8,7 +8,7 @@ import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 interface TripSummaryProps {
   startLocation: string;
   endLocation: string;
-  segments: CreateSegmentV2[];
+  segments: CreateSegment[];
 }
 
 export default function TripSummary({ startLocation, endLocation, segments }: TripSummaryProps) {
@@ -24,7 +24,10 @@ export default function TripSummary({ startLocation, endLocation, segments }: Tr
             <FlatList
               data={segments}
               renderItem={({ item, index }) => (
-                <RouteItem segment={item} color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]} />
+                <RouteItem
+                  segment={item}
+                  color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
+                />
               )}
               keyExtractor={(item) => item.segmentName}
             />

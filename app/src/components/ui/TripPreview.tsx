@@ -39,7 +39,7 @@ const getImageSource = (mode: TransportationMode) => {
   }
 };
 
-export default function TripPreview({ trip }: { trip: FullTripV2 }) {
+export default function TripPreview({ trip }: { trip: FullTrip }) {
   const { user } = useSession();
 
   const [bookmarked, setBookmarked] = useState(false);
@@ -97,11 +97,19 @@ export default function TripPreview({ trip }: { trip: FullTripV2 }) {
           <View className="flex flex-row gap-4 items-center">
             <View className="flex flex-row gap-2">
               <View className="flex flex-row gap-1 items-center">
-                <Image source={verifiedMod} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                <Image
+                  source={verifiedMod}
+                  style={{ width: 16, height: 16 }}
+                  resizeMode="contain"
+                />
                 <Text className="text-sm">{trip.modVerified}</Text>
               </View>
               <View className="flex flex-row gap-1 items-center">
-                <Image source={verifiedGPS} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                <Image
+                  source={verifiedGPS}
+                  style={{ width: 16, height: 16 }}
+                  resizeMode="contain"
+                />
                 <Text className="text-sm">{trip.gpsVerified}</Text>
               </View>
             </View>

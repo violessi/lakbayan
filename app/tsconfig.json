@@ -10,7 +10,8 @@
       "@hooks/*": ["hooks/*"],
       "@contexts/*": ["contexts/*"],
       "@services/*": ["services/*"],
-      "@utils/*": ["utils/*"]
+      "@utils/*": ["utils/*"],
+      "@api/*": ["api/*"]
     }
   },
   "include": [

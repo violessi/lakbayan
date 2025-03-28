@@ -17,7 +17,7 @@ async function generateWalkingSegment(
   startCoords: Coordinates,
   endLoc: string,
   endCoords: Coordinates,
-): Promise<SegmentV2 | null> {
+): Promise<Segment | null> {
   // if the distance between the current and start location < 100 meters
   // then no need to add a walking segment
   if (isNearLocation(startCoords, endCoords, 100)) return null;
@@ -34,7 +34,7 @@ async function generateWalkingSegment(
     })),
   );
 
-  const segment: SegmentV2 = {
+  const segment: Segment = {
     id: `walk-${startLoc}-${endLoc}`,
     contributorId: "system",
     segmentName: `Walk from ${startLoc} to ${endLoc}`,
@@ -53,8 +53,8 @@ async function generateWalkingSegment(
     startCoords,
     endLocation: endLoc,
     endCoords,
-    createdAt: new Date().getTime(),
-    updatedAt: new Date().getTime(),
+    createdAt: new Date().toDateString(),
+    updatedAt: new Date().toDateString(),
   };
 
   return segment;
@@ -70,8 +70,8 @@ export default function SuggestedTrips() {
   const { params } = useLocalSearchParams();
   const tripDetails = JSON.parse(params as string) as TripDetails;
 
-  const [fullTrips, setFullTrips] = useState<FullTripV2[]>([]);
-  const [filteredTrips, setFilteredTrips] = useState<FullTripV2[]>([]);
+  const [fullTrips, setFullTrips] = useState<FullTrip[]>([]);
+  const [filteredTrips, setFilteredTrips] = useState<FullTrip[]>([]);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [filters, setFilters] = useState(FILTER_INITIAL_STATE);
 
@@ -89,7 +89,7 @@ export default function SuggestedTrips() {
         if (!data) throw new Error("No trips found.");
 
         // FIXME: append correct pre and post segments
-        const fullTrips: FullTripV2[] = await Promise.all(
+        const fullTrips: FullTrip[] = await Promise.all(
           data.map(async (trip) => {
             const start = await generateWalkingSegment(
               tripDetails.startLocation,
@@ -131,7 +131,7 @@ export default function SuggestedTrips() {
   }, []);
 
   useEffect(() => {
-    const filteredTrips: FullTripV2[] = fullTrips.filter((trip) => {
+    const filteredTrips: FullTrip[] = fullTrips.filter((trip) => {
       return trip.segments.every((segment) => {
         const mode = segment.segmentMode || segment.segmentMode;
         return mode === "Walk" || filters.transportModes.includes(mode);
@@ -163,7 +163,7 @@ export default function SuggestedTrips() {
     setFilteredTrips(filteredTrips);
   }, [fullTrips, filters]);
 
-  const handlePress = (trip: FullTripV2) => {
+  const handlePress = (trip: FullTrip) => {
     router.push({
       pathname: "/(search)/3-trip-overview",
       params: { params: JSON.stringify(trip) },

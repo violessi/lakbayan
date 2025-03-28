@@ -1,10 +1,21 @@
+import { z } from "zod";
 import type { FeatureCollection, LineString } from "geojson";
-import { TRANSPORTATION_MODES } from "@constants/transportation-modes";
 import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
 
-declare global {
-  export type TransportationMode = ["Train", "Bus", "Jeep", "UV", "Tricycle", "Walk"][number];
+import type {
+  TransportationMode as TransportationModeSchema,
+  TransitJournalStatus as TransitJournalStatusSchema,
+  Coordinates as CoordinatesSchema,
+  LiveStatus as LiveStatusSchema,
+  NavigationSteps as NavigationStepsSchema,
+  TripDetails as TripDetailsSchema,
+  Trip as TripSchema,
+  Segment as SegmentSchema,
+  TripSegmentLink as TripSegmentLinkSchema,
+  TransitJournal as TransitJournalSchema,
+} from "./schema";
 
+declare global {
   export interface DotcRoute
     extends FeatureCollection<
       LineString,
@@ -29,139 +40,28 @@ declare global {
     contributor_id: string;
   }
 
-  export interface LiveStatus {
-    type: string;
-    coordinates: Coordinates;
-  }
-
-  export interface NavigationSteps {
-    instruction: string;
-    location: Coordinates;
-  }
-
-  export interface Trip {
-    id: string;
-    contributor_id: string;
-    name: string;
-    gps_verified: number;
-    mod_verified: number;
-    start_location: string;
-    start_coords: Coordinates;
-    end_location: string;
-    end_coords: Coordinates;
-    duration: number;
-    cost: number;
-    upvotes: number;
-    downvotes: number;
-  }
-
-  export interface Segment {
-    id: string;
-    contributor_id: string;
-    segment_name: string;
-    segment_mode: TransportationMode;
-    directions: MapboxDirectionsResponse;
-    waypoints: Coordinates[];
-    landmark: string;
-    instruction: string;
-    last_updated: Date;
-    gps_verified: number;
-    mod_verified: number;
-    start_location: string;
-    start_coords: Coordinates;
-    end_location: string;
-    end_coords: Coordinates;
-    duration: number;
-    cost: number;
-  }
-
-  export interface SegmentsToTrips {
-    trip_id: string;
-    segment_id: string;
-    segment_order: number;
-  }
-
   // ==================== V2 ====================
+  // types are inferred from the zod schema to reduce redundancy
 
-  export interface TripV2 {
-    id: string;
-    contributorId: string;
-    name: string;
-    gpsVerified: number;
-    modVerified: number;
-    startLocation: string;
-    startCoords: Coordinates;
-    endLocation: string;
-    endCoords: Coordinates;
-    duration: number;
-    distance: number;
-    cost: number;
-    upvotes: number;
-    downvotes: number;
-    createdAt: Timestamp;
-    updatedAt: Timestamp;
-  }
-  export type CreateTripV2 = Omit<TripV2, "id" | "createdAt" | "updatedAt">;
-  export type FullTripV2 = TripV2 & { segments: SegmentV2[] };
+  export type TransportationMode = z.infer<typeof TransportationModeSchema>;
+  export type TransitJournalStatus = z.infer<typeof TransitJournalStatusSchema>;
 
-  export interface SegmentV2 {
-    id: string;
-    contributorId: string;
-    segmentName: string;
-    segmentMode: TransportationMode;
-    landmark: string;
-    instruction: string;
-    gpsVerified: number;
-    modVerified: number;
-    duration: number;
-    distance: number;
-    cost: number;
-    liveStatus: LiveStatus[];
-    waypoints: Coordinates[];
-    navigationSteps: NavigationSteps[];
-    startLocation: string;
-    startCoords: Coordinates;
-    endLocation: string;
-    endCoords: Coordinates;
-    createdAt: Timestamp;
-    updatedAt: Timestamp;
-  }
-  export type CreateSegmentV2 = Omit<SegmentV2, "id" | "createdAt" | "updatedAt">;
+  export type Coordinates = z.infer<typeof CoordinatesSchema>;
+  export type LiveStatus = z.infer<typeof LiveStatusSchema>;
+  export type NavigationSteps = z.infer<typeof NavigationStepsSchema>;
 
-  export type WalkingSegment = Pick<
-    SegmentV2,
-    | "id"
-    | "segmentMode"
-    | "startLocation"
-    | "startCoords"
-    | "endLocation"
-    | "endCoords"
-    | "duration"
-  >;
+  export type TripDetails = z.infer<typeof TripDetailsSchema>;
 
-  export interface CreateRouteV2 {
-    startLocation: string;
-    startCoords: Coordinates;
-    endLocation: string;
-    endCoords: Coordinates;
-    segmentMode: TransportationMode;
-  }
+  export type Trip = z.infer<typeof TripSchema>;
+  export type CreateTrip = Omit<Trip, "id" | "createdAt" | "updatedAt">;
 
-  export interface TripSegmentLinkV2 {
-    id: string;
-    tripId: string;
-    segmentId: string;
-    segmentOrder: number;
-    createdAt: Timestamp;
-    updatedAt: Timestamp;
-  }
+  export type Segment = z.infer<typeof SegmentSchema>;
+  export type CreateSegment = Omit<Segment, "id" | "createdAt" | "updatedAt">;
 
-  export type CreateTripSegmentLinkV2 = Omit<TripSegmentLink, "id" | "createdAt" | "updatedAt">;
+  export type FullTrip = Trip & { segments: Segment[] };
 
-  export interface TripDetails {
-    startLocation: string;
-    endLocation: string;
-    startCoords: Coordinates;
-    endCoords: Coordinates;
-  }
+  export type TripSegmentLink = z.infer<typeof TripSegmentLinkSchema>;
+  export type CreateTripSegmentLink = Omit<TripSegmentLink, "id" | "createdAt" | "updatedAt">;
+
+  export type TransitJournal = z.infer<typeof TransitJournalSchema>;
 }

@@ -7,7 +7,7 @@ import {
 } from "@utils/map-utils";
 
 // Function to insert a trip into the database
-export async function insertTrip(trip: CreateTripV2): Promise<TripV2[]> {
+export async function insertTrip(trip: CreateTrip): Promise<Trip[]> {
   try {
     const payload = convertKeysToSnakeCase(trip);
     payload.start_coords = convertToPointWKT(payload.start_coords as Coordinates);
@@ -17,14 +17,14 @@ export async function insertTrip(trip: CreateTripV2): Promise<TripV2[]> {
     const { data, error } = await supabase.from("trips_v2").insert([payload]).select();
     if (error) throw new Error(`Error inserting trip: ${error.message}`);
 
-    return data.map((trip) => convertKeysToCamelCase(trip)) as TripV2[];
+    return data.map((trip) => convertKeysToCamelCase(trip)) as Trip[];
   } catch (error) {
     throw new Error(`Error inserting trip: ${error}`);
   }
 }
 
 // Function to insert multiple segments into the database
-export async function insertSegments(segments: CreateSegmentV2[]): Promise<SegmentV2[]> {
+export async function insertSegments(segments: CreateSegment[]): Promise<Segment[]> {
   try {
     const payload = segments.map((segment) => convertKeysToSnakeCase(segment));
 
@@ -38,7 +38,7 @@ export async function insertSegments(segments: CreateSegmentV2[]): Promise<Segme
     const { data, error } = await supabase.from("segments_v2").insert(insertData).select();
     if (error) throw new Error(`Error inserting segments: ${error.message}`);
 
-    return data.map((segment: any) => convertKeysToCamelCase(segment)) as SegmentV2[];
+    return data.map((segment: any) => convertKeysToCamelCase(segment)) as Segment[];
   } catch (error) {
     throw new Error(`Error inserting segments: ${error}`);
   }
@@ -46,9 +46,9 @@ export async function insertSegments(segments: CreateSegmentV2[]): Promise<Segme
 
 // Function to insert trip-segment junction into the database
 export async function insertTripSegmentLinks(
-  tripData: TripV2[],
-  segmentData: SegmentV2[],
-): Promise<TripSegmentLinkV2[]> {
+  tripData: Trip[],
+  segmentData: Segment[],
+): Promise<TripSegmentLink[]> {
   try {
     const tripSegmentLinks = segmentData.map((segment, index) => ({
       trip_id: tripData[0].id,
@@ -62,7 +62,7 @@ export async function insertTripSegmentLinks(
       .select();
     if (error) throw new Error(`Error inserting trip-segment links: ${error.message}`);
 
-    return data.map((link: any) => convertKeysToCamelCase(link)) as TripSegmentLinkV2[];
+    return data.map((link: any) => convertKeysToCamelCase(link)) as TripSegmentLink[];
   } catch (error) {
     throw new Error(`Error inserting trip-segment links: ${error}`);
   }
@@ -71,7 +71,7 @@ export async function insertTripSegmentLinks(
 export async function fetchTripData(
   tripDetails: TripDetails,
   radius: number,
-): Promise<{ data: FullTripV2[] | null; error: Error | null }> {
+): Promise<{ data: FullTrip[] | null; error: Error | null }> {
   try {
     // console.log("[LOGS] Fetching nearby trips:\n", tripDetails);
     const { data, error } = await supabase.rpc("get_nearby_trips", {
