@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Text, SafeAreaView, View, Alert } from "react-native";
 
 import { logoutUser } from "@services/account-service";
-import { getUsername, getUserRole, getUserDetails } from "@services/account-service";
+import {
+  getUsername,
+  getUserRole,
+  getUserPoints,
+  getUserJoinedDate,
+} from "@services/account-service";
 import { useSession } from "@contexts/SessionContext";
 
 import Option from "@components/ContributeOption";
@@ -20,7 +25,7 @@ export default function Account() {
   const [username, setUsername] = useState<string>("");
   const [userRole, setUserRole] = useState<string | null>(null);
   const [points, setPoints] = useState<number>(0);
-  const [joinedDate, setJoinedDate] = useState<string>("");
+  const [joinedDate, setJoinedDate] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchUserDetails() {
@@ -31,7 +36,8 @@ export default function Account() {
         const username = await getUsername(user.id);
         setUsername(username || "User");
 
-        const { points, joinedDate } = await getUserDetails(user.id);
+        const points = await getUserPoints(user.id);
+        const joinedDate = await getUserJoinedDate(user.id);
         setPoints(points);
         setJoinedDate(joinedDate);
       }

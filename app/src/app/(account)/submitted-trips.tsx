@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, View, FlatList, ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import {
+  SafeAreaView,
+  View,
+  FlatList,
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { useRouter } from "expo-router";
 
 import { useSession } from "@contexts/SessionContext";
@@ -23,7 +30,7 @@ export default function SubmittedTrips() {
     setLoading(true);
 
     // Filter trips where the user is the contributor
-    const userTrips = tripData.filter((trip) => trip.contributor_id === user.id);
+    const userTrips = tripData.filter((trip) => trip.contributorId === user.id);
     setSubmittedTrips(userTrips);
 
     setLoading(false);
@@ -31,7 +38,7 @@ export default function SubmittedTrips() {
 
   function handleTripPress(trip: Trip) {
     router.push({
-      pathname: "/trip-overview",
+      pathname: "/(search)/3-trip-overview",
       params: {
         trip: JSON.stringify(trip),
         segments: JSON.stringify(segmentData[trip.id] || []),

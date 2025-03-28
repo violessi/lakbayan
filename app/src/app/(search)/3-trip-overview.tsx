@@ -39,7 +39,7 @@ export default function TripOverview() {
 
   function handleCommentPress(tripId: string) {
     router.push({
-      pathname: "/(search)/comments-list",
+      pathname: "/(social)/comments-list",
       params: { tripId },
     });
   }

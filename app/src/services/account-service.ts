@@ -17,7 +17,11 @@ export async function createUserProfile(userId: string, username: string, isComm
 }
 
 export async function getUsername(contributorId: string): Promise<string | null> {
-  const { data, error } = await supabase.from("profiles").select("username").eq("id", contributorId).single();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", contributorId)
+    .single();
 
   if (error) {
     console.error("Error fetching username:", error);
@@ -38,28 +42,47 @@ export async function getUserRole(userId: string): Promise<string | null> {
   return data?.role || null;
 }
 
-export async function getUserDetails(userId: string) {
-  const { data, error } = await supabase.from("profiles").select("points, created_at").eq("id", userId).single();
+// TODO Point fetching
+export async function getUserPoints(userId: string) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("points")
+    .eq("id", userId)
+    .single();
 
   if (error) {
     console.error("Error fetching user details:", error);
-    return { points: 0, joinedDate: "" };
   }
 
-  return {
-    points: data?.points || 0,
-    joinedDate: data?.created_at
-      ? new Date(data.created_at).toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        })
-      : "",
-  };
+  return data?.points || 0;
+}
+
+export async function getUserJoinedDate(userId: string) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("created_at")
+    .eq("id", userId)
+    .single();
+
+  if (error) {
+    console.error("Error fetching user details:", error);
+  }
+
+  return data?.created_at
+    ? new Date(data.created_at).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
 }
 
 export async function fetchUserProfile(userId: string) {
-  const { data, error } = await supabase.from("profiles").select("username").eq("id", userId).single();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", userId)
+    .single();
 
   if (error) throw new Error(error.message);
   return data;
@@ -83,7 +106,11 @@ export async function logoutUser() {
 }
 
 export async function checkUsernameExists(username: string): Promise<boolean> {
-  const { data, error } = await supabase.from("profiles").select("id").eq("username", username).single();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("username", username)
+    .single();
 
   if (error && error.code !== "PGRST116") {
     console.error("Error checking username:", error);

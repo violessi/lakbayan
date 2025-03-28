@@ -8,7 +8,7 @@ export default function SocialLayout() {
   return (
     <Stack>
       <Stack.Screen name="comments-list" options={{ headerShown: false }} />
-      <Stack.Screen name="user-account" options={{ headerShown: false }} />
+      <Stack.Screen name="contributor-account" options={{ headerShown: false }} />
     </Stack>
   );
 }
