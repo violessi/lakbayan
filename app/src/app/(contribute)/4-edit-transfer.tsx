@@ -1,7 +1,8 @@
 import { router } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Alert, SafeAreaView, View } from "react-native";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
+import { useLocalSearchParams } from "expo-router";
 
 import Header from "@components/ui/Header";
 import PrimaryButton from "@components/ui/PrimaryButton";
@@ -20,7 +21,7 @@ export default function RouteInput() {
   const cameraRef = useRef<Camera>(null);
   const [zoomLevel, setZoomLevel] = useState(13);
 
-  const { route, updateRoute, addSegment } = useTripCreator();
+  const { route, updateRoute, addSegment, getSegment } = useTripCreator();
   const [customWaypoints, setCustomWaypoint] = useState<Coordinates[]>([]);
   const [isEditingRoute, setIsEditingRoute] = useState(false);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
@@ -131,23 +132,6 @@ export default function RouteInput() {
         )}
       </MapView>
 
-      <View className="absolute bottom-96 w-full flex flex-col gap-4">
-        <View className="flex-row z-10">
-          <View className="flex-1 pl-3 pr-[5px]">
-            <PrimaryButton
-              label={isEditingRoute ? "Recalculate" : "Edit Route"}
-              onPress={handleToggleMode}
-            />
-          </View>
-          <View className="flex-1 pr-3 pl-[5px]">
-            <PrimaryButton
-              label={isEditingRoute ? "Clear" : "Calculate"}
-              onPress={isEditingRoute ? clearWaypoints : getRouteDirections}
-            />
-          </View>
-        </View>
-      </View>
-
       <RouteInformation
         onRouteNameChange={(segmentName) => updateRoute({ segmentName })}
         onLandmarkChange={(landmark) => updateRoute({ landmark })}
@@ -158,6 +142,10 @@ export default function RouteInput() {
         instruction={route.instruction}
         cost={route.cost.toString()}
         onSubmit={handleSubmit}
+        isEditingRoute={isEditingRoute}
+        handleToggleMode={handleToggleMode}
+        clearWaypoints={clearWaypoints}
+        getRouteDirections={getRouteDirections}
       />
     </SafeAreaView>
   );

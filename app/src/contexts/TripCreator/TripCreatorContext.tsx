@@ -12,6 +12,8 @@ interface TripCreatorContextType {
   updateRoute: (updates: Partial<CreateSegment>) => void;
   updateTrip: (updates: Partial<CreateTrip>) => void;
   submitTrip: () => Promise<{ tripData: Trip[]; segmentData: Segment[] }>;
+  getSegment: (index: number) => CreateSegment;
+  updateSegment: (index: number, updates: Partial<CreateSegment>) => void;
 }
 
 interface TripCreatorProviderProps {
@@ -45,6 +47,21 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     setSegments((prevSegments) => [...prevSegments, segment]);
   };
 
+  const getSegment = (index: number) => {
+    if (index < 0 || index >= segments.length) {
+      throw new Error("Index out of bounds");
+    }
+    return segments[index];
+  }
+
+  const updateSegment = (index: number, updates: Partial<CreateSegment>) => {
+    setSegments((prevSegments) => {
+      const updatedSegments = [...prevSegments];
+      updatedSegments[index] = { ...updatedSegments[index], ...updates };
+      return updatedSegments;
+    });
+  };
+  
   // Handles the submission of the trip, segments, and junction table
   const submitTrip = async () => {
     const newTrip: CreateTrip = {
@@ -76,7 +93,7 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     });
   }, [segments, trip]);
 
-  const value = { trip, route, segments, addSegment, updateRoute, updateTrip, submitTrip };
+  const value = { trip, route, segments, addSegment, updateRoute, updateTrip, submitTrip, getSegment, updateSegment };
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;
 }
 

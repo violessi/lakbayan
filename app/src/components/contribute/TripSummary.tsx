@@ -4,14 +4,16 @@ import RouteItem from "@components/ui/RouteItem";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
+import { Pressable } from "react-native-gesture-handler";
 
 interface TripSummaryProps {
   startLocation: string;
   endLocation: string;
   segments: CreateSegment[];
+  onSegmentPress: (index: number) => void;
 }
 
-export default function TripSummary({ startLocation, endLocation, segments }: TripSummaryProps) {
+export default function TripSummary({ startLocation, endLocation, segments, onSegmentPress }: TripSummaryProps) {
   const snapPoints = ["15%", "25%", "40%", "72%"];
 
   return (
@@ -24,10 +26,12 @@ export default function TripSummary({ startLocation, endLocation, segments }: Tr
             <FlatList
               data={segments}
               renderItem={({ item, index }) => (
-                <RouteItem
-                  segment={item}
-                  color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
-                />
+                <Pressable onPress={() => onSegmentPress(index)}>
+                  <RouteItem
+                    segment={item}
+                    color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
+                  />
+                </Pressable>
               )}
               keyExtractor={(item) => item.segmentName}
             />

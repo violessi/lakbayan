@@ -23,7 +23,7 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
-  const { trip, segments, submitTrip } = useTripCreator();
+  const { trip, segments, submitTrip, getSegment } = useTripCreator();
 
   // transformation/calculations we need
   const segmentCoordinates = segments.map(({ waypoints }) => waypoints);
@@ -50,6 +50,11 @@ export default function TripReview() {
       console.log("Error submitting trip", error);
       Alert.alert("Error submitting trip");
     }
+  };
+
+  const handleEditSegment = (index: number) => {
+    const segment = getSegment(index);
+    console.log("Editing segment:", segment);
   };
 
   return (
@@ -97,6 +102,7 @@ export default function TripReview() {
         startLocation={trip.startLocation}
         endLocation={trip.endLocation}
         segments={segments}
+        onSegmentPress={handleEditSegment}
       />
     </SafeAreaView>
   );
