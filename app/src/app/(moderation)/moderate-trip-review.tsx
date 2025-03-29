@@ -52,8 +52,8 @@ export default function TripOverview() {
 
   function handleCommentPress(tripId: string) {
     router.push({
-      pathname: "/(search)/comments-list",
-      params: { tripId },
+      pathname: "/(social)/comments-list",
+      params: { tripId, is_gps_verified: "false" },
     });
   }
 
@@ -72,7 +72,7 @@ export default function TripOverview() {
               Alert.alert("Success", `Trip has been marked as ${status}.`, [
                 { text: "OK", onPress: () => router.back() },
               ]);
-            } catch (error) {
+            } catch {
               Alert.alert("Error", "Failed to update moderation status. Please try again.");
             }
           },
@@ -80,16 +80,30 @@ export default function TripOverview() {
       ],
     );
   }
-
+  // FIXME Correct with new ver of tripData
   return (
     <SafeAreaView className="flex-1">
       <Header title="Trip Overview" />
 
-      <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12" projection="mercator">
-        <Camera ref={cameraRef} centerCoordinate={startCoordinates} animationMode="easeTo" zoomLevel={10} />
+      <MapView
+        style={{ flex: 1 }}
+        styleURL="mapbox://styles/mapbox/streets-v12"
+        projection="mercator"
+      >
+        <Camera
+          ref={cameraRef}
+          centerCoordinate={startCoordinates}
+          animationMode="easeTo"
+          zoomLevel={10}
+        />
 
         {/* Overall Start and End Markers */}
-        <LocationMarker coordinates={startCoordinates} label={startLocation} color="red" radius={8} />
+        <LocationMarker
+          coordinates={startCoordinates}
+          label={startLocation}
+          color="red"
+          radius={8}
+        />
         <LocationMarker coordinates={endCoordinates} label={endLocation} color="red" radius={8} />
 
         {segmentData.map((segment, index) => (
@@ -110,7 +124,11 @@ export default function TripOverview() {
         ))}
 
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" style={{ position: "absolute", top: "50%", left: "50%" }} />
+          <ActivityIndicator
+            size="large"
+            color="#0000ff"
+            style={{ position: "absolute", top: "50%", left: "50%" }}
+          />
         ) : segmentRoutes.length > 0 ? (
           segmentRoutes.map((coordinates, index) => (
             <DirectionsLine

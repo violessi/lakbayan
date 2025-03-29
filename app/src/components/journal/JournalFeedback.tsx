@@ -19,6 +19,7 @@ interface JournalFeedbackProps {
   segments: Segment[];
   currentUserId: string;
   onCommentPress: (tripId: string) => void;
+  isGpsVerified: boolean;
 }
 
 export default function JournalFeedback({
@@ -28,6 +29,7 @@ export default function JournalFeedback({
   segments,
   currentUserId,
   onCommentPress,
+  isGpsVerified,
 }: JournalFeedbackProps) {
   const snapPoints = ["10%", "18%", "40%", "72%"];
   const router = useRouter();
@@ -49,7 +51,7 @@ export default function JournalFeedback({
     if (!newComment.trim()) return;
 
     try {
-      await addComment(trip.id, currentUserId || "", newComment);
+      await addComment(trip.id, currentUserId || "", newComment, isGpsVerified);
       console.log("Comment added successfully");
 
       for (const segment of segments) {

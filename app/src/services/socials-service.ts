@@ -1,12 +1,5 @@
 import { supabase } from "@utils/supabase";
 
-interface Comment {
-  id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-}
-
 // Votes
 
 export async function getPoints(tripId: string): Promise<number> {
@@ -90,10 +83,10 @@ export async function getUserVote(
 
 // Comments
 
-export async function getComments(tripId: string): Promise<Comment[] | null> {
+export async function getComments(tripId: string): Promise<CommentData[] | null> {
   const { data, error } = await supabase
     .from("comments")
-    .select("id, user_id, content, created_at")
+    .select("id, user_id, content, created_at, is_gps_verified")
     .eq("trip_id", tripId)
     .order("created_at", { ascending: false });
 
@@ -109,12 +102,14 @@ export async function addComment(
   tripId: string,
   userId: string,
   content: string,
+  isGpsVerified: boolean,
 ): Promise<boolean> {
   const { error } = await supabase.from("comments").insert([
     {
       trip_id: tripId,
       user_id: userId,
       content: content,
+      is_gps_verified: isGpsVerified,
     },
   ]);
 
