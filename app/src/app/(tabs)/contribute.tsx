@@ -25,12 +25,6 @@ export default function Contribute() {
           link="/(contribute)/toda-stops"
           icon={todaStopsIcon}
         />
-        <Option
-          title="Jeepney Routes"
-          description="Help others know the routes of jeepneys in your area!"
-          link="/(contribute)/jeepney-routes"
-          icon={jeepRoutesIcon}
-        />
       </View>
     </SafeAreaView>
   );
