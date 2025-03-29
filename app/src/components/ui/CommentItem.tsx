@@ -36,7 +36,7 @@ export default function CommentItem({
         <Text className="font-bold text-primary">{username}</Text>
         <Text className="text-xs text-gray-500">{new Date(createdAt).toLocaleString()}</Text>
 
-        {!isGpsVerified && (
+        {isGpsVerified && (
           <TouchableOpacity onPress={() => setShowPopover(true)}>
             <Image source={gpsBadge} className="w-4 h-4" accessibilityLabel="GPS Verified" />
           </TouchableOpacity>

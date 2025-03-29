@@ -43,25 +43,40 @@ export default function VotingBar({ tripId, userId }: VotingProps) {
 
   return (
     <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
-      <TouchableOpacity onPress={() => handleVote("upvote")} style={{ flexDirection: "row", alignItems: "center" }}>
+      <TouchableOpacity
+        onPress={() => handleVote("upvote")}
+        style={{ flexDirection: "row", alignItems: "center" }}
+      >
         <Image
           source={upvote}
           style={{
             width: 12,
             height: 12,
-            tintColor: userVote === "upvote" ? "#7F55D9" : "#000",
+            tintColor: userVote === "upvote" ? "#E53935" : "#000",
           }}
           resizeMode="contain"
         />
       </TouchableOpacity>
-      <Text style={{ fontSize: 14 }}>{points}</Text>
-      <TouchableOpacity onPress={() => handleVote("downvote")} style={{ flexDirection: "row", alignItems: "center" }}>
+      <Text
+        style={{
+          fontSize: 14,
+          fontWeight: "bold",
+          color:
+            userVote === "upvote" ? "#E53935" : userVote === "downvote" ? "#1E88E5" : "#666666",
+        }}
+      >
+        {points}
+      </Text>
+      <TouchableOpacity
+        onPress={() => handleVote("downvote")}
+        style={{ flexDirection: "row", alignItems: "center" }}
+      >
         <Image
           source={downvote}
           style={{
             width: 12,
             height: 12,
-            tintColor: userVote === "downvote" ? "#7F55D9" : "#000",
+            tintColor: userVote === "downvote" ? "#1E88E5" : "#000",
           }}
           resizeMode="contain"
         />

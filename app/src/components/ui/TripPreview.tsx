@@ -113,7 +113,7 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
                 <Text className="text-sm">{trip.gpsVerified}</Text>
               </View>
             </View>
-            <View className="flex flex-row gap-1">
+            <View className="flex flex-row gap-3">
               {user && <VotingBar tripId={trip.id} userId={user.id} />}
               <View className="flex flex-row gap-1 items-center">
                 <Image source={comment} style={{ width: 11, height: 11 }} resizeMode="contain" />
