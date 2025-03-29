@@ -3,16 +3,16 @@ import type { FeatureCollection, LineString } from "geojson";
 import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
 
 import type {
-  TransportationMode as TransportationModeSchema,
-  TransitJournalStatus as TransitJournalStatusSchema,
-  Coordinates as CoordinatesSchema,
-  LiveStatus as LiveStatusSchema,
-  NavigationSteps as NavigationStepsSchema,
-  TripDetails as TripDetailsSchema,
-  Trip as TripSchema,
-  Segment as SegmentSchema,
-  TripSegmentLink as TripSegmentLinkSchema,
-  TransitJournal as TransitJournalSchema,
+  TransportationModeSchema,
+  TransitJournalStatusSchema,
+  CoordinatesSchema,
+  LiveStatusSchema,
+  NavigationStepsSchema,
+  TripDetailsSchema,
+  TripSchema,
+  SegmentSchema,
+  TripSegmentLinkSchema,
+  TransitJournalSchema,
 } from "./schema";
 
 declare global {

@@ -40,33 +40,36 @@ export type GtfsRoute = z.infer<typeof GtfsRoute>;
 
 // ================== DATABASE ==================
 
-export const TransportationMode = z.enum(["Train", "Bus", "Jeep", "UV", "Tricycle", "Walk"]);
+export const TransportationModeSchema = z.enum(["Train", "Bus", "Jeep", "UV", "Tricycle", "Walk"]);
 
-export const TransitJournalStatus = z.enum(["Success", "Cancelled", "Ongoing"]);
+export const TransitJournalStatusSchema = z.enum(["Success", "Cancelled", "Ongoing"]);
 
-export const Coordinates = z.tuple([z.number(), z.number()]);
+export const CoordinatesSchema = z.tuple([z.number(), z.number()]);
 
-export const LiveStatus = z.object({ type: z.string(), coordinates: Coordinates });
+export const LiveStatusSchema = z.object({ type: z.string(), coordinates: CoordinatesSchema });
 
-export const NavigationSteps = z.object({ instruction: z.string(), location: Coordinates });
-
-export const TripDetails = z.object({
-  startLocation: z.string(),
-  endLocation: z.string(),
-  startCoords: Coordinates,
-  endCoords: Coordinates,
+export const NavigationStepsSchema = z.object({
+  instruction: z.string(),
+  location: CoordinatesSchema,
 });
 
-export const Trip = z.object({
+export const TripDetailsSchema = z.object({
+  startLocation: z.string(),
+  endLocation: z.string(),
+  startCoords: CoordinatesSchema,
+  endCoords: CoordinatesSchema,
+});
+
+export const TripSchema = z.object({
   id: z.string(),
   contributorId: z.string(),
   name: z.string(),
   gpsVerified: z.number(),
   modVerified: z.number(),
   startLocation: z.string(),
-  startCoords: Coordinates,
+  startCoords: CoordinatesSchema,
   endLocation: z.string(),
-  endCoords: Coordinates,
+  endCoords: CoordinatesSchema,
   duration: z.number(),
   distance: z.number(),
   cost: z.number(),
@@ -76,30 +79,41 @@ export const Trip = z.object({
   updatedAt: z.string(),
 });
 
-export const Segment = z.object({
+export const TripsSchema = z.array(TripSchema);
+
+export const SegmentSchema = z.object({
   id: z.string(),
   contributorId: z.string(),
   segmentName: z.string(),
-  segmentMode: TransportationMode,
-  landmark: z.string(),
-  instruction: z.string(),
+  segmentMode: TransportationModeSchema,
+  landmark: z.string().nullable(),
+  instruction: z.string().nullable(),
   gpsVerified: z.number(),
   modVerified: z.number(),
   duration: z.number(),
   distance: z.number(),
   cost: z.number(),
-  liveStatus: z.array(LiveStatus),
-  waypoints: z.array(Coordinates),
-  navigationSteps: z.array(NavigationSteps),
+  liveStatus: z.array(LiveStatusSchema),
+  waypoints: z.array(CoordinatesSchema),
+  navigationSteps: z.array(NavigationStepsSchema),
   startLocation: z.string(),
-  startCoords: Coordinates,
+  startCoords: CoordinatesSchema,
   endLocation: z.string(),
-  endCoords: Coordinates,
+  endCoords: CoordinatesSchema,
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 
-export const TripSegmentLink = z.object({
+export const SegmentsSchema = z.array(SegmentSchema);
+
+export const FullTripSchema = z.object({
+  ...TripSchema.shape,
+  segments: SegmentsSchema,
+});
+
+export const FullTripsSchema = z.array(FullTripSchema);
+
+export const TripSegmentLinkSchema = z.object({
   id: z.string(),
   tripId: z.string(),
   segmentId: z.string(),
@@ -108,15 +122,17 @@ export const TripSegmentLink = z.object({
   updatedAt: z.string(),
 });
 
-export const TransitJournal = z.object({
+export const TripSegmentLinksSchema = z.array(TripSegmentLinkSchema);
+
+export const TransitJournalSchema = z.object({
   id: z.string(),
   userId: z.string(),
   tripId: z.string(),
-  preSegment: Segment.nullable(),
-  postSegment: Segment.nullable(),
+  preSegment: SegmentSchema.nullable(),
+  postSegment: SegmentSchema.nullable(),
   startTime: z.string(),
   endTime: z.string().nullable(),
-  status: TransitJournalStatus,
+  status: TransitJournalStatusSchema,
   createdAt: z.string(),
   updatedAt: z.string(),
 });
