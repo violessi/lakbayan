@@ -1,4 +1,6 @@
-import { supabase } from "@utils/supabase";
+import { newError } from "@utils/utils";
+import { FullTripsSchema } from "types/schema";
+import { insertData, fetchDataRPC } from "@api/supabase";
 import {
   convertKeysToSnakeCase,
   convertKeysToCamelCase,
@@ -6,87 +8,81 @@ import {
   convertToMultiPointWKT,
 } from "@utils/map-utils";
 
-// Function to insert a trip into the database
-export async function insertTrip(trip: CreateTrip): Promise<Trip[]> {
+// Inserts a new trip record into the database
+export async function insertTrip(trip: CreateTrip): Promise<string> {
   try {
     const payload = convertKeysToSnakeCase(trip);
-    payload.start_coords = convertToPointWKT(payload.start_coords as Coordinates);
-    payload.end_coords = convertToPointWKT(payload.end_coords as Coordinates);
+    payload.start_coords = convertToPointWKT(payload.start_coords);
+    payload.end_coords = convertToPointWKT(payload.end_coords);
 
-    console.log("Inserting trip:", payload);
-    const { data, error } = await supabase.from("trips_v2").insert([payload]).select();
-    if (error) throw new Error(`Error inserting trip: ${error.message}`);
-
-    return data.map((trip) => convertKeysToCamelCase(trip)) as Trip[];
+    // Insert the trip data into the database
+    const res = await insertData("trips_v2", [payload]);
+    return res[0].id;
   } catch (error) {
-    throw new Error(`Error inserting trip: ${error}`);
+    throw new Error("Error inserting trip");
   }
 }
 
-// Function to insert multiple segments into the database
-export async function insertSegments(segments: CreateSegment[]): Promise<Segment[]> {
+// Inserts multiple segment records into the database
+export async function insertSegments(segments: CreateSegment[]): Promise<string[]> {
   try {
-    const payload = segments.map((segment) => convertKeysToSnakeCase(segment));
-
-    const insertData = payload.map((segment) => ({
+    const formattedSegments = segments.map(convertKeysToSnakeCase);
+    const payload = formattedSegments.map((segment) => ({
       ...segment,
-      start_coords: convertToPointWKT(segment.start_coords as Coordinates),
-      end_coords: convertToPointWKT(segment.end_coords as Coordinates),
-      waypoints: convertToMultiPointWKT(segment.waypoints as Coordinates[]),
+      start_coords: convertToPointWKT(segment.start_coords),
+      end_coords: convertToPointWKT(segment.end_coords),
+      waypoints: convertToMultiPointWKT(segment.waypoints),
     }));
 
-    const { data, error } = await supabase.from("segments_v2").insert(insertData).select();
-    if (error) throw new Error(`Error inserting segments: ${error.message}`);
-
-    return data.map((segment: any) => convertKeysToCamelCase(segment)) as Segment[];
+    // Insert the segment data into the database
+    const res = await insertData("segments_v2", payload);
+    return res.map(({ id }) => id);
   } catch (error) {
-    throw new Error(`Error inserting segments: ${error}`);
+    throw new Error("Error inserting segments");
   }
 }
 
-// Function to insert trip-segment junction into the database
+// Inserts trip-segment links into the database
 export async function insertTripSegmentLinks(
-  tripData: Trip[],
-  segmentData: Segment[],
-): Promise<TripSegmentLink[]> {
+  tripId: string,
+  segmentIds: string[],
+): Promise<string[]> {
   try {
-    const tripSegmentLinks = segmentData.map((segment, index) => ({
-      trip_id: tripData[0].id,
-      segment_id: segment.id,
-      segment_order: index,
+    const payload = segmentIds.map((segmentId, segmentOrder) => ({
+      trip_id: tripId,
+      segment_id: segmentId,
+      segment_order: segmentOrder,
     }));
 
-    const { data, error } = await supabase
-      .from("trip_segment_links_v2")
-      .insert(tripSegmentLinks)
-      .select();
-    if (error) throw new Error(`Error inserting trip-segment links: ${error.message}`);
-
-    return data.map((link: any) => convertKeysToCamelCase(link)) as TripSegmentLink[];
-  } catch (error) {
-    throw new Error(`Error inserting trip-segment links: ${error}`);
+    // Insert the trip-segment links into the database
+    const res = await insertData("trip_segment_links_v2", payload);
+    return res.map(({ id }) => id);
+  } catch (error: Error | any) {
+    throw new Error("Error inserting trip-segment links");
   }
 }
 
-export async function fetchTripData(
-  tripDetails: TripDetails,
-  radius: number,
-): Promise<{ data: FullTrip[] | null; error: Error | null }> {
+// Fetches trip data based on provided details and radius
+export async function fetchTripData(tripDetails: TripDetails, radius: number): Promise<FullTrip[]> {
   try {
-    // console.log("[LOGS] Fetching nearby trips:\n", tripDetails);
-    const { data, error } = await supabase.rpc("get_nearby_trips", {
+    const args = {
       start_lat: tripDetails.startCoords[1],
       start_lon: tripDetails.startCoords[0],
       end_lat: tripDetails.endCoords[1],
       end_lon: tripDetails.endCoords[0],
       radius,
-    });
+    };
 
-    if (error) throw new Error(`Supabase RPC Error: ${error.message}`);
+    // Fetch nearby trips from the database
+    const res = await fetchDataRPC("fetch_nearby_trips", args);
+    const formattedData = res.map(convertKeysToCamelCase);
 
-    // console.log("[LOGS] Fetched nearby trips:\n", data);
-    return { data, error: null };
+    // Validate the response data
+    const result = FullTripsSchema.safeParse(formattedData);
+    if (!result.success) throw new Error("Invalid Trip Data");
+
+    return result.data;
   } catch (error) {
-    return { data: null, error: error instanceof Error ? error : new Error(String(error)) };
+    throw new Error("Error fetching trip data");
   }
 }
