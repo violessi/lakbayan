@@ -11,7 +11,7 @@ interface TripCreatorContextType {
   addSegment: () => void;
   updateRoute: (updates: Partial<CreateSegment>) => void;
   updateTrip: (updates: Partial<CreateTrip>) => void;
-  submitTrip: () => Promise<{ tripData: Trip[]; segmentData: Segment[] }>;
+  submitTrip: () => Promise<{ tripId: string; segmentIds: string[]; linkIds: string[] }>;
 }
 
 interface TripCreatorProviderProps {
@@ -57,12 +57,12 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     };
 
     try {
-      const tripData = await insertTrip(newTrip);
-      const segmentData = await insertSegments(segments);
-      const tripSegmentLinks = await insertTripSegmentLinks(tripData, segmentData);
-      return { tripData, segmentData, tripSegmentLinks };
+      const tripId = await insertTrip(newTrip);
+      const segmentIds = await insertSegments(segments);
+      const linkIds = await insertTripSegmentLinks(tripId, segmentIds);
+      return { tripId, segmentIds, linkIds };
     } catch (error) {
-      throw new Error(`[ERROR] Failed to submit trip: ${error}`);
+      throw new Error(`[ERROR] Failed to create trip:\n${error}`);
     }
   };
 

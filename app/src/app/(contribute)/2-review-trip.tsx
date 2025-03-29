@@ -42,8 +42,8 @@ export default function TripReview() {
 
   const handleSubmitTrip = async () => {
     try {
-      const { tripData } = await submitTrip();
-      await addTripToModeration(tripData[0].id);
+      const { tripId } = await submitTrip();
+      await addTripToModeration(tripId);
       Alert.alert("Trip Submitted");
       router.replace("/(tabs)");
     } catch (error) {

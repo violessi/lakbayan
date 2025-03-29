@@ -84,9 +84,7 @@ export default function SuggestedTrips() {
       setError(null);
 
       try {
-        const { data, error } = await fetchTripData(tripDetails, 1500);
-        if (error) throw new Error(`Error fetching trips: ${error}`);
-        if (!data) throw new Error("No trips found.");
+        const data = await fetchTripData(tripDetails, 1500);
 
         // FIXME: append correct pre and post segments
         const fullTrips: FullTrip[] = await Promise.all(
