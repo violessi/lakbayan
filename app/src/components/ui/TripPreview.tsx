@@ -3,7 +3,12 @@ import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Text } from "react-native-paper";
 
 import { useSession } from "@contexts/SessionContext";
-import { getBookmarks, addBookmark, removeBookmark } from "@services/socials-service";
+import {
+  getBookmarks,
+  addBookmark,
+  removeBookmark,
+  countModVerifications,
+} from "@services/socials-service";
 
 import VotingBar from "@components/VotingBar";
 
@@ -43,15 +48,22 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
   const { user } = useSession();
 
   const [bookmarked, setBookmarked] = useState(false);
+  const [modVerifications, setModVerifications] = useState(0);
 
   useEffect(() => {
-    async function fetchBookmarks() {
-      if (user) {
-        const bookmarks = await getBookmarks(user.id);
-        setBookmarked(bookmarks.includes(trip.id));
-      }
+    async function fetchData() {
+      if (!user) return;
+
+      const [bookmarks, modCount] = await Promise.all([
+        getBookmarks(user.id),
+        countModVerifications(trip.id),
+      ]);
+
+      setBookmarked(bookmarks.includes(trip.id));
+      setModVerifications(modCount);
     }
-    fetchBookmarks();
+
+    fetchData();
   }, [user, trip.id]);
 
   const toggleBookmark = async () => {
@@ -102,7 +114,7 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
                   style={{ width: 16, height: 16 }}
                   resizeMode="contain"
                 />
-                <Text className="text-sm">{trip.modVerified}</Text>
+                <Text className="text-sm">{modVerifications}</Text>
               </View>
               <View className="flex flex-row gap-1 items-center">
                 <Image

@@ -159,3 +159,19 @@ export async function removeBookmark(userId: string, tripId: string) {
 
   return true;
 }
+
+// Moderator Verifications
+
+export async function countModVerifications(tripId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("moderation-reviews")
+    .select("*", { count: "exact", head: true })
+    .eq("trip_id", tripId);
+
+  if (error) {
+    console.error("Error fetching mod verifications count:", error);
+    return 0;
+  }
+
+  return count || 0;
+}
