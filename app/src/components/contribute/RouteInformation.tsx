@@ -15,6 +15,10 @@ interface RouteInformationProps {
   instruction: string;
   cost: string;
   onSubmit: () => void;
+  isEditingRoute: boolean;
+  handleToggleMode: () => void;
+  clearWaypoints: () => void;
+  getRouteDirections: () => void;
 }
 
 export default function RouteInformation({
@@ -27,12 +31,37 @@ export default function RouteInformation({
   instruction,
   cost,
   onSubmit,
+  isEditingRoute,
+  handleToggleMode,
+  clearWaypoints,
+  getRouteDirections,
 }: RouteInformationProps) {
   const snapPoints = ["40%"];
 
   return (
     <>
-      <BottomSheet snapPoints={snapPoints} index={1}>
+      <View className="absolute bottom-[350px] flex flex-col gap-4 w-full z-0">
+        <View className="flex-row z-10">
+          <View className="flex-1 pl-3 pr-[5px]">
+            <PrimaryButton
+              label={isEditingRoute ? "Recalculate" : "Edit Route"}
+              onPress={handleToggleMode}
+            />
+          </View>
+          <View className="flex-1 pr-3 pl-[5px]">
+            <PrimaryButton
+              label={isEditingRoute ? "Clear" : "Calculate"}
+              onPress={isEditingRoute ? clearWaypoints : getRouteDirections}
+            />
+          </View>
+        </View>
+      </View>
+      <BottomSheet 
+        snapPoints={snapPoints} index={1} 
+        enablePanDownToClose={false} // Prevent closing by dragging
+        enableContentPanningGesture={false} // Disable user dragging
+        enableHandlePanningGesture={false} // Disable handle dragging
+      >
         <BottomSheetView className="flex flex-col px-5 gap-2">
           <Text className="text-xl font-bold">Route Information</Text>
           <View className="flex-row gap-3">

@@ -4,7 +4,6 @@ import { Alert, SafeAreaView, View } from "react-native";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
 import Header from "@components/ui/Header";
-import PrimaryButton from "@components/ui/PrimaryButton";
 import DirectionsLine from "@components/ui/DirectionsLine";
 import CircleMarker from "@components/map/CircleMarker";
 import TripTitle from "@components/contribute/TripTitle";
@@ -131,23 +130,6 @@ export default function RouteInput() {
         )}
       </MapView>
 
-      <View className="absolute bottom-96 w-full flex flex-col gap-4">
-        <View className="flex-row z-10">
-          <View className="flex-1 pl-3 pr-[5px]">
-            <PrimaryButton
-              label={isEditingRoute ? "Recalculate" : "Edit Route"}
-              onPress={handleToggleMode}
-            />
-          </View>
-          <View className="flex-1 pr-3 pl-[5px]">
-            <PrimaryButton
-              label={isEditingRoute ? "Clear" : "Calculate"}
-              onPress={isEditingRoute ? clearWaypoints : getRouteDirections}
-            />
-          </View>
-        </View>
-      </View>
-
       <RouteInformation
         onRouteNameChange={(segmentName) => updateRoute({ segmentName })}
         onLandmarkChange={(landmark) => updateRoute({ landmark })}
@@ -158,6 +140,10 @@ export default function RouteInput() {
         instruction={route.instruction}
         cost={route.cost.toString()}
         onSubmit={handleSubmit}
+        isEditingRoute={isEditingRoute}
+        handleToggleMode={handleToggleMode}
+        clearWaypoints={clearWaypoints}
+        getRouteDirections={getRouteDirections}
       />
     </SafeAreaView>
   );
