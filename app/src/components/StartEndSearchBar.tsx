@@ -107,7 +107,7 @@ export default function StartEndSearch({
               <FlatList
                 data={startSuggestions.slice(0, 8)}
                 keyExtractor={(item) => item.id}
-                style={{ paddingBottom: 10 }}
+                style={{ paddingTop: 10, paddingBottom: 10 }}
                 renderItem={({ item }) => (
                   <List.Item
                     title={item.place_name}
@@ -128,7 +128,7 @@ export default function StartEndSearch({
               <FlatList
                 data={endSuggestions.slice(0, 8)}
                 keyExtractor={(item) => item.id}
-                style={{ paddingBottom: 10 }}
+                style={{ paddingTop: 10, paddingBottom: 10 }}
                 renderItem={({ item }) => (
                   <List.Item
                     title={item.place_name}
