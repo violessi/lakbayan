@@ -42,7 +42,7 @@ export type GtfsRoute = z.infer<typeof GtfsRoute>;
 
 export const TransportationModeSchema = z.enum(["Train", "Bus", "Jeep", "UV", "Tricycle", "Walk"]);
 
-export const TransitJournalStatusSchema = z.enum(["Success", "Cancelled", "Ongoing"]);
+export const TransitJournalStatusSchema = z.enum(["success", "cancelled", "ongoing"]);
 
 export const CoordinatesSchema = z.tuple([z.number(), z.number()]);
 
