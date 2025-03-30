@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { router } from "expo-router";
 import {
   Text,
@@ -43,6 +43,7 @@ export default function Onboarding() {
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
+      setCurrentSlide((prev) => prev + 1);
       flatListRef.current?.scrollToIndex({ index: currentSlide + 1 });
     } else {
       router.replace("/(auth)/log-in");
@@ -61,6 +62,7 @@ export default function Onboarding() {
 
         {/* Content */}
         <FlatList
+          testID="onboarding-flatlist"
           ref={flatListRef}
           data={slides}
           horizontal
@@ -71,6 +73,11 @@ export default function Onboarding() {
             const index = Math.round(event.nativeEvent.contentOffset.x / width);
             setCurrentSlide(index);
           }}
+          getItemLayout={(data, index) => ({
+            length: width,
+            offset: width * index,
+            index,
+          })}
           renderItem={({ item }) => (
             <View className="flex-1 items-center justify-center px-6 gap-3" style={{ width }}>
               <Image source={item.image} className="w-40 h-40 mb-6" resizeMode="contain" />
@@ -90,7 +97,6 @@ export default function Onboarding() {
               />
             ))}
           </View>
-
           <PrimaryButton
             label={currentSlide === slides.length - 1 ? "Get Started" : "Next"}
             onPress={handleNext}
