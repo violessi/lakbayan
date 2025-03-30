@@ -14,8 +14,8 @@ export default function ContributeLayout() {
         <Stack.Screen name="3-add-transfer" options={{ headerShown: false }} />
         <Stack.Screen name="4-edit-transfer" options={{ headerShown: false }} />
         {/* FIXME: temporary location */}
-        <Stack.Screen name="jeepney-routes" options={{ headerShown: false }} />
-        <Stack.Screen name="toda-stop" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="jeepney-routes" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="toda-stops" options={{ headerShown: false }} />
       </Stack>
     </TripCreatorProvider>
   );
