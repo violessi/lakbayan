@@ -1,22 +1,19 @@
-import React, { useEffect, useRef, useMemo, Fragment } from "react";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { View, SafeAreaView, Text, ActivityIndicator } from "react-native";
+import { useRouter } from "expo-router";
+import React, { useRef, Fragment } from "react";
+import { Alert, View, SafeAreaView } from "react-native";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
-
-import { useSession } from "@contexts/SessionContext";
-import { useFetchSegmentDirections } from "@hooks/use-fetch-segment-directions";
+import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 import Header from "@components/ui/Header";
-import DirectionsLine from "@components/ui/DirectionsLine";
-import LocationMarker from "@components/ui/LocationMarker";
-import PrimaryButton from "@components/ui/PrimaryButton";
 import CircleMarker from "@components/map/CircleMarker";
-
-import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
-
+import PrimaryButton from "@components/ui/PrimaryButton";
 import TripSummary from "@components/search/TripSummary";
+import DirectionsLine from "@components/ui/DirectionsLine";
 
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+import { useTripSearch } from "@contexts/TripSearch";
+import { useSession } from "@contexts/SessionContext";
+import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
+import { insertSegments, insertTransitJournal, updateProfile } from "@services/trip-service-v2";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
@@ -25,11 +22,8 @@ export default function TripOverview() {
   const { user } = useSession();
   const cameraRef = useRef<Camera>(null);
 
-  const { params } = useLocalSearchParams();
-  const trip = JSON.parse(params as string) as FullTrip;
-  const segments = trip.segments;
-  console.log("Trip Overview", trip);
-  console.log("Trip Segments", segments);
+  const { trip } = useTripSearch();
+  if (!trip) throw new Error("Trip not found in context");
 
   const handleMapLoaded = () => {
     if (cameraRef.current) {
@@ -44,11 +38,29 @@ export default function TripOverview() {
     });
   }
 
-  function handleStartPress() {
-    router.push({
-      pathname: "/(journal)/transit-journal",
-      params: { trip: JSON.stringify(trip), segments: JSON.stringify(trip.segments) },
-    });
+  async function handleStartPress() {
+    try {
+      // if trip has pre/post segments, insert them first to segments table
+      const { preSegment, postSegment } = trip!;
+      const preSegmentId = preSegment ? (await insertSegments([preSegment]))[0] : null;
+      const postSegmentId = postSegment ? (await insertSegments([postSegment]))[0] : null;
+
+      // insert transit journal for the trip
+      const transitJournalId = await insertTransitJournal({
+        userId: user!.id,
+        tripId: trip!.id,
+        preSegmentId,
+        postSegmentId,
+      });
+
+      // bind transit journal to user
+      await updateProfile({ id: user!.id, transitJournalId });
+      Alert.alert("Trip started successfully");
+      // router.push("/(journal)/transit-journal");
+    } catch (error) {
+      Alert.alert("Error starting trip");
+      console.error(error);
+    }
   }
 
   return (
@@ -79,7 +91,7 @@ export default function TripOverview() {
           radius={8}
         />
 
-        {segments.map((segment, index) => (
+        {trip.segments.map((segment, index) => (
           <Fragment key={`segment-markers-${index}`}>
             <CircleMarker
               id="start-seg"
@@ -97,7 +109,7 @@ export default function TripOverview() {
             />
           </Fragment>
         ))}
-        {segments.map((segment, index) => (
+        {trip.segments.map((segment, index) => (
           <DirectionsLine
             key={index}
             coordinates={segment.waypoints}
@@ -112,8 +124,6 @@ export default function TripOverview() {
 
       {user && (
         <TripSummary
-          startLocation={trip.startLocation}
-          endLocation={trip.endLocation}
           trip={trip}
           segments={trip.segments}
           currentUserId={user.id}

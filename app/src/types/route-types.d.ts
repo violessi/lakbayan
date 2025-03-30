@@ -9,10 +9,14 @@ import type {
   LiveStatusSchema,
   NavigationStepsSchema,
   TripDetailsSchema,
+  TripEndpointsSchema,
   TripSchema,
   SegmentSchema,
+  FullTripSchema,
+  TripSearchSchema,
   TripSegmentLinkSchema,
   TransitJournalSchema,
+  ProfileSchema,
 } from "./schema";
 
 declare global {
@@ -52,16 +56,26 @@ declare global {
 
   export type TripDetails = z.infer<typeof TripDetailsSchema>;
 
+  export type TripEndpoints = z.infer<typeof TripEndpointsSchema>;
+
   export type Trip = z.infer<typeof TripSchema>;
   export type CreateTrip = Omit<Trip, "id" | "createdAt" | "updatedAt">;
 
   export type Segment = z.infer<typeof SegmentSchema>;
   export type CreateSegment = Omit<Segment, "id" | "createdAt" | "updatedAt">;
 
-  export type FullTrip = Trip & { segments: Segment[] };
+  export type FullTrip = z.infer<typeof FullTripSchema>;
+
+  export type TripSearch = z.infer<typeof TripSearchSchema>;
 
   export type TripSegmentLink = z.infer<typeof TripSegmentLinkSchema>;
   export type CreateTripSegmentLink = Omit<TripSegmentLink, "id" | "createdAt" | "updatedAt">;
 
   export type TransitJournal = z.infer<typeof TransitJournalSchema>;
+  export type CreateTransitJournal = Omit<
+    TransitJournal,
+    "id" | "createdAt" | "updatedAt" | "startTime" | "endTime" | "status"
+  >;
+
+  export type Profile = z.infer<typeof ProfileSchema>;
 }

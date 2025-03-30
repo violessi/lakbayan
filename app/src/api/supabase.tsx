@@ -13,6 +13,24 @@ export async function insertData(table: string, payload: any[]): Promise<any[]> 
     if (error) throw new Error(error.message);
     return data;
   } catch (error: Error | any) {
+    console.error("[API ERROR]", errMsg, error.message);
+    throw new Error(error.message || errMsg);
+  }
+}
+
+export async function updateData(
+  table: string,
+  payload: any,
+  column: string,
+  value: any,
+): Promise<any[]> {
+  const errMsg = `Failed to update data in ${table}`;
+  try {
+    const { data, error } = await supabase.from(table).update(payload).eq(column, value).select();
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (error: Error | any) {
+    console.error("[API ERROR]", errMsg, error.message);
     throw new Error(error.message || errMsg);
   }
 }
@@ -25,6 +43,7 @@ export async function fetchDataRPC(fn: string, params: any): Promise<any[]> {
     if (error) throw new Error(error.message);
     return data;
   } catch (error: Error | any) {
+    console.error("[API ERROR]", errMsg, error.message);
     throw new Error(error.message || errMsg);
   }
 }

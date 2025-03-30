@@ -1,6 +1,5 @@
-import { newError } from "@utils/utils";
 import { FullTripsSchema } from "types/schema";
-import { insertData, fetchDataRPC } from "@api/supabase";
+import { insertData, updateData, fetchDataRPC } from "@api/supabase";
 import {
   convertKeysToSnakeCase,
   convertKeysToCamelCase,
@@ -59,6 +58,29 @@ export async function insertTripSegmentLinks(
     return res.map(({ id }) => id);
   } catch (error: Error | any) {
     throw new Error("Error inserting trip-segment links");
+  }
+}
+
+// Inserts a new transit journal record into the database
+export async function insertTransitJournal(journal: CreateTransitJournal): Promise<string> {
+  try {
+    const payload = convertKeysToSnakeCase(journal);
+    // Insert the transit journal data into the database
+    const res = await insertData("transit_journals_v2", [payload]);
+    return res[0].id;
+  } catch (error) {
+    throw new Error("Error inserting transit journal");
+  }
+}
+
+// Updates the profile record
+export async function updateProfile(profile: Partial<Profile>): Promise<void> {
+  try {
+    const payload = convertKeysToSnakeCase(profile);
+    // Update the profile data in the database
+    await updateData("profiles", payload, "id", profile.id);
+  } catch (error) {
+    throw new Error("Error updating profile");
   }
 }
 

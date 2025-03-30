@@ -5,4 +5,9 @@ declare global {
     message: string;
     details: string;
   };
+
+  type FilterState = {
+    sortBy: string;
+    transportModes: string[];
+  };
 }

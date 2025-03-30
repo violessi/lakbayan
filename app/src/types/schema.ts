@@ -60,6 +60,13 @@ export const TripDetailsSchema = z.object({
   endCoords: CoordinatesSchema,
 });
 
+export const TripEndpointsSchema = z.object({
+  startLocation: z.string(),
+  endLocation: z.string(),
+  startCoords: CoordinatesSchema,
+  endCoords: CoordinatesSchema,
+});
+
 export const TripSchema = z.object({
   id: z.string(),
   contributorId: z.string(),
@@ -111,6 +118,21 @@ export const FullTripSchema = z.object({
   segments: SegmentsSchema,
 });
 
+export const TripSearchSchema = z.object({
+  ...TripSchema.shape,
+  segments: SegmentsSchema,
+  preSegment: SegmentSchema.omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  }).nullable(),
+  postSegment: SegmentSchema.omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  }).nullable(),
+});
+
 export const FullTripsSchema = z.array(FullTripSchema);
 
 export const TripSegmentLinkSchema = z.object({
@@ -128,11 +150,24 @@ export const TransitJournalSchema = z.object({
   id: z.string(),
   userId: z.string(),
   tripId: z.string(),
-  preSegment: SegmentSchema.nullable(),
-  postSegment: SegmentSchema.nullable(),
+  preSegmentId: z.string().nullable(),
+  postSegmentId: z.string().nullable(),
   startTime: z.string(),
   endTime: z.string().nullable(),
   status: TransitJournalStatusSchema,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const ProfileSchema = z.object({
+  id: z.string(),
+  username: z.string(),
+  fullName: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
+  role: z.string(),
+  points: z.number(),
+  isCommuter: z.boolean(),
+  transitJournalId: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
