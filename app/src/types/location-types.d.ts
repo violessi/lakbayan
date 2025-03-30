@@ -3,6 +3,7 @@ declare global {
   export interface Suggestion {
     id: string;
     place_name: string;
+    address: string;
     geometry: {
       coordinates: [number, number];
     };
