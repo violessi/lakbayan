@@ -1,5 +1,7 @@
 import { FullTripsSchema } from "types/schema";
-import { insertData, updateData, fetchDataRPC } from "@api/supabase";
+import { TransitJournalSchema, FullTripSchema } from "types/schema";
+
+import { insertData, updateData, fetchData, fetchDataRPC } from "@api/supabase";
 import {
   convertKeysToSnakeCase,
   convertKeysToCamelCase,
@@ -73,14 +75,50 @@ export async function insertTransitJournal(journal: CreateTransitJournal): Promi
   }
 }
 
-// Updates the profile record
-export async function updateProfile(profile: Partial<Profile>): Promise<void> {
+// Fetches the transit journal ID for a user
+export async function fetchUserTransitJournal(userId: string): Promise<string | null> {
   try {
-    const payload = convertKeysToSnakeCase(profile);
-    // Update the profile data in the database
-    await updateData("profiles", payload, "id", profile.id);
+    // Fetch the transit journal ID from the database
+    const [data, ...rest] = await fetchData("profiles", ["transit_journal_id"], { id: userId });
+    if (rest.length > 0) throw new Error("Multiple profiles found");
+    return data.transit_journal_id;
   } catch (error) {
-    throw new Error("Error updating profile");
+    throw new Error("Error fetching transit journal");
+  }
+}
+
+// Fetches the transit journal data for a given journal ID
+export async function fetchTransitJournal(journalId: string): Promise<TransitJournal> {
+  try {
+    // Fetch the transit journal data from the database
+    const [data, ...rest] = await fetchData("transit_journals_v2", ["*"], { id: journalId });
+    if (rest.length > 0) throw new Error("Multiple transit journals found");
+
+    // Validate the response data
+    const formattedData = convertKeysToCamelCase(data);
+    const result = TransitJournalSchema.safeParse(formattedData);
+    console.log("Transit Journal Data!", result);
+    if (!result.success) throw new Error("Invalid Transit Journal Data");
+    return result.data;
+  } catch (error) {
+    throw new Error("Error fetching transit journal");
+  }
+}
+
+// Fetches the trip data for a given trip ID
+export async function fetchTrip(tripId: string): Promise<FullTrip> {
+  try {
+    // Fetch trip data from the database
+    const [data, ...rest] = await fetchDataRPC("fetch_trip", { trip_id: tripId });
+    if (rest.length > 0) throw new Error("Multiple trips found");
+
+    // Validate the response data
+    const formattedData = convertKeysToCamelCase(data);
+    const result = FullTripSchema.safeParse(formattedData);
+    if (!result.success) throw new Error("Invalid Trip Data");
+    return result.data;
+  } catch (error) {
+    throw new Error("Error fetching trip data");
   }
 }
 
@@ -106,5 +144,16 @@ export async function fetchTripData(endpoints: TripEndpoints, radius: number): P
     return result.data;
   } catch (error) {
     throw new Error("Error fetching trip data");
+  }
+}
+
+// Updates the profile record
+export async function updateProfile(profile: Partial<Profile>): Promise<void> {
+  try {
+    const payload = convertKeysToSnakeCase(profile);
+    // Update the profile data in the database
+    await updateData(payload, "profiles", { id: profile.id });
+  } catch (error) {
+    throw new Error("Error updating profile");
   }
 }
