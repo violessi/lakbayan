@@ -40,7 +40,10 @@ serve(async (req) => {
         "X-Goog-Api-Key": GOOGLE_API_KEY,
         "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.location",
       },
-      body: JSON.stringify({ textQuery: query }),
+      body: JSON.stringify({
+        textQuery: query,
+        regionCode: "PH",
+      }),
     });
 
     console.log("Google Places API response status:", response.status);
