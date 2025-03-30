@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import { Text, View, Image, TouchableOpacity } from "react-native";
-
+import React from "react";
+import * as ExpoLocation from "expo-location";
+import { Text, View, Image, TouchableOpacity, Alert } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+
+import { useTransitJournal } from "@contexts/TransitJournal";
 
 const reportOptions = [
   { label: "Traffic", image: require("@assets/report-traffic.png") },
@@ -11,10 +13,20 @@ const reportOptions = [
 
 export default function ReportTab() {
   const snapPoints = ["15%", "20%", "40%", "72%"];
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
-  const toggleSelection = (label: string) => {
-    setSelectedOptions((prev) => (prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label]));
+  const { addLiveStatus } = useTransitJournal();
+
+  const handleReportPress = async (type: string) => {
+    const location = await ExpoLocation.getCurrentPositionAsync({});
+    const coordinate: Coordinates = [location.coords.longitude, location.coords.latitude];
+
+    Alert.alert("Send Live Update", `Report ${type} at your current location?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Send Live Update",
+        onPress: () => addLiveStatus({ type, coordinate }),
+      },
+    ]);
   };
 
   return (
@@ -25,22 +37,20 @@ export default function ReportTab() {
         </View>
         <View className="flex flex-row justify-between px-12">
           {reportOptions.map(({ label, image }) => {
-            const isSelected = selectedOptions.includes(label);
             return (
               <TouchableOpacity
                 key={label}
-                onPress={() => toggleSelection(label)}
-                className={`border rounded py-5 w-24 items-center ${
-                  isSelected ? "border-primary bg-primary/10" : "border-gray-200"
+                onPress={() => handleReportPress(label)}
+                className={`border rounded py-5 w-24 items-center border-gray-200"
                 }`}
               >
                 <Image
                   source={image}
                   className="w-7 h-7 mb-2"
                   resizeMode="contain"
-                  style={{ tintColor: isSelected ? "#6D28D9" : "#9CA3AF" }} // Purple when selected, gray when not
+                  style={{ tintColor: "#9CA3AF" }} // Purple when selected, gray when not
                 />
-                <Text className={`${isSelected ? "text-primary" : "text-secondary"} text-sm`}>{label}</Text>
+                <Text className={`text-secondary text-sm`}>{label}</Text>
               </TouchableOpacity>
             );
           })}

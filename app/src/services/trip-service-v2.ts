@@ -63,6 +63,19 @@ export async function insertTripSegmentLinks(
   }
 }
 
+export async function insertLiveStatus(status: CreateLiveStatus): Promise<string> {
+  try {
+    const payload = convertKeysToSnakeCase(status);
+    payload.coordinate = convertToPointWKT(payload.coordinate);
+
+    console.log("Inserting live status", payload);
+    const res = await insertData("live_status_v2", [payload]);
+    return res[0].id;
+  } catch (error) {
+    throw new Error("Error inserting live status");
+  }
+}
+
 // Inserts a new transit journal record into the database
 export async function insertTransitJournal(journal: CreateTransitJournal): Promise<string> {
   try {

@@ -46,8 +46,6 @@ export const TransitJournalStatusSchema = z.enum(["success", "cancelled", "ongoi
 
 export const CoordinatesSchema = z.tuple([z.number(), z.number()]);
 
-export const LiveStatusSchema = z.object({ type: z.string(), coordinates: CoordinatesSchema });
-
 export const NavigationStepsSchema = z.object({
   instruction: z.string(),
   location: CoordinatesSchema,
@@ -93,7 +91,6 @@ export const SegmentSchema = z.object({
   duration: z.number(),
   distance: z.number(),
   cost: z.number(),
-  liveStatus: z.array(LiveStatusSchema),
   waypoints: z.array(CoordinatesSchema),
   navigationSteps: z.array(NavigationStepsSchema),
   startLocation: z.string(),
@@ -148,6 +145,17 @@ export const TransitJournalSchema = z.object({
   startTime: z.string(),
   endTime: z.string().nullable(),
   status: TransitJournalStatusSchema,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const LiveStatusSchema = z.object({
+  id: z.string(),
+  contributorId: z.string(),
+  TransitJournalId: z.string(),
+  type: z.string(),
+  coordinate: CoordinatesSchema,
+  expirationDate: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
