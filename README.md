@@ -26,7 +26,12 @@
 
 2. Ensure API keys are stored in a `.env` file in the `/supabase/functions` folder
 
-3. Start Supabase 
+3. Navigate to `supabase`
+
+ ```cd supabase
+   ```
+
+Start Supabase 
 
    ```bash
     supabase start
@@ -37,3 +42,19 @@
    ```bash
    supabase functions serve
    ```
+
+## Running tests
+
+Navigate to the app via `cd app`
+
+1. Run Jest tests
+
+```bash
+npm test
+```
+
+2. Run Maestro tests (ensure Maestro is installed locally)
+
+```bash
+maestro test src/maestro/[file]
+```

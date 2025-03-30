@@ -1,4 +1,12 @@
 {
   "newArchEnabled": true,
-  "extends": "./app.config.js"
+  "extends": "./app.config.js",
+  "owner": "lakbayan",
+  "ios": {
+    "supportsTablet": true,
+    "bundleIdentifier": "com.lakbayan",
+    "infoPlist": {
+      "ITSAppUsesNonExemptEncryption": false
+    }
+  }
 }
