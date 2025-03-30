@@ -1,10 +1,13 @@
 import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { useSession } from "@contexts/SessionContext";
 import { supabase } from "@utils/supabase";
-import { ProfileSchema } from "types/schema";
+import { fetchUserTransitJournal, fetchTransitJournal, fetchTrip } from "@services/trip-service-v2";
 
 interface TransitJournalContextType {
+  hasActiveTransitJournal: boolean;
   transitJournalData: any | null;
+  trip: Trip | null;
+  segments: Segment[] | null;
 }
 
 const TransitJournalContext = createContext<TransitJournalContextType | null>(null);
@@ -15,20 +18,20 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
 
   const [transitJournalId, setTransitJournalId] = useState<string | null>(null);
   const [transitJournalData, setTransitJournalData] = useState<any | null>(null);
+  const [trip, setTrip] = useState<Trip | null>(null);
+  const [segments, setSegments] = useState<Segment[] | null>(null);
+
+  const hasActiveTransitJournal = !!transitJournalId;
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("transit_journal_id")
-        .eq("id", user.id)
-        .single();
-
-      if (error) throw new Error("Error fetching transit journal id: " + error.message);
-      setTransitJournalId(data.transit_journal_id ?? null);
+      try {
+        const transitJournalId = await fetchUserTransitJournal(user.id);
+        setTransitJournalId(transitJournalId);
+      } catch (error) {
+        throw new Error("Error fetching transit journal ID");
+      }
     };
-
-    fetchInitialData();
 
     const subscription = supabase
       .channel("profiles")
@@ -41,6 +44,8 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
       )
       .subscribe();
 
+    fetchInitialData();
+
     return () => {
       subscription.unsubscribe();
     };
@@ -49,33 +54,36 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     console.log("Transit Journal ID!", transitJournalId);
     if (!transitJournalId) {
+      setTrip(null);
+      setSegments(null);
       setTransitJournalData(null);
       return;
     }
 
     const fetchTransitJournalData = async () => {
-      const { data, error } = await supabase
-        .from("transit_journal_v2")
-        .select("*")
-        .eq("id", transitJournalId)
-        .single();
-
-      if (error) throw new Error("Error fetching transit journal data: " + error.message);
-      setTransitJournalData(data);
+      try {
+        const journalData = await fetchTransitJournal(transitJournalId);
+        const fullTripData = await fetchTrip(journalData.tripId);
+        const { segments, ...trip } = fullTripData;
+        setTrip(trip);
+        setSegments(segments);
+        setTransitJournalData(journalData);
+      } catch (error) {
+        throw new Error("Error fetching transit journal data");
+      }
     };
 
     fetchTransitJournalData();
   }, [transitJournalId]);
 
-  const value = { transitJournalData };
-
+  const value = { hasActiveTransitJournal, transitJournalData, trip, segments };
   return <TransitJournalContext.Provider value={value}>{children}</TransitJournalContext.Provider>;
 }
 
-export const useTransitJournalContext = (): TransitJournalContextType => {
+export const useTransitJournal = (): TransitJournalContextType => {
   const context = React.useContext(TransitJournalContext);
   if (!context) {
-    throw new Error("useTransitJournalContext must be used within a TransitJournalProvider");
+    throw new Error("useTransitJournal must be used within a TransitJournalProvider");
   }
   return context;
 };

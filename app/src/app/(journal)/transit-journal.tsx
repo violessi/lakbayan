@@ -1,37 +1,32 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { SafeAreaView, View, ActivityIndicator, Text, Modal, Button } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import Mapbox, { MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
+import { useRouter } from "expo-router";
 import * as ExpoLocation from "expo-location";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import Mapbox, { MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
+import { SafeAreaView, View, Text, Modal, Button } from "react-native";
 
 import Header from "@components/ui/Header";
+import ReportTab from "@components/journal/ReportTab";
 import DirectionsLine from "@components/ui/DirectionsLine";
 import LocationMarker from "@components/ui/LocationMarker";
-import ReportTab from "@components/journal/ReportTab";
 
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 import { isNearLocation, computeHeading } from "@utils/map-utils";
-import { useSegmentDirections } from "@hooks/use-segment-directions";
-
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
+
+import { useTransitJournal } from "@contexts/TransitJournal";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TransitJournal() {
-  const cameraRef = useRef<Camera>(null);
   const router = useRouter();
+  const cameraRef = useRef<Camera>(null);
 
-  const { trip, segments } = useLocalSearchParams();
-  const segmentData = useMemo(() => {
-    if (!segments) return [];
-    const segmentString = Array.isArray(segments) ? segments[0] : segments;
-    try {
-      return JSON.parse(segmentString);
-    } catch (error) {
-      console.error("Error parsing segments:", error);
-      return [];
-    }
-  }, [segments]);
+  const { trip, segments } = useTransitJournal();
+  if (!segments) throw new Error("Segments must be defined");
+  if (!trip) throw new Error("Trip must be defined");
+  const steps = segments.flatMap((segment) => segment.navigationSteps);
+  const segmentRoutes = segments.map((segment) => segment.waypoints);
+  const segmentData = segments;
 
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
@@ -40,8 +35,6 @@ export default function TransitJournal() {
 
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
-
-  const { segmentRoutes, steps, loading } = useSegmentDirections(segmentData, currentSegmentIndex);
 
   // Request location permission and get initial location
   useEffect(() => {
@@ -63,7 +56,9 @@ export default function TransitJournal() {
     if (!userLocation || !steps.length) return;
 
     const nextLocation =
-      currentStepIndex < steps.length ? steps[currentStepIndex].location : segmentData[currentSegmentIndex].end_coords;
+      currentStepIndex < steps.length
+        ? steps[currentStepIndex].location
+        : segmentData[currentSegmentIndex].endCoords;
     const computedHeading = computeHeading(nextLocation, userLocation);
 
     cameraRef.current?.setCamera({
@@ -119,10 +114,7 @@ export default function TransitJournal() {
 
   function handleNavigateToReview() {
     setShowTripFinishedModal(false);
-    router.push({
-      pathname: "/(journal)/journal-review",
-      params: { trip: trip, segments: JSON.stringify(segmentData) },
-    });
+    router.push("/(journal)/journal-review");
   }
 
   return (
@@ -132,24 +124,28 @@ export default function TransitJournal() {
         <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12">
           <Camera ref={cameraRef} />
 
-          <UserLocation visible={true} showsUserHeadingIndicator={true} onUpdate={handleUserLocationUpdate} />
+          <UserLocation
+            visible={true}
+            showsUserHeadingIndicator={true}
+            onUpdate={handleUserLocationUpdate}
+          />
 
           <LocationMarker
-            coordinates={segmentData[currentSegmentIndex].start_coords}
-            label={segmentData[currentSegmentIndex].start_location}
+            id="start"
+            coordinates={segmentData[currentSegmentIndex].startCoords}
+            label={segmentData[currentSegmentIndex].startLocation}
             color={TRANSPORTATION_COLORS[currentSegmentIndex % TRANSPORTATION_COLORS.length]}
             radius={6}
           />
           <LocationMarker
-            coordinates={segmentData[currentSegmentIndex].end_coords}
-            label={segmentData[currentSegmentIndex].end_location}
+            id="end"
+            coordinates={segmentData[currentSegmentIndex].endCoords}
+            label={segmentData[currentSegmentIndex].endLocation}
             color={TRANSPORTATION_COLORS[currentSegmentIndex % TRANSPORTATION_COLORS.length]}
             radius={6}
           />
 
-          {loading ? (
-            <ActivityIndicator size="large" style={{ position: "absolute", top: "50%", left: "50%" }} />
-          ) : segmentRoutes.length > 0 ? (
+          {segmentRoutes.length > 0 ? (
             segmentRoutes.map((coordinates, index) => (
               <DirectionsLine
                 key={index}
@@ -159,7 +155,9 @@ export default function TransitJournal() {
               />
             ))
           ) : (
-            <Text style={{ position: "absolute", top: "50%", left: "50%" }}>No route available!</Text>
+            <Text style={{ position: "absolute", top: "50%", left: "50%" }}>
+              No route available!
+            </Text>
           )}
         </MapView>
 
@@ -170,10 +168,14 @@ export default function TransitJournal() {
             <Text className="font-bold text-lg mb-2">Follow the instructions on the map.</Text>
           )}
           {segmentData[currentSegmentIndex].landmark && (
-            <Text className="text-sm mb-2">Landmark: {segmentData[currentSegmentIndex].landmark}</Text>
+            <Text className="text-sm mb-2">
+              Landmark: {segmentData[currentSegmentIndex].landmark}
+            </Text>
           )}
           {segmentData[currentSegmentIndex].instruction && (
-            <Text className="text-sm mb-2">Instruction: {segmentData[currentSegmentIndex].instruction}</Text>
+            <Text className="text-sm mb-2">
+              Instruction: {segmentData[currentSegmentIndex].instruction}
+            </Text>
           )}
         </View>
       </View>
