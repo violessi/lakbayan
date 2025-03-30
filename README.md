@@ -24,7 +24,7 @@
 
 1. Run Docker
 
-2. Ensure API keys are stored in a `.env` file in the `/supabase` folder
+2. Ensure API keys are stored in a `.env` file in the `/supabase/functions` folder
 
 3. Start Supabase 
 

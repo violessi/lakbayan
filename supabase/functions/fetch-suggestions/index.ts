@@ -54,8 +54,9 @@ serve(async (req) => {
     }
 
     const places = data.places.map((place: any) => ({
-      id: place.id,
+      id: place.id || crypto.randomUUID(), // Generate a unique ID 
       place_name: place.displayName.text,
+      address: place.formattedAddress || "No address available",
       geometry: {
         coordinates: [place.location.longitude, place.location.latitude],
       },
