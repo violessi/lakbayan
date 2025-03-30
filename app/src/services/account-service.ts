@@ -113,7 +113,6 @@ export async function checkUsernameExists(username: string): Promise<boolean> {
     .single();
 
   if (error && error.code !== "PGRST116") {
-    console.error("Error checking username:", error);
     throw error;
   }
 

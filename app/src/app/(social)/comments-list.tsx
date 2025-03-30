@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, FlatList, SafeAreaView } from "react-native";
+import { View, Text, TextInput, FlatList, SafeAreaView, Alert } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useSession } from "@contexts/SessionContext";
 import { getComments, addComment } from "@services/socials-service";
@@ -25,7 +25,7 @@ export default function CommentsList() {
         const fetchedComments = await getComments(tripId);
         setComments(fetchedComments || []);
       } catch (error) {
-        console.error("Error fetching comments:", error);
+        Alert.alert("Error", "Failed to get comments. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -76,6 +76,7 @@ export default function CommentsList() {
             onChangeText={setContent}
             placeholder="Add a comment..."
             className="flex-1 border border-gray-200 rounded-lg px-3"
+            testID="comment-input"
           />
           <PrimaryButton label="Post" onPress={handleCommentSubmit} />
         </View>
