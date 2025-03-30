@@ -55,8 +55,8 @@ export default function TripOverview() {
 
       // bind transit journal to user
       await updateProfile({ id: user!.id, transitJournalId });
-      // FIXME: wait for 5 seconds to simulate trip start
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      // FIXME: should verify if journal context is updated before navigating
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       router.push("/(journal)/transit-journal");
     } catch (error) {
       Alert.alert("Error starting trip");

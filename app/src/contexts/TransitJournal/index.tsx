@@ -6,7 +6,7 @@ import {
   fetchTransitJournal,
   fetchTrip,
   fetchSegments,
-  insertLiveStatus,
+  insertLiveUpdate,
 } from "@services/trip-service-v2";
 
 interface TransitJournalContextType {
@@ -15,7 +15,7 @@ interface TransitJournalContextType {
   trip: Trip | null;
   segments: Segment[] | null;
   loading: boolean;
-  addLiveStatus: (status: { type: string; coordinate: Coordinates }) => Promise<void>;
+  addLiveUpdate: (status: { type: LiveUpdateType; coordinate: Coordinates }) => Promise<void>;
 }
 
 const TransitJournalContext = createContext<TransitJournalContextType | null>(null);
@@ -99,16 +99,16 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, [transitJournalId]);
 
-  const addLiveStatus = async (status: { type: string; coordinate: Coordinates }) => {
-    const payload: CreateLiveStatus = {
+  const addLiveUpdate = async (status: { type: LiveUpdateType; coordinate: Coordinates }) => {
+    const payload: CreateLiveUpdate = {
       contributorId: user.id,
-      TransitJournalId: transitJournalId!,
+      transitJournalId: transitJournalId!,
       type: status.type,
       coordinate: status.coordinate,
     };
 
     try {
-      await insertLiveStatus(payload);
+      await insertLiveUpdate(payload);
     } catch (error) {
       throw new Error("Error adding live status");
     }
@@ -120,7 +120,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     trip,
     segments,
     loading,
-    addLiveStatus,
+    addLiveUpdate,
   };
   return <TransitJournalContext.Provider value={value}>{children}</TransitJournalContext.Provider>;
 }

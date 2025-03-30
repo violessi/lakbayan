@@ -44,6 +44,8 @@ export const TransportationModeSchema = z.enum(["Train", "Bus", "Jeep", "UV", "T
 
 export const TransitJournalStatusSchema = z.enum(["success", "cancelled", "ongoing"]);
 
+export const LiveUpdateTypeSchema = z.enum(["Traffic", "Disruption", "Long Line"]);
+
 export const CoordinatesSchema = z.tuple([z.number(), z.number()]);
 
 export const NavigationStepsSchema = z.object({
@@ -149,16 +151,18 @@ export const TransitJournalSchema = z.object({
   updatedAt: z.string(),
 });
 
-export const LiveStatusSchema = z.object({
+export const LiveUpdateSchema = z.object({
   id: z.string(),
   contributorId: z.string(),
-  TransitJournalId: z.string(),
-  type: z.string(),
+  transitJournalId: z.string(),
+  type: LiveUpdateTypeSchema,
   coordinate: CoordinatesSchema,
   expirationDate: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
+
+export const LiveUpdatesSchema = z.array(LiveUpdateSchema);
 
 export const ProfileSchema = z.object({
   id: z.string(),

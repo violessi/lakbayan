@@ -14,7 +14,7 @@ const reportOptions = [
 export default function ReportTab() {
   const snapPoints = ["15%", "20%", "40%", "72%"];
 
-  const { addLiveStatus } = useTransitJournal();
+  const { addLiveUpdate } = useTransitJournal();
 
   const handleReportPress = async (type: string) => {
     const location = await ExpoLocation.getCurrentPositionAsync({});
@@ -24,7 +24,7 @@ export default function ReportTab() {
       { text: "Cancel", style: "cancel" },
       {
         text: "Send Live Update",
-        onPress: () => addLiveStatus({ type, coordinate }),
+        onPress: () => addLiveUpdate({ type, coordinate }),
       },
     ]);
   };
