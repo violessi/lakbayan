@@ -53,7 +53,7 @@ export default function LogIn() {
       email: form.email,
       password: form.password,
     });
-    if (error) Alert.alert(error.message);
+    if (error) Alert.alert("Login Failed", error.message);
     setLoading(false);
   }
 
@@ -78,6 +78,7 @@ export default function LogIn() {
             placeholder="email@address.com"
             autoCapitalize="none"
             keyboardType="email-address"
+            testID="email-input"
           />
           <OutlinedTextInput
             label="Password"
@@ -86,16 +87,18 @@ export default function LogIn() {
             placeholder="Password"
             autoCapitalize="none"
             secureTextEntry
+            testID="password-input"
           />
         </View>
         <View className="flex flex-col w-full">
           <PrimaryButton label="Log in" disabled={loading} onPress={signInWithEmail} />
         </View>
-        <View className="flex flex-col w-full items-center">
+        <View>
           <TouchableOpacity onPress={() => router.push("/(auth)/sign-up")}>
-            <Text className="mt-4 text-md">
-              No account yet? <Text style={styles.grayText}>Sign up here.</Text>
-            </Text>
+            <View className="flex flex-row w-full items-end justify-center gap-1">
+              <Text className="mt-4 text-md">No account yet?</Text>
+              <Text style={styles.grayText}>Sign up here.</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
