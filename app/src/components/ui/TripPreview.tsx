@@ -8,6 +8,7 @@ import {
   addBookmark,
   removeBookmark,
   countModVerifications,
+  countGpsVerifications,
 } from "@services/socials-service";
 
 import VotingBar from "@components/VotingBar";
@@ -49,22 +50,28 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
 
   const [bookmarked, setBookmarked] = useState(false);
   const [modVerifications, setModVerifications] = useState(0);
+  const [gpsVerifications, setGpsVerifications] = useState(0);
 
   useEffect(() => {
     async function fetchData() {
       if (!user) return;
 
-      const [bookmarks, modCount] = await Promise.all([
+      const segmentIds = trip.segments.map((seg) => seg.id);
+
+      const [bookmarks, modCount, gpsCount] = await Promise.all([
         getBookmarks(user.id),
         countModVerifications(trip.id),
+        countGpsVerifications(segmentIds),
       ]);
 
       setBookmarked(bookmarks.includes(trip.id));
       setModVerifications(modCount);
+      // TODO test GPS verification count
+      setGpsVerifications(gpsCount);
     }
 
     fetchData();
-  }, [user, trip.id]);
+  }, [user, trip]);
 
   const toggleBookmark = async () => {
     if (!user) return;
@@ -122,7 +129,7 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
                   style={{ width: 16, height: 16 }}
                   resizeMode="contain"
                 />
-                <Text className="text-sm">{trip.gpsVerified}</Text>
+                <Text className="text-sm">{gpsVerifications}</Text>
               </View>
             </View>
             <View className="flex flex-row gap-3">

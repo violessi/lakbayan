@@ -175,3 +175,30 @@ export async function countModVerifications(tripId: string): Promise<number> {
 
   return count || 0;
 }
+
+// GPS Verifications
+
+export async function countGpsVerifications(segmentIds: string[]): Promise<number> {
+  if (segmentIds.length === 0) return 0;
+
+  const { data, error } = await supabase
+    .from("journal-entries")
+    .select("segment_id", { count: "exact" })
+    .in("segment_id", segmentIds);
+
+  if (error) {
+    console.error("Error fetching GPS verifications:", error);
+    return 0;
+  }
+
+  if (!data || data.length === 0) return 0;
+
+  // Count occurrences per segment_id
+  const segmentCounts: Record<string, number> = {};
+  data.forEach((entry) => {
+    segmentCounts[entry.segment_id] = (segmentCounts[entry.segment_id] || 0) + 1;
+  });
+
+  // Return the minimum verification count among all segments
+  return Math.min(...Object.values(segmentCounts));
+}
