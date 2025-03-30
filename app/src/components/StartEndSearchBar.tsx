@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, FlatList, Keyboard, StyleSheet } from "react-native";
+import { View, FlatList, Keyboard } from "react-native";
 import { TextInput, List, IconButton } from "react-native-paper";
 import { fetchSuggestions } from "@services/mapbox-service";
 
@@ -78,7 +78,9 @@ export default function StartEndSearch({
           editable={isStartActive}
           style={{ backgroundColor: "none", fontSize: 12, flex: 1 }}
         />
-        {isStartActive && <IconButton icon="close" size={20} onPress={() => handleClearAll("start")} />}
+        {isStartActive && (
+          <IconButton icon="close" size={20} onPress={() => handleClearAll("start")} />
+        )}
       </View>
 
       <View className="absolute top-16 left-0 z-50 mx-5 my-3 flex-row items-center bg-white rounded-[8]">
@@ -103,13 +105,16 @@ export default function StartEndSearch({
           {startSuggestions.length > 0 && (
             <View>
               <FlatList
-                data={startSuggestions}
-                keyExtractor={(item, index) => `${item.id}-${index}`}
+                data={startSuggestions.slice(0, 8)}
+                keyExtractor={(item) => item.id}
+                style={{ paddingTop: 10, paddingBottom: 10 }}
                 renderItem={({ item }) => (
                   <List.Item
                     title={item.place_name}
-                    titleStyle={{ fontSize: 11 }}
-                    style={{ height: 40, paddingBottom: 0 }}
+                    description={item.address || ""}
+                    titleStyle={{ fontSize: 13, fontWeight: "bold", color: "#333" }}
+                    descriptionStyle={{ fontSize: 11, color: "gray" }}
+                    style={{ height: 45 }}
                     onPress={() => handleSuggestionPress(item, "start")}
                   />
                 )}
@@ -121,13 +126,16 @@ export default function StartEndSearch({
           {endSuggestions.length > 0 && (
             <View>
               <FlatList
-                data={endSuggestions}
+                data={endSuggestions.slice(0, 8)}
                 keyExtractor={(item) => item.id}
+                style={{ paddingTop: 10, paddingBottom: 10 }}
                 renderItem={({ item }) => (
                   <List.Item
                     title={item.place_name}
-                    titleStyle={{ fontSize: 11 }}
-                    style={{ height: 40, paddingBottom: 0 }}
+                    description={item.address || ""}
+                    titleStyle={{ fontSize: 13, fontWeight: "bold", color: "#333" }}
+                    descriptionStyle={{ fontSize: 11, color: "gray" }}
+                    style={{ height: 45 }}
                     onPress={() => handleSuggestionPress(item, "end")}
                   />
                 )}

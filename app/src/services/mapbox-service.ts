@@ -4,32 +4,41 @@ import { supabaseUrl } from "@utils/supabase";
 
 const BASE_URL = "https://api.mapbox.com";
 
+let debounceTimer: NodeJS.Timeout;
+
 export async function fetchSuggestions(query: string): Promise<any[]> {
-  if (!query.trim()) {
-    return [];
-  }
+  return new Promise((resolve) => {
+    // Add debounce to limit the number of API calls, wait for keystrokes to stop
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(async () => {
+      if (!query.trim()) {
+        resolve([]);
+        return;
+      }
 
-  const SUPABASE_EDGE_FUNCTION_URL = `${supabaseUrl}/functions/v1/fetch-suggestions`;
+      const SUPABASE_EDGE_FUNCTION_URL = `${supabaseUrl}/functions/v1/fetch-suggestions`;
 
-  try {
-    const response = await fetch(SUPABASE_EDGE_FUNCTION_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query }),
-    });
+      try {
+        const response = await fetch(SUPABASE_EDGE_FUNCTION_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query }),
+        });
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
 
-    const data = await response.json();
-    return data.suggestions || [];
-  } catch (error) {
-    console.error("Error fet:", error);
-    return [];
-  }
+        const data = await response.json();
+        resolve(data.suggestions || []);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+        resolve([]);
+      }
+    }, 100); // Debounce delay
+  });
 }
 
 export async function getDirections(
@@ -95,7 +104,10 @@ export async function getDistanceDuration(start: Coordinates, end: Coordinates) 
 
   const responseJSON = await response.json();
   console.log("Directions response:", responseJSON);
-  const walkingInfo = { distance: responseJSON.routes[0].distance, duration: responseJSON.routes[0].duration };
+  const walkingInfo = {
+    distance: responseJSON.routes[0].distance,
+    duration: responseJSON.routes[0].duration,
+  };
   return walkingInfo;
 }
 

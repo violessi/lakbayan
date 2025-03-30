@@ -62,13 +62,16 @@ export default function LocationSearchBar({ onSuggestionSelect, onClear }: Locat
       <View className="absolute max-h-500 top-20 left-0 z-40 mx-5 items-center bg-white rounded-[8]">
         {suggestions.length > 0 && (
           <FlatList
-            data={suggestions}
+            data={suggestions.slice(0, 8)}
             keyExtractor={(item) => item.id}
+            style={{ paddingTop: 10, paddingBottom: 10 }}
             renderItem={({ item }) => (
               <List.Item
                 title={item.place_name}
-                titleStyle={{ fontSize: 11 }}
-                style={{ height: 40, paddingBottom: 0 }}
+                description={item.address || ""}
+                titleStyle={{ fontSize: 13, fontWeight: "bold", color: "#333" }}
+                descriptionStyle={{ fontSize: 11, color: "gray" }}
+                style={{ height: 45 }}
                 onPress={() => handleSuggestionPress(item)}
               />
             )}
