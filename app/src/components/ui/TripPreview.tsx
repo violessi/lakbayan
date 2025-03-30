@@ -9,6 +9,7 @@ import {
   removeBookmark,
   countModVerifications,
   countGpsVerifications,
+  countComments,
 } from "@services/socials-service";
 
 import VotingBar from "@components/VotingBar";
@@ -51,6 +52,7 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
   const [bookmarked, setBookmarked] = useState(false);
   const [modVerifications, setModVerifications] = useState(0);
   const [gpsVerifications, setGpsVerifications] = useState(0);
+  const [commentCount, setCommentCount] = useState(0);
 
   useEffect(() => {
     async function fetchData() {
@@ -58,16 +60,18 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
 
       const segmentIds = trip.segments.map((seg) => seg.id);
 
-      const [bookmarks, modCount, gpsCount] = await Promise.all([
+      const [bookmarks, modCount, gpsCount, commentCountTemp] = await Promise.all([
         getBookmarks(user.id),
         countModVerifications(trip.id),
         countGpsVerifications(segmentIds),
+        countComments(trip.id),
       ]);
 
       setBookmarked(bookmarks.includes(trip.id));
       setModVerifications(modCount);
       // TODO test GPS verification count
       setGpsVerifications(gpsCount);
+      setCommentCount(commentCountTemp);
     }
 
     fetchData();
@@ -136,7 +140,7 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
               {user && <VotingBar tripId={trip.id} userId={user.id} />}
               <View className="flex flex-row gap-1 items-center">
                 <Image source={comment} style={{ width: 11, height: 11 }} resizeMode="contain" />
-                <Text className="text-sm">0</Text>
+                <Text className="text-sm">{commentCount}</Text>
               </View>
             </View>
           </View>

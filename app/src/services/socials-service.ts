@@ -121,6 +121,20 @@ export async function addComment(
   return true;
 }
 
+export async function countComments(tripId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("comments")
+    .select("*", { count: "exact" })
+    .eq("trip_id", tripId);
+
+  if (error) {
+    console.error("Error fetching comment count:", error);
+    return 0;
+  }
+
+  return count ?? 0;
+}
+
 // Bookmarks
 
 export async function getBookmarks(userId: string) {
