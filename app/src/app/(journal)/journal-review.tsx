@@ -50,7 +50,7 @@ export default function JournalReview() {
   function handleCommentPress(tripId: string) {
     router.push({
       pathname: "/(social)/comments-list",
-      params: { tripId },
+      params: { tripId, is_gps_verified: "true" },
     });
   }
 
@@ -122,6 +122,7 @@ export default function JournalReview() {
           segments={segmentData}
           currentUserId={user.id}
           onCommentPress={handleCommentPress}
+          isGpsVerified={true}
         />
       )}
     </SafeAreaView>

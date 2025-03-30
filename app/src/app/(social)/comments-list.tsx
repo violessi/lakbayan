@@ -8,20 +8,14 @@ import Header from "@components/ui/Header";
 import CommentItem from "@components/ui/CommentItem";
 import PrimaryButton from "@components/ui/PrimaryButton";
 
-interface Comment {
-  id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-}
-
 export default function CommentsList() {
   const { user } = useSession();
   const params = useLocalSearchParams();
   const tripId = Array.isArray(params.tripId) ? params.tripId[0] : params.tripId;
+  const isGpsVerified = params.is_gps_verified === "true";
 
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState("");
+  const [comments, setComments] = useState<CommentData[]>([]);
+  const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -41,13 +35,13 @@ export default function CommentsList() {
   }, [tripId]);
 
   const handleCommentSubmit = async () => {
-    if (!newComment.trim()) return;
+    if (!content.trim()) return;
 
     try {
-      await addComment(tripId, user?.id || "", newComment);
+      await addComment(tripId, user?.id || "", content, isGpsVerified);
       const updatedComments = await getComments(tripId);
       setComments(updatedComments || []);
-      setNewComment("");
+      setContent("");
     } catch (error) {
       console.error("Error adding comment:", error);
     }
@@ -69,6 +63,7 @@ export default function CommentsList() {
                 userId={item.user_id}
                 content={item.content}
                 createdAt={item.created_at}
+                isGpsVerified={item.is_gps_verified}
               />
             )}
           />
@@ -77,8 +72,8 @@ export default function CommentsList() {
         {/* Add Comment Input */}
         <View className="flex-row mt-4 gap-3">
           <TextInput
-            value={newComment}
-            onChangeText={setNewComment}
+            value={content}
+            onChangeText={setContent}
             placeholder="Add a comment..."
             className="flex-1 border border-gray-200 rounded-lg px-3"
           />

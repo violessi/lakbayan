@@ -3,7 +3,14 @@ import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Text } from "react-native-paper";
 
 import { useSession } from "@contexts/SessionContext";
-import { getBookmarks, addBookmark, removeBookmark } from "@services/socials-service";
+import {
+  getBookmarks,
+  addBookmark,
+  removeBookmark,
+  countModVerifications,
+  countGpsVerifications,
+  countComments,
+} from "@services/socials-service";
 
 import VotingBar from "@components/VotingBar";
 
@@ -43,16 +50,34 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
   const { user } = useSession();
 
   const [bookmarked, setBookmarked] = useState(false);
+  const [modVerifications, setModVerifications] = useState(0);
+  const [gpsVerifications, setGpsVerifications] = useState(0);
+  const [commentCount, setCommentCount] = useState(0);
 
   useEffect(() => {
-    async function fetchBookmarks() {
-      if (user) {
-        const bookmarks = await getBookmarks(user.id);
-        setBookmarked(bookmarks.includes(trip.id));
-      }
+    async function fetchData() {
+      if (!user) return;
+
+      const segmentIds = trip.segments
+        .filter((seg) => !seg.id.startsWith("walk-"))
+        .map((seg) => seg.id);
+
+      const [bookmarks, modCount, gpsCount, commentCountTemp] = await Promise.all([
+        getBookmarks(user.id),
+        countModVerifications(trip.id),
+        countGpsVerifications(segmentIds),
+        countComments(trip.id),
+      ]);
+
+      setBookmarked(bookmarks.includes(trip.id));
+      setModVerifications(modCount);
+      // TODO test GPS verification count
+      setGpsVerifications(gpsCount);
+      setCommentCount(commentCountTemp);
     }
-    fetchBookmarks();
-  }, [user, trip.id]);
+
+    fetchData();
+  }, [user, trip]);
 
   const toggleBookmark = async () => {
     if (!user) return;
@@ -91,9 +116,12 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
           </View>
         </View>
         <View className="gap-1" style={{ flex: 6 }}>
-          <Text className="text-ms" style={{ fontWeight: 700 }}>
-            Est. Travel Time: {Math.round(totalDuration / 60)} min
-          </Text>
+          <View className="flex flex-row justify-between gap-1 items-center">
+            <Text className="text-md" style={{ fontWeight: 700 }}>
+              Time: {Math.round(totalDuration / 60)} min
+            </Text>
+            <Text className="text-sm">₱{totalCost.toFixed(2)}</Text>
+          </View>
           <View className="flex flex-row gap-4 items-center">
             <View className="flex flex-row gap-2">
               <View className="flex flex-row gap-1 items-center">
@@ -102,7 +130,7 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
                   style={{ width: 16, height: 16 }}
                   resizeMode="contain"
                 />
-                <Text className="text-sm">{trip.modVerified}</Text>
+                <Text className="text-sm">{modVerifications}</Text>
               </View>
               <View className="flex flex-row gap-1 items-center">
                 <Image
@@ -110,14 +138,14 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
                   style={{ width: 16, height: 16 }}
                   resizeMode="contain"
                 />
-                <Text className="text-sm">{trip.gpsVerified}</Text>
+                <Text className="text-sm">{gpsVerifications}</Text>
               </View>
             </View>
-            <View className="flex flex-row gap-1">
+            <View className="flex flex-row gap-3">
               {user && <VotingBar tripId={trip.id} userId={user.id} />}
               <View className="flex flex-row gap-1 items-center">
                 <Image source={comment} style={{ width: 11, height: 11 }} resizeMode="contain" />
-                <Text className="text-sm">0</Text>
+                <Text className="text-sm">{commentCount}</Text>
               </View>
             </View>
           </View>

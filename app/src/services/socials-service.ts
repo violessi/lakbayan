@@ -1,12 +1,5 @@
 import { supabase } from "@utils/supabase";
 
-interface Comment {
-  id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-}
-
 // Votes
 
 export async function getPoints(tripId: string): Promise<number> {
@@ -90,10 +83,10 @@ export async function getUserVote(
 
 // Comments
 
-export async function getComments(tripId: string): Promise<Comment[] | null> {
+export async function getComments(tripId: string): Promise<CommentData[] | null> {
   const { data, error } = await supabase
     .from("comments")
-    .select("id, user_id, content, created_at")
+    .select("id, user_id, content, created_at, is_gps_verified")
     .eq("trip_id", tripId)
     .order("created_at", { ascending: false });
 
@@ -109,12 +102,14 @@ export async function addComment(
   tripId: string,
   userId: string,
   content: string,
+  isGpsVerified: boolean,
 ): Promise<boolean> {
   const { error } = await supabase.from("comments").insert([
     {
       trip_id: tripId,
       user_id: userId,
       content: content,
+      is_gps_verified: isGpsVerified,
     },
   ]);
 
@@ -124,6 +119,20 @@ export async function addComment(
   }
 
   return true;
+}
+
+export async function countComments(tripId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("comments")
+    .select("*", { count: "exact" })
+    .eq("trip_id", tripId);
+
+  if (error) {
+    console.error("Error fetching comment count:", error);
+    return 0;
+  }
+
+  return count ?? 0;
 }
 
 // Bookmarks
@@ -163,4 +172,47 @@ export async function removeBookmark(userId: string, tripId: string) {
   }
 
   return true;
+}
+
+// Moderator Verifications
+
+export async function countModVerifications(tripId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("moderation-reviews")
+    .select("*", { count: "exact", head: true })
+    .eq("trip_id", tripId);
+
+  if (error) {
+    console.error("Error fetching mod verifications count:", error);
+    return 0;
+  }
+
+  return count || 0;
+}
+
+// GPS Verifications
+
+export async function countGpsVerifications(segmentIds: string[]): Promise<number> {
+  if (segmentIds.length === 0) return 0;
+
+  const { data, error } = await supabase
+    .from("journal-entries")
+    .select("segment_id", { count: "exact" })
+    .in("segment_id", segmentIds);
+
+  if (error) {
+    console.error("Error fetching GPS verifications:", error);
+    return 0;
+  }
+
+  if (!data || data.length === 0) return 0;
+
+  // Count occurrences per segment_id
+  const segmentCounts: Record<string, number> = {};
+  data.forEach((entry) => {
+    segmentCounts[entry.segment_id] = (segmentCounts[entry.segment_id] || 0) + 1;
+  });
+
+  // Return the minimum verification count among all segments
+  return Math.min(...Object.values(segmentCounts));
 }

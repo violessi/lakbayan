@@ -40,7 +40,7 @@ export default function TripOverview() {
   function handleCommentPress(tripId: string) {
     router.push({
       pathname: "/(social)/comments-list",
-      params: { tripId },
+      params: { tripId, is_gps_verified: "false" },
     });
   }
 
