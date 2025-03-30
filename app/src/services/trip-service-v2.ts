@@ -1,5 +1,5 @@
 import { FullTripsSchema } from "types/schema";
-import { TransitJournalSchema, FullTripSchema } from "types/schema";
+import { TransitJournalSchema, FullTripSchema, SegmentsSchema } from "types/schema";
 
 import { insertData, updateData, fetchData, fetchDataRPC } from "@api/supabase";
 import {
@@ -97,11 +97,30 @@ export async function fetchTransitJournal(journalId: string): Promise<TransitJou
     // Validate the response data
     const formattedData = convertKeysToCamelCase(data);
     const result = TransitJournalSchema.safeParse(formattedData);
-    console.log("Transit Journal Data!", result);
     if (!result.success) throw new Error("Invalid Transit Journal Data");
     return result.data;
   } catch (error) {
     throw new Error("Error fetching transit journal");
+  }
+}
+
+export async function fetchSegments(segmentIds: string[]): Promise<Segment[]> {
+  try {
+    // Fetch the segment data from the database
+    const segments = Promise.all(
+      segmentIds.map(async (segmentId) => {
+        console.log("Fetching segment", segmentId);
+        const data = await fetchDataRPC("fetch_segment", { segment_id: segmentId });
+        return data;
+      }),
+    );
+
+    const result = SegmentsSchema.safeParse(segments);
+    if (!result.success) throw new Error("Invalid Segment Data");
+    return result.data;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Error fetching segments");
   }
 }
 
