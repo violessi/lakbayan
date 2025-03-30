@@ -49,7 +49,10 @@ export default function LogIn() {
     if (!isValid) return;
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+    });
     if (error) Alert.alert(error.message);
     setLoading(false);
   }

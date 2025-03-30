@@ -11,6 +11,7 @@ interface OutlinedTextInputProps {
   secureTextEntry?: boolean;
   placeholder?: string;
   disabled?: boolean;
+  testID?: string;
 }
 
 export default function OutlinedTextInput({
@@ -22,6 +23,7 @@ export default function OutlinedTextInput({
   secureTextEntry = false,
   placeholder,
   disabled = false,
+  testID,
 }: OutlinedTextInputProps) {
   return (
     <TextInput
@@ -37,6 +39,7 @@ export default function OutlinedTextInput({
       secureTextEntry={secureTextEntry}
       placeholder={placeholder}
       disabled={disabled}
+      testID={testID}
     />
   );
 }
