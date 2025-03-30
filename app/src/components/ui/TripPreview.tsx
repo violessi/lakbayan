@@ -58,7 +58,9 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
     async function fetchData() {
       if (!user) return;
 
-      const segmentIds = trip.segments.map((seg) => seg.id);
+      const segmentIds = trip.segments
+        .filter((seg) => !seg.id.startsWith("walk-"))
+        .map((seg) => seg.id);
 
       const [bookmarks, modCount, gpsCount, commentCountTemp] = await Promise.all([
         getBookmarks(user.id),
@@ -114,9 +116,12 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
           </View>
         </View>
         <View className="gap-1" style={{ flex: 6 }}>
-          <Text className="text-ms" style={{ fontWeight: 700 }}>
-            Est. Travel Time: {Math.round(totalDuration / 60)} min
-          </Text>
+          <View className="flex flex-row justify-between gap-1 items-center">
+            <Text className="text-md" style={{ fontWeight: 700 }}>
+              Time: {Math.round(totalDuration / 60)} min
+            </Text>
+            <Text className="text-sm">₱{totalCost.toFixed(2)}</Text>
+          </View>
           <View className="flex flex-row gap-4 items-center">
             <View className="flex flex-row gap-2">
               <View className="flex flex-row gap-1 items-center">
