@@ -8,7 +8,6 @@ import type {
   CoordinatesSchema,
   LiveStatusSchema,
   NavigationStepsSchema,
-  TripDetailsSchema,
   TripEndpointsSchema,
   TripSchema,
   SegmentSchema,
@@ -53,8 +52,6 @@ declare global {
   export type Coordinates = z.infer<typeof CoordinatesSchema>;
   export type LiveStatus = z.infer<typeof LiveStatusSchema>;
   export type NavigationSteps = z.infer<typeof NavigationStepsSchema>;
-
-  export type TripDetails = z.infer<typeof TripDetailsSchema>;
 
   export type TripEndpoints = z.infer<typeof TripEndpointsSchema>;
 

@@ -112,14 +112,14 @@ const getSortFunction = (sortBy: string) => {
 async function appendWalkingSegments(
   userId: string,
   trips: FullTrip[],
-  tripDetails: TripDetails,
+  endpoints: TripEndpoints,
 ): Promise<TripSearch[]> {
   return Promise.all(
     trips.map(async (trip) => {
       const start = await generateWalkingSegment(
         userId,
-        tripDetails.startLocation,
-        tripDetails.startCoords,
+        endpoints.startLocation,
+        endpoints.startCoords,
         trip.startLocation,
         trip.startCoords,
       );
@@ -127,23 +127,23 @@ async function appendWalkingSegments(
         userId,
         trip.endLocation,
         trip.endCoords,
-        tripDetails.endLocation,
-        tripDetails.endCoords,
+        endpoints.endLocation,
+        endpoints.endCoords,
       );
 
       const newTrip: TripSearch = { ...trip, preSegment: null, postSegment: null };
 
       if (start) {
         const { id, createdAt, updatedAt, ...cleanStart } = start;
-        newTrip.startLocation = tripDetails.startLocation;
-        newTrip.startCoords = tripDetails.startCoords;
+        newTrip.startLocation = endpoints.startLocation;
+        newTrip.startCoords = endpoints.startCoords;
         newTrip.segments.unshift(start);
         newTrip.preSegment = cleanStart;
       }
       if (end) {
         const { id, createdAt, updatedAt, ...cleanEnd } = end;
-        newTrip.endLocation = tripDetails.endLocation;
-        newTrip.endCoords = tripDetails.endCoords;
+        newTrip.endLocation = endpoints.endLocation;
+        newTrip.endCoords = endpoints.endCoords;
         newTrip.segments.push(end);
         newTrip.postSegment = cleanEnd;
       }

@@ -53,13 +53,6 @@ export const NavigationStepsSchema = z.object({
   location: CoordinatesSchema,
 });
 
-export const TripDetailsSchema = z.object({
-  startLocation: z.string(),
-  endLocation: z.string(),
-  startCoords: CoordinatesSchema,
-  endCoords: CoordinatesSchema,
-});
-
 export const TripEndpointsSchema = z.object({
   startLocation: z.string(),
   endLocation: z.string(),

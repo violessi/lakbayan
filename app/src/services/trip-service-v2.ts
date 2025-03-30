@@ -85,13 +85,13 @@ export async function updateProfile(profile: Partial<Profile>): Promise<void> {
 }
 
 // Fetches trip data based on provided details and radius
-export async function fetchTripData(tripDetails: TripDetails, radius: number): Promise<FullTrip[]> {
+export async function fetchTripData(endpoints: TripEndpoints, radius: number): Promise<FullTrip[]> {
   try {
     const args = {
-      start_lat: tripDetails.startCoords[1],
-      start_lon: tripDetails.startCoords[0],
-      end_lat: tripDetails.endCoords[1],
-      end_lon: tripDetails.endCoords[0],
+      start_lat: endpoints.startCoords[1],
+      start_lon: endpoints.startCoords[0],
+      end_lat: endpoints.endCoords[1],
+      end_lon: endpoints.endCoords[0],
       radius,
     };
 
