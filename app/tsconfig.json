@@ -11,7 +11,8 @@
       "@contexts/*": ["contexts/*"],
       "@services/*": ["services/*"],
       "@utils/*": ["utils/*"],
-      "@api/*": ["api/*"]
+      "@api/*": ["api/*"],
+      "@app/*": ["app/*"]
     }
   },
   "include": [

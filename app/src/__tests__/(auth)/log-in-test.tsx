@@ -1,22 +1,11 @@
 import { fireEvent, render, waitFor, act } from "@testing-library/react-native";
-import LogIn from "../log-in";
-import { useRouter } from "expo-router";
-import { supabase } from "@utils/supabase";
 import { Alert } from "react-native";
 
+import LogIn from "@app/(auth)/log-in";
+import { useRouter } from "expo-router";
+import { supabase } from "@utils/supabase";
+
 jest.spyOn(Alert, "alert").mockImplementation(() => {});
-
-jest.mock("expo-router", () => ({
-  useRouter: jest.fn(),
-}));
-
-jest.mock("@utils/supabase", () => ({
-  supabase: {
-    auth: {
-      signInWithPassword: jest.fn(),
-    },
-  },
-}));
 
 beforeEach(() => {
   jest.useFakeTimers();

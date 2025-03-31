@@ -1,5 +1,5 @@
 import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
-import Onboarding from "../onboarding";
+import Onboarding from "@app/(auth)/onboarding";
 import { router } from "expo-router";
 import { Dimensions } from "react-native";
 

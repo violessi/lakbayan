@@ -1,30 +1,13 @@
 import React from "react";
 import { Alert } from "react-native";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import CommentsList from "../comments-list";
+
+import CommentsList from "@app/(social)/comments-list";
 import { useSession } from "@contexts/SessionContext";
 import { getComments, addComment } from "@services/socials-service";
-
 import { TESTER_ID } from "@constants/test-constants";
 
 jest.spyOn(Alert, "alert").mockImplementation(() => {});
-
-// Mock dependencies
-jest.mock("@contexts/SessionContext", () => ({
-  useSession: jest.fn(),
-}));
-
-jest.mock("@services/socials-service", () => ({
-  getComments: jest.fn(),
-  addComment: jest.fn(),
-}));
-
-jest.mock("expo-router", () => ({
-  useLocalSearchParams: jest.fn(() => ({
-    tripId: "123",
-    is_gps_verified: "true",
-  })),
-}));
 
 describe("CommentsList", () => {
   beforeEach(() => {
@@ -45,12 +28,8 @@ describe("CommentsList", () => {
 
     await waitFor(() => {
       expect(getByText("Comments")).toBeTruthy();
-
-      const textInput = getByPlaceholderText("Add a comment...");
-      expect(textInput).toBeTruthy();
-
-      const button = getByText("Post");
-      expect(button).toBeTruthy();
+      expect(getByPlaceholderText("Add a comment...")).toBeTruthy();
+      expect(getByText("Post")).toBeTruthy();
     });
   });
 
