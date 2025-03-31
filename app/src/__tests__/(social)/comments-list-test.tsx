@@ -1,48 +1,46 @@
 import React from "react";
 import { Alert } from "react-native";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-
 import CommentsList from "@app/(social)/comments-list";
-import { useSession } from "@contexts/SessionContext";
+import { useLocalSearchParams } from "expo-router";
 import { getComments, addComment } from "@services/socials-service";
-import { TESTER_ID } from "@constants/test-constants";
+
+jest.mock("expo-router");
+jest.mock("@contexts/SessionContext");
 
 jest.spyOn(Alert, "alert").mockImplementation(() => {});
+
+const mockComment = (overrides = {}) => ({
+  id: "1",
+  user_id: "mockcommentuser",
+  content: "This is a comment",
+  created_at: "2023-01-01T00:00:00Z",
+  is_gps_verified: true,
+  ...overrides,
+});
 
 describe("CommentsList", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useSession as jest.Mock).mockReturnValue({
-      user: { id: "user123" },
+    (useLocalSearchParams as jest.Mock).mockReturnValue({
+      tripId: "mocktrip",
+      is_gps_verified: "true",
     });
   });
 
-  it("renders correctly with no comments", async () => {
+  it("shows loading then displays empty comment UI", async () => {
     (getComments as jest.Mock).mockResolvedValue([]);
 
     const { getByText, getByPlaceholderText } = render(<CommentsList />);
 
-    await waitFor(() => {
-      expect(getByText("Loading comments...")).toBeTruthy();
-    });
-
-    await waitFor(() => {
-      expect(getByText("Comments")).toBeTruthy();
-      expect(getByPlaceholderText("Add a comment...")).toBeTruthy();
-      expect(getByText("Post")).toBeTruthy();
-    });
+    await waitFor(() => expect(getByText("Loading comments...")).toBeTruthy());
+    expect(getByText("Comments")).toBeTruthy();
+    expect(getByPlaceholderText("Add a comment...")).toBeTruthy();
+    expect(getByText("Post")).toBeTruthy();
   });
 
-  it("renders a list of comments", async () => {
-    (getComments as jest.Mock).mockResolvedValue([
-      {
-        id: "1",
-        user_id: TESTER_ID,
-        content: "This is a comment",
-        created_at: "2023-01-01T00:00:00Z",
-        is_gps_verified: true,
-      },
-    ]);
+  it("displays a list of comments", async () => {
+    (getComments as jest.Mock).mockResolvedValue([mockComment()]);
 
     const { getByText } = render(<CommentsList />);
 
@@ -51,86 +49,58 @@ describe("CommentsList", () => {
     });
   });
 
-  it("allows the user to add a comment", async () => {
-    (getComments as jest.Mock).mockResolvedValueOnce([]).mockResolvedValueOnce([
-      {
-        id: "1",
-        user_id: TESTER_ID,
-        content: "This is a comment",
-        created_at: "2023-01-01T00:00:00Z",
-        is_gps_verified: true,
-      },
-    ]);
-
+  it("lets the user add a comment", async () => {
+    (getComments as jest.Mock).mockResolvedValueOnce([]).mockResolvedValueOnce([mockComment()]);
     (addComment as jest.Mock).mockResolvedValue({});
 
     const { getByPlaceholderText, getByText } = render(<CommentsList />);
-
-    const input = getByPlaceholderText("Add a comment...");
-    const postButton = getByText("Post");
-
-    fireEvent.changeText(input, "This is a comment");
-    fireEvent.press(postButton);
+    fireEvent.changeText(getByPlaceholderText("Add a comment..."), "This is a comment");
+    fireEvent.press(getByText("Post"));
 
     await waitFor(() => {
-      expect(addComment).toHaveBeenCalledWith("123", "user123", "This is a comment", true);
+      expect(addComment).toHaveBeenCalledWith(
+        "mocktrip",
+        "3aa3a6d1-aef3-44c1-a02b-dc5db06f184a",
+        "This is a comment",
+        true,
+      );
     });
 
-    await waitFor(() => {
-      expect(getByText("This is a comment")).toBeTruthy();
-    });
+    expect(getByText("This is a comment")).toBeTruthy();
   });
 
   it("renders GPS verified badge when is_gps_verified is true", async () => {
     (getComments as jest.Mock).mockResolvedValue([
-      {
-        id: "1",
-        user_id: TESTER_ID,
-        content: "Verified comment",
-        created_at: "2023-01-01T00:00:00Z",
-        is_gps_verified: true,
-      },
-      {
-        id: "2",
-        user_id: TESTER_ID,
-        content: "Unverified comment",
-        created_at: "2023-01-02T00:00:00Z",
-        is_gps_verified: false,
-      },
+      mockComment({ id: "1", content: "Verified", is_gps_verified: true }),
+      mockComment({ id: "2", content: "Unverified", is_gps_verified: false }),
     ]);
 
     const { getByText, queryByTestId } = render(<CommentsList />);
 
     await waitFor(() => {
-      expect(getByText("Verified comment")).toBeTruthy();
-      expect(getByText("Unverified comment")).toBeTruthy();
+      expect(getByText("Verified")).toBeTruthy();
+      expect(getByText("Unverified")).toBeTruthy();
     });
 
     expect(queryByTestId("gps-verified-badge")).toBeTruthy();
   });
 
-  it("does not allow posting an empty comment", async () => {
+  it("does not submit blank comments", async () => {
     const { getByPlaceholderText, getByText } = render(<CommentsList />);
-
-    const input = getByPlaceholderText("Add a comment...");
-    const postButton = getByText("Post");
-
-    fireEvent.changeText(input, "   ");
-    fireEvent.press(postButton);
+    fireEvent.changeText(getByPlaceholderText("Add a comment..."), "   ");
+    fireEvent.press(getByText("Post"));
 
     await waitFor(() => {
       expect(addComment).not.toHaveBeenCalled();
     });
   });
 
-  it("handles errors when fetching comments", async () => {
+  it("alerts on error while fetching comments", async () => {
     (getComments as jest.Mock).mockRejectedValue(new Error("Failed to fetch comments"));
 
     const { getByText } = render(<CommentsList />);
 
-    await waitFor(() => {
-      expect(getByText("Loading comments...")).toBeTruthy();
-    });
+    await waitFor(() => expect(getByText("Loading comments...")).toBeTruthy());
 
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(

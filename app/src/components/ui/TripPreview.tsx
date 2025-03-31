@@ -62,8 +62,6 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
         .filter((seg) => !seg.id.startsWith("walk-"))
         .map((seg) => seg.id);
 
-      console.log("segments: ", trip.segments);
-
       const [bookmarks, modCount, gpsCount, commentCountTemp] = await Promise.all([
         getBookmarks(user.id),
         countModVerifications(trip.id),

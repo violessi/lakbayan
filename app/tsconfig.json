@@ -12,7 +12,8 @@
       "@services/*": ["services/*"],
       "@utils/*": ["utils/*"],
       "@api/*": ["api/*"],
-      "@app/*": ["app/*"]
+      "@app/*": ["app/*"],
+      "@test-utils/*": ["__test-utils__/*"],
     }
   },
   "include": [

@@ -1,11 +1,10 @@
-import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import Onboarding from "@app/(auth)/onboarding";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { Dimensions } from "react-native";
 
-jest.mock("expo-router", () => ({
-  router: { replace: jest.fn() },
-}));
+const mockReplace = jest.fn();
+(useRouter as jest.Mock).mockReturnValue({ replace: mockReplace });
 
 jest.spyOn(Dimensions, "get").mockReturnValue({
   width: 400,
@@ -26,7 +25,7 @@ describe("Onboarding Component", () => {
   it("navigates to login when Skip is pressed", () => {
     const { getByText } = render(<Onboarding />);
     fireEvent.press(getByText("Skip"));
-    expect(router.replace).toHaveBeenCalledWith("/(auth)/log-in");
+    expect(mockReplace).toHaveBeenCalledWith("/(auth)/log-in");
   });
 
   it("goes to the next slide when Next is pressed", async () => {
@@ -82,6 +81,6 @@ describe("Onboarding Component", () => {
     const getStartedButton = await waitFor(() => getByText("Get Started"));
     fireEvent.press(getStartedButton);
 
-    expect(router.replace).toHaveBeenCalledWith("/(auth)/log-in");
+    expect(mockReplace).toHaveBeenCalledWith("/(auth)/log-in");
   });
 });

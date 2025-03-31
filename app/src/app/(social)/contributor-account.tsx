@@ -112,7 +112,7 @@ export default function ContributorAccount() {
               {contributor.username}'s submitted trips
             </Text>
             {loading || tripsLoading ? (
-              <ActivityIndicator size="small" />
+              <ActivityIndicator size="small" testID="ActivityIndicator" />
             ) : submittedTrips.length === 0 ? (
               <Text className="mx-4 mt-4">No submitted trips</Text>
             ) : (

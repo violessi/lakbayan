@@ -1,5 +1,5 @@
-import { useRef, useState, useEffect } from "react";
-import { router } from "expo-router";
+import { useRef, useState } from "react";
+import { useRouter } from "expo-router";
 import {
   Text,
   View,
@@ -40,6 +40,7 @@ const slides = [
 export default function Onboarding() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const flatListRef = useRef<FlatList>(null);
+  const router = useRouter();
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
