@@ -14,7 +14,7 @@ export default function CommentsList() {
   const tripId = Array.isArray(params.tripId) ? params.tripId[0] : params.tripId;
   const isGpsVerified = params.is_gps_verified === "true";
 
-  const [comments, setComments] = useState<CommentWithUsername[]>([]);
+  const [comments, setComments] = useState<CommentData[]>([]);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
 
