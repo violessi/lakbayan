@@ -4,7 +4,6 @@ import { useRouter } from "expo-router";
 import { supabase } from "@utils/supabase";
 import { Alert } from "react-native";
 
-jest.useFakeTimers();
 jest.spyOn(Alert, "alert").mockImplementation(() => {});
 
 jest.mock("expo-router", () => ({
@@ -18,6 +17,11 @@ jest.mock("@utils/supabase", () => ({
     },
   },
 }));
+
+beforeEach(() => {
+  jest.useFakeTimers();
+  jest.clearAllMocks();
+});
 
 describe("LogIn Component", () => {
   let mockRouter: { push: jest.Mock };
@@ -98,4 +102,9 @@ describe("LogIn Component", () => {
     fireEvent.press(getByText("Sign up here."));
     expect(mockRouter.push).toHaveBeenCalledWith("/(auth)/sign-up");
   });
+});
+
+afterEach(() => {
+  jest.runOnlyPendingTimers();
+  jest.useRealTimers();
 });

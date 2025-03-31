@@ -1,7 +1,7 @@
 import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
 import Onboarding from "../onboarding";
 import { router } from "expo-router";
-import { FlatList, Dimensions } from "react-native";
+import { Dimensions } from "react-native";
 
 jest.mock("expo-router", () => ({
   router: { replace: jest.fn() },

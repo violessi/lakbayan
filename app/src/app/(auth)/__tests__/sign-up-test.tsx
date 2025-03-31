@@ -7,7 +7,6 @@ import { supabase } from "@utils/supabase";
 import { createUserProfile, checkUsernameExists } from "@services/account-service";
 import SignUp from "../sign-up";
 
-jest.useFakeTimers();
 jest.spyOn(Alert, "alert").mockImplementation(() => {});
 
 jest.mock("expo-router", () => ({ useRouter: jest.fn() }));
@@ -19,7 +18,10 @@ jest.mock("@utils/supabase", () => ({
   supabase: { auth: { signUp: jest.fn() } },
 }));
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.useFakeTimers();
+  jest.clearAllMocks();
+});
 
 describe("SignUp Component", () => {
   const setup = () => {
@@ -146,4 +148,9 @@ describe("SignUp Component", () => {
       expect(Alert.alert).toHaveBeenCalledWith("Sign-up failed");
     });
   });
+});
+
+afterEach(() => {
+  jest.runOnlyPendingTimers();
+  jest.useRealTimers();
 });
