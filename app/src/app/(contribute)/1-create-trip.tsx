@@ -5,14 +5,14 @@ import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
 
 import pin from "@assets/pin-purple.png";
 import Header from "@components/ui/Header";
+import SymbolMarker from "@components/map/SymbolMarker";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import StartEndSearchBar from "@components/StartEndSearchBar";
-import SymbolMarker from "@components/map/SymbolMarker";
 
-import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 import { reverseGeocode } from "@services/mapbox-service";
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 
+import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 // TODO: set initial camera to current location
@@ -55,9 +55,9 @@ export default function CustomTrip() {
       "Confirm Location",
       `Do you want to set ${location} as your source or destination?`,
       [
+        { text: "Cancel", onPress: () => setMapCoordinates(null) },
         { text: "Source", onPress: () => handleStartChange(location, coords) },
         { text: "Destination", onPress: () => handleEndChange(location, coords) },
-        { text: "Cancel", onPress: () => setMapCoordinates(null) },
       ],
     );
   };
@@ -65,11 +65,14 @@ export default function CustomTrip() {
   // When the user presses Confirm, navigate to the next screen if both locations are set.
   const handleConfirmLocation = () => {
     if (trip.startLocation && trip.endLocation) {
-      router.push("/(contribute)/2-review-trip");
+      router.replace("/(contribute)/2-review-trip");
     } else {
       Alert.alert("Please select both a source and destination.");
     }
   };
+
+  // back function
+  const prevCallback = () => router.replace("/(tabs)/contribute");
 
   // Update zoom level when region changes.
   // FIXME: translation of device zoom tp map zoom level
@@ -79,7 +82,7 @@ export default function CustomTrip() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Custom Trips" />
+      <Header title="Custom Trips" prevCallback={prevCallback} />
 
       <View>
         {/*​FIXME: This is not being overwritten by the map. */}

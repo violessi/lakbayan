@@ -1,28 +1,36 @@
 import { router } from "expo-router";
-import React, { useRef, useState } from "react";
-import { Alert, SafeAreaView, View } from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
+import { Alert, SafeAreaView, View } from "react-native";
+import React, { useRef, useState, useCallback } from "react";
 
 import Header from "@components/ui/Header";
-import DirectionsLine from "@components/ui/DirectionsLine";
 import CircleMarker from "@components/map/CircleMarker";
 import TripTitle from "@components/contribute/TripTitle";
+import PrimaryButton from "@components/ui/PrimaryButton";
+import DirectionsLine from "@components/ui/DirectionsLine";
 import RouteInformation from "@components/contribute/RouteInformation";
 
 import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 import { getDirections, paraphraseStep } from "@services/mapbox-service";
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
+import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteInput() {
   const cameraRef = useRef<Camera>(null);
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [zoomLevel, setZoomLevel] = useState(13);
 
-  const { route, updateRoute, addSegment } = useTripCreator();
+  const { route, inEditMode, setInEditMode, updateRoute, addSegment, clearRouteData } =
+    useTripCreator();
   const [customWaypoints, setCustomWaypoint] = useState<Coordinates[]>([]);
-  const [isEditingRoute, setIsEditingRoute] = useState(false);
+  const [isAddingWaypoints, setIsAddingWaypoints] = useState(false);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+
+  const { index } = useLocalSearchParams<{ index: string }>();
+  const segmentIndex = index !== undefined && index !== null ? parseInt(String(index), 10) : -1;
 
   const getRouteDirections = async () => {
     setIsLoadingRoute(true);
@@ -54,22 +62,33 @@ export default function RouteInput() {
   };
 
   const handleMapClick = async (event: any) => {
-    if (!isEditingRoute) return;
+    if (!isAddingWaypoints) return;
     setCustomWaypoint((prev) => [...prev, event.geometry.coordinates]);
   };
 
   const handleToggleMode = async () => {
-    if (isEditingRoute) await getRouteDirections();
-    setIsEditingRoute((prev) => !prev);
+    if (isAddingWaypoints) await getRouteDirections();
+    setIsAddingWaypoints((prev) => !prev);
   };
 
+  const handleDismissPress = useCallback(() => {
+    bottomSheetModalRef.current?.dismiss();
+  }, []);
+
   const handleSubmit = () => {
-    if (!route.segmentName || !route.cost || isNaN(route.cost) || route.waypoints.length === 0) {
+    if (
+      !route.segmentMode ||
+      !route.segmentName ||
+      !route.cost ||
+      isNaN(route.cost) ||
+      route.waypoints.length === 0
+    ) {
       Alert.alert("Please fill in all fields to proceed.");
       return;
     }
-    addSegment();
-    router.push("/(contribute)/2-review-trip");
+    handleDismissPress();
+    addSegment(segmentIndex);
+    router.replace("/(contribute)/2-review-trip");
   };
 
   const clearWaypoints = () => setCustomWaypoint([]);
@@ -80,9 +99,37 @@ export default function RouteInput() {
     }
   };
 
+  // bottom sheet
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current!.present();
+  }, []);
+
+  const prevCallback = () => {
+    Alert.alert(
+      "Unsaved Changes",
+      "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
+      [
+        {
+          text: "Leave Anyway",
+          style: "destructive",
+          onPress: () => {
+            clearRouteData();
+            if (inEditMode) {
+              setInEditMode(false);
+              router.replace("/(contribute)/2-review-trip");
+            } else {
+              router.replace("/(contribute)/3-add-transfer");
+            }
+          },
+        },
+        { text: "Stay", style: "cancel" },
+      ],
+    );
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Route Input" />
+      <Header title="Route Input" prevCallback={prevCallback} />
       <View className="flex justify-center items-center">
         <TripTitle
           startLocation={route.startLocation}
@@ -125,10 +172,22 @@ export default function RouteInput() {
           />
         ))}
 
-        {!isLoadingRoute && !isEditingRoute && route.waypoints.length > 0 && (
+        {!isLoadingRoute && !isAddingWaypoints && route.waypoints.length > 0 && (
           <DirectionsLine coordinates={route.waypoints} />
         )}
       </MapView>
+
+      <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
+        <PrimaryButton
+          label={isAddingWaypoints ? "Recalculate" : "Edit Route"}
+          onPress={handleToggleMode}
+        />
+        <PrimaryButton
+          label={isAddingWaypoints ? "Clear" : "Calculate"}
+          onPress={isAddingWaypoints ? clearWaypoints : getRouteDirections}
+        />
+        <PrimaryButton label="Edit Details" onPress={handlePresentModalPress} />
+      </View>
 
       <RouteInformation
         onRouteNameChange={(segmentName) => updateRoute({ segmentName })}
@@ -136,14 +195,12 @@ export default function RouteInput() {
         onInstructionChange={(instruction) => updateRoute({ instruction })}
         onCostChange={(cost) => updateRoute({ cost: Number(cost) })}
         routeName={route.segmentName}
-        landmark={route.landmark}
-        instruction={route.instruction}
+        landmark={route.landmark ?? ""}
+        instruction={route.instruction ?? ""}
         cost={route.cost.toString()}
         onSubmit={handleSubmit}
-        isEditingRoute={isEditingRoute}
-        handleToggleMode={handleToggleMode}
-        clearWaypoints={clearWaypoints}
-        getRouteDirections={getRouteDirections}
+        bottomSheetModalRef={bottomSheetModalRef}
+        updateRoute={updateRoute}
       />
     </SafeAreaView>
   );

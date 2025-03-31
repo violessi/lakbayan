@@ -4,11 +4,11 @@ import { SafeAreaView, View, Alert } from "react-native";
 import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
 
 import Header from "@components/ui/Header";
+import SymbolMarker from "@components/map/SymbolMarker";
 import TripTitle from "@components/contribute/TripTitle";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import TripSummary from "@components/contribute/TripSummary";
 import DirectionsLine from "@components/ui/DirectionsLine";
-import SymbolMarker from "@components/map/SymbolMarker";
+import TripSummary from "@components/contribute/TripSummary";
 
 import pin from "@assets/pin-purple.png";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
@@ -23,21 +23,20 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
-  const { trip, segments, submitTrip } = useTripCreator();
+  const { trip, segments, submitTrip, updateRoute, setInEditMode, clearTripData } =
+    useTripCreator();
 
   // transformation/calculations we need
+  const len = segments.length;
   const segmentCoordinates = segments.map(({ waypoints }) => waypoints);
-  const isSameEndLocation =
-    segments.length > 0 && trip.endLocation === segments[segments.length - 1].endLocation;
+  const isSameEndLocation = len > 0 && trip.endLocation === segments[len - 1].endLocation;
 
   // When the map is loaded, fit the camera to the pins
   const handleMapLoaded = () => {
-    if (cameraRef.current)
-      cameraRef.current.fitBounds(trip.startCoords, trip.endCoords, [150, 150, 150, 150]);
-  };
-
-  const handleNavigateToRouteInput = () => {
-    router.push("/(contribute)/3-add-transfer");
+    if (cameraRef.current) {
+      const frame = [150, 150, 150, 150];
+      cameraRef.current.fitBounds(trip.startCoords, trip.endCoords, frame);
+    }
   };
 
   const handleSubmitTrip = async () => {
@@ -47,14 +46,49 @@ export default function TripReview() {
       Alert.alert("Trip Submitted");
       router.replace("/(tabs)");
     } catch (error) {
-      console.log("Error submitting trip", error);
+      console.error("Error submitting trip", error);
       Alert.alert("Error submitting trip");
+    }
+  };
+
+  const handleCreateSegment = () => {
+    return router.replace("/(contribute)/3-add-transfer");
+  };
+
+  const handleEditSegment = (index: number) => {
+    setInEditMode(true);
+    updateRoute(segments[index]);
+    router.replace("/(contribute)/4-edit-transfer");
+  };
+
+  const prevCallback = () => {
+    const hasEmptySegments = segments.length === 0;
+
+    if (hasEmptySegments) {
+      clearTripData();
+      router.replace("/(contribute)/1-create-trip");
+    } else {
+      Alert.alert(
+        "Unsaved Changes",
+        "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
+        [
+          {
+            text: "Leave Anyway",
+            style: "destructive",
+            onPress: () => {
+              clearTripData();
+              router.replace("/(contribute)/1-create-trip");
+            },
+          },
+          { text: "Stay", style: "cancel" },
+        ],
+      );
     }
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Trip Review" />
+      <Header title="Trip Review" prevCallback={prevCallback} />
 
       <View className="flex justify-center items-center">
         <TripTitle startLocation={trip.startLocation} endLocation={trip.endLocation} />
@@ -86,10 +120,10 @@ export default function TripReview() {
         ))}
       </MapView>
 
-      <View className="px-10 py-20 z-10">
+      <View className="p-5 z-10">
         <PrimaryButton
           label={isSameEndLocation ? "Submit" : "Add Transfers"}
-          onPress={isSameEndLocation ? handleSubmitTrip : handleNavigateToRouteInput}
+          onPress={isSameEndLocation ? handleSubmitTrip : handleCreateSegment}
         />
       </View>
 
@@ -97,7 +131,35 @@ export default function TripReview() {
         startLocation={trip.startLocation}
         endLocation={trip.endLocation}
         segments={segments}
+        onSegmentPress={handleEditSegment}
       />
     </SafeAreaView>
   );
 }
+
+// back navigation for android
+// usePreventRemove(hasAddedSegment, ({ data }) => {
+//   if (hasAddedSegment) {
+//     Alert.alert(
+//       "Unsaved Changes",
+//       "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
+//       [
+//         {
+//           text: "Leave Anyway",
+//           style: "destructive",
+//           onPress: () => {
+//             clearTripData();
+//             navigation.dispatch(data.action);
+//           },
+//         },
+//         {
+//           text: "Stay",
+//           style: "cancel",
+//           onPress: () => {},
+//         },
+//       ],
+//     );
+//   } else {
+//     navigation.dispatch(data.action);
+//   }
+// });

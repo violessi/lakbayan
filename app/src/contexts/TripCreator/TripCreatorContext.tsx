@@ -8,10 +8,14 @@ interface TripCreatorContextType {
   trip: CreateTrip;
   route: CreateSegment;
   segments: CreateSegment[];
-  addSegment: () => void;
+  inEditMode: boolean;
+  setInEditMode: (editMode: boolean) => void;
+  addSegment: (index: number) => void;
   updateRoute: (updates: Partial<CreateSegment>) => void;
   updateTrip: (updates: Partial<CreateTrip>) => void;
   submitTrip: () => Promise<{ tripId: string; segmentIds: string[]; linkIds: string[] }>;
+  clearTripData: () => void;
+  clearRouteData: () => void;
 }
 
 interface TripCreatorProviderProps {
@@ -30,6 +34,7 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
   const [trip, setTrip] = useState<CreateTrip>(TRIP_INITIAL_STATE);
   const [route, setRoute] = useState<CreateSegment>(SEGMENT_INITIAL_STATE);
   const [segments, setSegments] = useState<CreateSegment[]>([]);
+  const [inEditMode, setInEditMode] = useState(false);
 
   const updateRoute = (updates: Partial<CreateSegment>) => {
     setRoute((prevRoute) => ({ ...prevRoute, ...updates }));
@@ -39,10 +44,27 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     setTrip((prevTrip) => ({ ...prevTrip, ...updates }));
   };
 
-  const addSegment = () => {
+  const addSegment = (index: number) => {
     const segment = { ...route, contributorId: user.id };
-    setRoute(SEGMENT_INITIAL_STATE);
-    setSegments((prevSegments) => [...prevSegments, segment]);
+
+    // handle case when editing a segment or adding a new one
+    if (inEditMode) {
+      setSegments((prevSegments) => {
+        prevSegments.splice(index, 1, segment);
+        return prevSegments;
+      });
+      setInEditMode(false);
+    } else {
+      setSegments((prevSegments) => [...prevSegments, segment]);
+    }
+
+    // Reset the route to the last segment's end location
+    const lastSegment = segments.length > 0 ? segments[segments.length - 1] : null;
+    updateRoute({
+      ...SEGMENT_INITIAL_STATE,
+      startLocation: lastSegment ? lastSegment.endLocation : trip.startLocation,
+      startCoords: lastSegment ? lastSegment.endCoords : trip.startCoords,
+    });
   };
 
   // Handles the submission of the trip, segments, and junction table
@@ -66,17 +88,42 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     }
   };
 
-  // Update the start location and coordinates of the route every time a segment is added
-  useEffect(() => {
+  // reset data and only retain the start and end locations
+  const clearTripData = () => {
+    setTrip((prevTrip) => ({
+      ...TRIP_INITIAL_STATE,
+      startLocation: prevTrip.startLocation,
+      startCoords: prevTrip.startCoords,
+      endCoords: prevTrip.endCoords,
+      endLocation: prevTrip.endLocation,
+    }));
+    setRoute(SEGMENT_INITIAL_STATE);
+    setSegments([]);
+  };
+
+  // reset route data and add new start location
+  const clearRouteData = () => {
     const lastSegment = segments.length > 0 ? segments[segments.length - 1] : null;
     updateRoute({
-      ...route,
+      ...SEGMENT_INITIAL_STATE,
       startLocation: lastSegment ? lastSegment.endLocation : trip.startLocation,
       startCoords: lastSegment ? lastSegment.endCoords : trip.startCoords,
     });
-  }, [segments, trip]);
+  };
 
-  const value = { trip, route, segments, addSegment, updateRoute, updateTrip, submitTrip };
+  const value = {
+    trip,
+    route,
+    segments,
+    inEditMode,
+    setInEditMode,
+    addSegment,
+    updateRoute,
+    updateTrip,
+    submitTrip,
+    clearTripData,
+    clearRouteData,
+  };
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;
 }
 
