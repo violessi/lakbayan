@@ -62,6 +62,8 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
         .filter((seg) => !seg.id.startsWith("walk-"))
         .map((seg) => seg.id);
 
+      console.log("segments: ", trip.segments);
+
       const [bookmarks, modCount, gpsCount, commentCountTemp] = await Promise.all([
         getBookmarks(user.id),
         countModVerifications(trip.id),
@@ -93,7 +95,6 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
   const totalDuration = trip.segments.reduce((sum, seg) => sum + seg.duration, 0);
   const totalCost = trip.segments.reduce((sum, seg) => sum + seg.cost, 0);
   const transportModes = trip.segments.map((seg) => seg.segmentMode);
-  console.log("Transport Modes: ", transportModes);
 
   return (
     <View className="w-full border-b border-gray-200 py-6 px-2">

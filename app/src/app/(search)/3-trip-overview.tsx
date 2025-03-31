@@ -15,6 +15,8 @@ import { useSession } from "@contexts/SessionContext";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 import { insertSegments, insertTransitJournal, updateProfile } from "@services/trip-service-v2";
 
+import { useLocalSearchParams } from "expo-router"; // for pages that redirect to this screen
+
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TripOverview() {
@@ -22,8 +24,12 @@ export default function TripOverview() {
   const { user } = useSession();
   const cameraRef = useRef<Camera>(null);
 
-  const { trip } = useTripSearch();
-  if (!trip) throw new Error("Trip not found in context");
+  const { tripData } = useLocalSearchParams();
+  const { trip: contextTrip } = useTripSearch();
+
+  // Use contextTrip if available, otherwise parse tripData from params
+  const trip = contextTrip ?? (typeof tripData === "string" ? JSON.parse(tripData) : null);
+  if (!trip) throw new Error("Trip not found");
 
   const handleMapLoaded = () => {
     if (cameraRef.current) {

@@ -5,7 +5,8 @@ import CommentsList from "../comments-list";
 import { useSession } from "@contexts/SessionContext";
 import { getComments, addComment } from "@services/socials-service";
 
-const testerID = "3aa3a6d1-aef3-44c1-a02b-dc5db06f184a";
+import { TESTER_ID } from "@constants/test-constants";
+
 jest.spyOn(Alert, "alert").mockImplementation(() => {});
 
 // Mock dependencies
@@ -57,7 +58,7 @@ describe("CommentsList", () => {
     (getComments as jest.Mock).mockResolvedValue([
       {
         id: "1",
-        user_id: testerID,
+        user_id: TESTER_ID,
         content: "This is a comment",
         created_at: "2023-01-01T00:00:00Z",
         is_gps_verified: true,
@@ -75,7 +76,7 @@ describe("CommentsList", () => {
     (getComments as jest.Mock).mockResolvedValueOnce([]).mockResolvedValueOnce([
       {
         id: "1",
-        user_id: testerID,
+        user_id: TESTER_ID,
         content: "This is a comment",
         created_at: "2023-01-01T00:00:00Z",
         is_gps_verified: true,
@@ -99,6 +100,34 @@ describe("CommentsList", () => {
     await waitFor(() => {
       expect(getByText("This is a comment")).toBeTruthy();
     });
+  });
+
+  it("renders GPS verified badge when is_gps_verified is true", async () => {
+    (getComments as jest.Mock).mockResolvedValue([
+      {
+        id: "1",
+        user_id: TESTER_ID,
+        content: "Verified comment",
+        created_at: "2023-01-01T00:00:00Z",
+        is_gps_verified: true,
+      },
+      {
+        id: "2",
+        user_id: TESTER_ID,
+        content: "Unverified comment",
+        created_at: "2023-01-02T00:00:00Z",
+        is_gps_verified: false,
+      },
+    ]);
+
+    const { getByText, queryByTestId } = render(<CommentsList />);
+
+    await waitFor(() => {
+      expect(getByText("Verified comment")).toBeTruthy();
+      expect(getByText("Unverified comment")).toBeTruthy();
+    });
+
+    expect(queryByTestId("gps-verified-badge")).toBeTruthy();
   });
 
   it("does not allow posting an empty comment", async () => {

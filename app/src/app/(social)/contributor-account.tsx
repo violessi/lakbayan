@@ -7,7 +7,7 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 import {
   getUsername,
@@ -16,11 +16,10 @@ import {
   getUserJoinedDate,
 } from "@services/account-service";
 
-// FIXME Option is broken from new trip, need to fix it
-import Option from "@components/ContributeOption";
 import UserHeader from "@components/account/UserHeader";
+import TripPreview from "@components/ui/TripPreview";
 
-import { useTripData } from "@hooks/use-trip-data";
+import { useUserTrips } from "@hooks/use-trip-data";
 
 interface ContributorDetails {
   id: string;
@@ -32,8 +31,9 @@ interface ContributorDetails {
 
 export default function ContributorAccount() {
   const { contributorId, contributorUsername } = useLocalSearchParams();
-  const { tripData, segmentData, loading: tripsLoading } = useTripData();
+  const router = useRouter();
 
+  // Default values for contributor details
   const [contributor, setContributor] = useState<ContributorDetails>({
     id: contributorId as string,
     username: contributorUsername as string,
@@ -41,17 +41,18 @@ export default function ContributorAccount() {
     points: 0,
     joinedDate: null,
   });
-  const [submittedTrips, setSubmittedTrips] = useState<Trip[]>([]);
+
+  const [submittedTrips, setSubmittedTrips] = useState<FullTrip[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { userTrips, loading: tripsLoading, error } = useUserTrips(contributor.id);
 
   useEffect(() => {
     if (!contributor.id || tripsLoading) return;
-
     setLoading(true);
-    const contributorTrips = tripData.filter((trip) => trip.contributorId === contributor.id);
-    setSubmittedTrips(contributorTrips);
+    setSubmittedTrips(userTrips);
     setLoading(false);
-  }, [contributor.id, tripData, tripsLoading]);
+  }, [contributor.id, userTrips, tripsLoading]);
 
   useEffect(() => {
     async function fetchContributorData() {
@@ -80,6 +81,20 @@ export default function ContributorAccount() {
     }
   }, [contributor.id]);
 
+  function handleTripPress(trip: FullTrip) {
+    const tripSearch: TripSearch = {
+      ...trip,
+      segments: trip.segments,
+      preSegment: null,
+      postSegment: null,
+    };
+
+    router.push({
+      pathname: "/(search)/3-trip-overview",
+      params: { tripData: JSON.stringify(tripSearch) },
+    });
+  }
+
   return (
     <SafeAreaView className="flex-1">
       <UserHeader
@@ -96,7 +111,7 @@ export default function ContributorAccount() {
             <Text className="text-black text-xl font-bold mx-4 mt-4">
               {contributor.username}'s submitted trips
             </Text>
-            {/* {loading || tripsLoading ? (
+            {loading || tripsLoading ? (
               <ActivityIndicator size="small" />
             ) : submittedTrips.length === 0 ? (
               <Text className="mx-4 mt-4">No submitted trips</Text>
@@ -105,12 +120,12 @@ export default function ContributorAccount() {
                 data={submittedTrips}
                 keyExtractor={(trip) => trip.id}
                 renderItem={({ item }) => (
-                  <TouchableOpacity>
-                    <Option trip={item} segments={segmentData[item.id] || []} />
+                  <TouchableOpacity onPress={() => handleTripPress(item)}>
+                    <TripPreview trip={item} />
                   </TouchableOpacity>
                 )}
               />
-            )} */}
+            )}
           </View>
         </View>
       </View>

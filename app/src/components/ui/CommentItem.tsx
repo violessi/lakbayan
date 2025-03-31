@@ -38,7 +38,12 @@ export default function CommentItem({
 
         {isGpsVerified && (
           <TouchableOpacity onPress={() => setShowPopover(true)}>
-            <Image source={gpsBadge} className="w-4 h-4" accessibilityLabel="GPS Verified" />
+            <Image
+              source={gpsBadge}
+              className="w-4 h-4"
+              accessibilityLabel="GPS Verified"
+              testID="gps-verified-badge"
+            />
           </TouchableOpacity>
         )}
       </View>
