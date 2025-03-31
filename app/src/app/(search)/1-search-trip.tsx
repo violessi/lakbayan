@@ -1,18 +1,17 @@
-import React, { useRef, useState } from "react";
 import { useRouter } from "expo-router";
-
+import React, { useRef, useState } from "react";
 import { Alert, SafeAreaView, View } from "react-native";
+import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
 
 import Header from "@components/ui/Header";
 import SymbolMarker from "@components/map/SymbolMarker";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import pin from "@assets/pin-purple.png";
-
 import StartEndSearchBar from "@components/StartEndSearchBar";
 
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+import pin from "@assets/pin-purple.png";
+import { useTripSearch } from "@contexts/TripSearch";
 import { reverseGeocode } from "@services/mapbox-service";
-import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
+import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
@@ -24,18 +23,18 @@ export default function SearchTrip() {
   const cameraRef = useRef<Camera>(null);
   const [zoomLevel, setZoomLevel] = useState(15);
 
-  const [tripDetails, setTripDetails] = useState<Partial<TripDetails> | null>(null);
+  const { tripEndpoints, updateTripEndpoints, fetchSuggestedTrips } = useTripSearch();
   const [mapCoordinates, setMapCoordinates] = useState<Coordinates | null>(null);
 
   const handleStartChange = (startLocation: string, startCoords: Coordinates) => {
     setMapCoordinates(null);
-    setTripDetails((prev) => ({ ...prev, startLocation, startCoords }));
+    updateTripEndpoints({ startLocation, startCoords });
     if (cameraRef.current) cameraRef.current.moveTo(startCoords, 1000);
   };
 
   const handleEndChange = (endLocation: string, endCoords: Coordinates) => {
     setMapCoordinates(null);
-    setTripDetails((prev) => ({ ...prev, endLocation, endCoords }));
+    updateTripEndpoints({ endLocation, endCoords });
     if (cameraRef.current) cameraRef.current.moveTo(endCoords, 1000);
   };
 
@@ -59,12 +58,10 @@ export default function SearchTrip() {
     );
   };
 
-  const handleConfirmLocation = () => {
-    if (tripDetails?.startLocation && tripDetails?.endLocation) {
-      router.push({
-        pathname: "/(search)/2-trip-suggestions",
-        params: { params: JSON.stringify(tripDetails) },
-      });
+  const handleConfirmLocation = async () => {
+    if (tripEndpoints?.startLocation && tripEndpoints?.endLocation) {
+      await fetchSuggestedTrips();
+      router.push("/(search)/2-trip-suggestions");
     } else {
       Alert.alert("Please select both a source and destination.");
     }
@@ -79,8 +76,8 @@ export default function SearchTrip() {
       <Header title="Where are we off to today?" />
       <View>
         <StartEndSearchBar
-          defaultStart={tripDetails?.startLocation || "Starting location"}
-          defaultEnd={tripDetails?.endLocation || "Destination"}
+          defaultStart={tripEndpoints?.startLocation || "Starting location"}
+          defaultEnd={tripEndpoints?.endLocation || "Destination"}
           onStartChange={handleStartChange}
           onEndChange={handleEndChange}
         />
@@ -102,13 +99,13 @@ export default function SearchTrip() {
         <SymbolMarker id="map-onclick-location-c1" coordinates={mapCoordinates} />
         <SymbolMarker
           id="start-location-c1"
-          label={tripDetails?.startLocation?.split(",")[0]}
-          coordinates={tripDetails?.startCoords}
+          label={tripEndpoints?.startLocation?.split(",")[0]}
+          coordinates={tripEndpoints?.startCoords}
         />
         <SymbolMarker
           id="end-location-c1"
-          label={tripDetails?.endLocation?.split(",")[0]}
-          coordinates={tripDetails?.endCoords}
+          label={tripEndpoints?.endLocation?.split(",")[0]}
+          coordinates={tripEndpoints?.endCoords}
         />
         <Images images={{ pin }} />
       </MapView>

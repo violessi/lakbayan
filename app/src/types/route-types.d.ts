@@ -3,16 +3,19 @@ import type { FeatureCollection, LineString } from "geojson";
 import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
 
 import type {
-  TransportationMode as TransportationModeSchema,
-  TransitJournalStatus as TransitJournalStatusSchema,
-  Coordinates as CoordinatesSchema,
-  LiveStatus as LiveStatusSchema,
-  NavigationSteps as NavigationStepsSchema,
-  TripDetails as TripDetailsSchema,
-  Trip as TripSchema,
-  Segment as SegmentSchema,
-  TripSegmentLink as TripSegmentLinkSchema,
-  TransitJournal as TransitJournalSchema,
+  TransportationModeSchema,
+  TransitJournalStatusSchema,
+  CoordinatesSchema,
+  LiveStatusSchema,
+  NavigationStepsSchema,
+  TripEndpointsSchema,
+  TripSchema,
+  SegmentSchema,
+  FullTripSchema,
+  TripSearchSchema,
+  TripSegmentLinkSchema,
+  TransitJournalSchema,
+  ProfileSchema,
 } from "./schema";
 
 declare global {
@@ -50,7 +53,7 @@ declare global {
   export type LiveStatus = z.infer<typeof LiveStatusSchema>;
   export type NavigationSteps = z.infer<typeof NavigationStepsSchema>;
 
-  export type TripDetails = z.infer<typeof TripDetailsSchema>;
+  export type TripEndpoints = z.infer<typeof TripEndpointsSchema>;
 
   export type Trip = z.infer<typeof TripSchema>;
   export type CreateTrip = Omit<Trip, "id" | "createdAt" | "updatedAt">;
@@ -58,10 +61,18 @@ declare global {
   export type Segment = z.infer<typeof SegmentSchema>;
   export type CreateSegment = Omit<Segment, "id" | "createdAt" | "updatedAt">;
 
-  export type FullTrip = Trip & { segments: Segment[] };
+  export type FullTrip = z.infer<typeof FullTripSchema>;
+
+  export type TripSearch = z.infer<typeof TripSearchSchema>;
 
   export type TripSegmentLink = z.infer<typeof TripSegmentLinkSchema>;
   export type CreateTripSegmentLink = Omit<TripSegmentLink, "id" | "createdAt" | "updatedAt">;
 
   export type TransitJournal = z.infer<typeof TransitJournalSchema>;
+  export type CreateTransitJournal = Omit<
+    TransitJournal,
+    "id" | "createdAt" | "updatedAt" | "startTime" | "endTime" | "status"
+  >;
+
+  export type Profile = z.infer<typeof ProfileSchema>;
 }

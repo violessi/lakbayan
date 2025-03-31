@@ -1,43 +1,49 @@
-import "react-native-url-polyfill/auto";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@utils/supabase";
 import { newError } from "@utils/utils";
 
-export const supabaseUrl = "https://bspdqbaestgrqeanapux.supabase.co";
+// type APISuccess = { data: any[]; error: null };
+// type APIFailure = { data: null; error: APIError };
+// type APIResponse = Promise<APISuccess | APIFailure>;
 
-const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzcGRxYmFlc3RncnFlYW5hcHV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE0MzA0MjksImV4cCI6MjA0NzAwNjQyOX0.n3mqYGZI1kMn8hMd8gTAAaNSgGlkGBhC0CdxmKzss-I";
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
-
-// ================== API ==================
-type APISuccess = { data: unknown[]; error: null };
-type APIFailure = { data: null; error: ApiError };
-type APIResponse = Promise<APISuccess | APIFailure>;
-
-export async function insertData(table: string, payload: any[]): APIResponse {
+// Inserts data into a specified Supabase table.
+export async function insertData(table: string, payload: any[]): Promise<any[]> {
   const errMsg = `Failed to insert data into ${table}`;
   try {
     const { data, error } = await supabase.from(table).insert(payload).select();
-    return error ? { data: null, error: newError(errMsg, error) } : { data, error: null };
-  } catch (error) {
-    return { data: null, error: newError(errMsg, error) };
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (error: Error | any) {
+    console.error("[API ERROR]", errMsg, error.message);
+    throw new Error(error.message || errMsg);
   }
 }
 
-export async function fetchDataRPC<T>(fn: string, params: any): APIResponse {
-  const errMsg = "Failed to fetch data";
+export async function updateData(
+  table: string,
+  payload: any,
+  column: string,
+  value: any,
+): Promise<any[]> {
+  const errMsg = `Failed to update data in ${table}`;
+  try {
+    const { data, error } = await supabase.from(table).update(payload).eq(column, value).select();
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (error: Error | any) {
+    console.error("[API ERROR]", errMsg, error.message);
+    throw new Error(error.message || errMsg);
+  }
+}
+
+// Inserts data into a specified Supabase table.
+export async function fetchDataRPC(fn: string, params: any): Promise<any[]> {
+  const errMsg = `Failed to fetch data from ${fn}`;
   try {
     const { data, error } = await supabase.rpc(fn, params);
-    return error ? { data: null, error: newError(errMsg, error) } : { data, error: null };
-  } catch (error) {
-    return { data: null, error: newError(errMsg, error) };
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (error: Error | any) {
+    console.error("[API ERROR]", errMsg, error.message);
+    throw new Error(error.message || errMsg);
   }
 }

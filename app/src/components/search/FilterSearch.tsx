@@ -7,24 +7,31 @@ import { Checkbox, Modal, Menu, RadioButton } from "react-native-paper";
 
 import PrimaryButton from "@components/ui/PrimaryButton";
 
-export default function FilterSearch({ onClose, filters, setFilters }) {
+interface Props {
+  onClose: () => void;
+  filters: FilterState;
+  applyFilters: (filters: FilterState) => void;
+}
+
+export default function FilterSearch({ onClose, filters, applyFilters }: Props) {
   const snapPoints = useMemo(() => ["55%"], []);
   const bottomSheetRef = useRef(null);
 
   const [timeToLeave, setTimeToLeave] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [sortMenuVisible, setSortMenuVisible] = useState(false);
 
   const [sortBy, setSortBy] = useState(filters.sortBy);
   const [selectedModes, setSelectedModes] = useState(filters.transportModes);
 
   // Toggle transport mode selection
-  const toggleTransportMode = (mode) => {
-    setSelectedModes((prev) => (prev.includes(mode) ? prev.filter((m) => m !== mode) : [...prev, mode]));
+  const toggleTransportMode = (mode: string) => {
+    setSelectedModes((prev) =>
+      prev.includes(mode) ? prev.filter((m) => m !== mode) : [...prev, mode],
+    );
   };
 
   const handleApplyFilters = () => {
-    setFilters({ sortBy, transportModes: selectedModes });
+    applyFilters({ sortBy, transportModes: selectedModes });
     onClose();
   };
 
@@ -44,8 +51,13 @@ export default function FilterSearch({ onClose, filters, setFilters }) {
 
         <View>
           <Text className="text-gray-600">Time to leave</Text>
-          <Pressable onPress={() => setShowTimePicker(true)} className="p-2 border border-gray-300 rounded">
-            <Text>{timeToLeave.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</Text>
+          <Pressable
+            onPress={() => setShowTimePicker(true)}
+            className="p-2 border border-gray-300 rounded"
+          >
+            <Text>
+              {timeToLeave.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </Text>
           </Pressable>
           {showTimePicker && (
             <DateTimePicker
