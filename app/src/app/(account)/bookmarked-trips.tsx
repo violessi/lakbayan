@@ -65,16 +65,16 @@ export default function BookmarkedTrips() {
           <FlatList
             data={bookmarkedTrips}
             keyExtractor={(trip) => trip.id}
-            renderItem={({ item }) => (
+            renderItem={({ item: trip }) => (
               <View className="flex flex-col justify-center mt-5">
-                <TouchableOpacity onPress={() => handleTripPress(item)}>
+                <TouchableOpacity onPress={() => handleTripPress(trip)}>
                   <View className="flex flex-row justify-center">
-                    <Text className="text-sm font-bold">
-                      {item.startLocation} to {item.endLocation}
+                    <Text className="text-sm text-center">
+                      {trip.startLocation} to {trip.endLocation}
                     </Text>
                   </View>
                   <View>
-                    <TripPreview trip={item} />
+                    <TripPreview trip={trip} />
                   </View>
                 </TouchableOpacity>
               </View>

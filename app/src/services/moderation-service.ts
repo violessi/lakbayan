@@ -1,6 +1,7 @@
 import { supabase } from "@utils/supabase";
+import { fetchTrip } from "@services/trip-service-v2";
 
-export async function getPendingVerifications(moderatorId: string) {
+export async function getPendingVerifications(moderatorId: string): Promise<FullTrip[]> {
   const { data: reviewData, error: reviewError } = await supabase
     .from("moderation-reviews")
     .select("trip_id")
@@ -12,21 +13,21 @@ export async function getPendingVerifications(moderatorId: string) {
     return [];
   }
 
-  // Extract trip IDs
   const tripIds = reviewData.map((review) => review.trip_id);
+  if (tripIds.length === 0) return [];
 
-  if (tripIds.length === 0) {
-    return []; // No pending verifications for this moderator
-  }
+  const trips = await Promise.all(
+    tripIds.map(async (id) => {
+      try {
+        return await fetchTrip(id);
+      } catch (err) {
+        console.error(`Failed to fetch trip ${id}:`, err);
+        return null;
+      }
+    }),
+  );
 
-  const { data: trips, error: tripError } = await supabase.from("trips").select("*").in("id", tripIds);
-
-  if (tripError) {
-    console.error("Error fetching pending verifications:", tripError);
-    return [];
-  }
-
-  return trips;
+  return trips.filter((trip): trip is FullTrip => trip !== null);
 }
 
 export async function getAllModerators() {

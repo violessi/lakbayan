@@ -59,10 +59,19 @@ export default function SubmittedTrips() {
           <FlatList
             data={submittedTrips}
             keyExtractor={(trip) => trip.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => handleTripPress(item)}>
-                <TripPreview trip={item} />
-              </TouchableOpacity>
+            renderItem={({ item: trip }) => (
+              <View className="flex flex-col justify-center mt-5">
+                <TouchableOpacity onPress={() => handleTripPress(trip)}>
+                  <View className="flex flex-row justify-center">
+                    <Text className="text-sm text-center">
+                      {trip.startLocation} to {trip.endLocation}
+                    </Text>
+                  </View>
+                  <View>
+                    <TripPreview trip={trip} />
+                  </View>
+                </TouchableOpacity>
+              </View>
             )}
           />
         )}
