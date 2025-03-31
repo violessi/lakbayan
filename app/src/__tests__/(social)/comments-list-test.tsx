@@ -11,7 +11,7 @@ jest.mock("@contexts/SessionContext");
 jest.spyOn(Alert, "alert").mockImplementation(() => {});
 
 const mockComment = (overrides = {}) => ({
-  id: "1",
+  id: "mockcommentid",
   user_id: "mockcommentuser",
   content: "This is a comment",
   created_at: "2023-01-01T00:00:00Z",
@@ -71,8 +71,8 @@ describe("CommentsList", () => {
 
   it("renders GPS verified badge when is_gps_verified is true", async () => {
     (getComments as jest.Mock).mockResolvedValue([
-      mockComment({ id: "1", content: "Verified", is_gps_verified: true }),
-      mockComment({ id: "2", content: "Unverified", is_gps_verified: false }),
+      mockComment({ id: "1", content: "Verified", isGpsVerified: true }),
+      mockComment({ id: "2", content: "Unverified", isGpsVerified: false }),
     ]);
 
     const { getByText, queryByTestId } = render(<CommentsList />);

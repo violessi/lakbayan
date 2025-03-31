@@ -1,5 +1,6 @@
 import { supabase } from "@utils/supabase";
 import { fetchTrip } from "@services/trip-service-v2";
+import { getUsername } from "@services/account-service";
 
 // Votes
 
@@ -96,7 +97,20 @@ export async function getComments(tripId: string): Promise<CommentData[] | null>
     return null;
   }
 
-  return data;
+  if (!data) return null;
+
+  const dataWithUsername = await Promise.all(
+    data.map(async (comment) => ({
+      id: comment.id,
+      userId: comment.user_id,
+      username: (await getUsername(comment.user_id)) || "Unknown User",
+      content: comment.content,
+      createdAt: comment.created_at,
+      isGpsVerified: comment.is_gps_verified,
+    })),
+  );
+
+  return dataWithUsername;
 }
 
 export async function addComment(
