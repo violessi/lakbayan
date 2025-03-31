@@ -1,16 +1,14 @@
 import { router } from "expo-router";
-import React, { useRef, useCallback } from "react";
-import { SafeAreaView, View, Alert, BackHandler } from "react-native";
+import React, { useRef } from "react";
+import { SafeAreaView, View, Alert } from "react-native";
 import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
-import { useLocalSearchParams, useNavigation } from "expo-router";
-import { usePreventRemove, useFocusEffect } from "@react-navigation/native";
 
 import Header from "@components/ui/Header";
+import SymbolMarker from "@components/map/SymbolMarker";
 import TripTitle from "@components/contribute/TripTitle";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import TripSummary from "@components/contribute/TripSummary";
 import DirectionsLine from "@components/ui/DirectionsLine";
-import SymbolMarker from "@components/map/SymbolMarker";
+import TripSummary from "@components/contribute/TripSummary";
 
 import pin from "@assets/pin-purple.png";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
@@ -25,24 +23,20 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
-  const navigation = useNavigation();
-  const { trip, segments, submitTrip, getSegment, updateRoute, setInEditMode, emptyTrip } = useTripCreator();
-
-  const hasAddedSegment = segments.length > 0;
+  const { trip, segments, submitTrip, updateRoute, setInEditMode, clearTripData } =
+    useTripCreator();
 
   // transformation/calculations we need
+  const len = segments.length;
   const segmentCoordinates = segments.map(({ waypoints }) => waypoints);
-  const isSameEndLocation =
-    segments.length > 0 && trip.endLocation === segments[segments.length - 1].endLocation;
+  const isSameEndLocation = len > 0 && trip.endLocation === segments[len - 1].endLocation;
 
   // When the map is loaded, fit the camera to the pins
   const handleMapLoaded = () => {
-    if (cameraRef.current)
-      cameraRef.current.fitBounds(trip.startCoords, trip.endCoords, [150, 150, 150, 150]);
-  };
-
-  const handleNavigateToRouteInput = () => {
-    router.push("/(contribute)/3-add-transfer");
+    if (cameraRef.current) {
+      const frame = [150, 150, 150, 150];
+      cameraRef.current.fitBounds(trip.startCoords, trip.endCoords, frame);
+    }
   };
 
   const handleSubmitTrip = async () => {
@@ -52,55 +46,49 @@ export default function TripReview() {
       Alert.alert("Trip Submitted");
       router.replace("/(tabs)");
     } catch (error) {
-      console.log("Error submitting trip", error);
+      console.error("Error submitting trip", error);
       Alert.alert("Error submitting trip");
     }
   };
 
-  const handleEditSegment = (index: number) => {
-    setInEditMode(true);
-    const segment = getSegment(index);
-    updateRoute(segment);
-    // navigate to the edit transfer page
-    router.push({
-      pathname: "/(contribute)/4-edit-transfer",
-      params: { index },
-    });
-    console.log("Editing segment:", segment);
+  const handleCreateSegment = () => {
+    return router.replace("/(contribute)/3-add-transfer");
   };
 
-  // back navigation
-  usePreventRemove(hasAddedSegment, ({ data }) => {
-    if (hasAddedSegment) {
+  const handleEditSegment = (index: number) => {
+    setInEditMode(true);
+    updateRoute(segments[index]);
+    router.replace("/(contribute)/4-edit-transfer");
+  };
+
+  const prevCallback = () => {
+    const hasEmptySegments = segments.length === 0;
+
+    if (hasEmptySegments) {
+      clearTripData();
+      router.replace("/(contribute)/1-create-trip");
+    } else {
       Alert.alert(
-        'Unsaved Changes',
-        'You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?',
+        "Unsaved Changes",
+        "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
         [
           {
-            text: 'Leave Anyway',
-            style: 'destructive',
+            text: "Leave Anyway",
+            style: "destructive",
             onPress: () => {
-              navigation.dispatch(data.action);
-
+              clearTripData();
+              router.replace("/(contribute)/1-create-trip");
             },
           },
-          {
-            text: 'Stay',
-            style: 'cancel',
-            onPress: () => {},
-          },
-        ]
+          { text: "Stay", style: "cancel" },
+        ],
       );
-    } else {
-      navigation.dispatch(data.action);
     }
-  });
-
-  
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Trip Review" />
+      <Header title="Trip Review" prevCallback={prevCallback} />
 
       <View className="flex justify-center items-center">
         <TripTitle startLocation={trip.startLocation} endLocation={trip.endLocation} />
@@ -135,7 +123,7 @@ export default function TripReview() {
       <View className="p-5 z-10">
         <PrimaryButton
           label={isSameEndLocation ? "Submit" : "Add Transfers"}
-          onPress={isSameEndLocation ? handleSubmitTrip : handleNavigateToRouteInput}
+          onPress={isSameEndLocation ? handleSubmitTrip : handleCreateSegment}
         />
       </View>
 
@@ -148,3 +136,30 @@ export default function TripReview() {
     </SafeAreaView>
   );
 }
+
+// back navigation for android
+// usePreventRemove(hasAddedSegment, ({ data }) => {
+//   if (hasAddedSegment) {
+//     Alert.alert(
+//       "Unsaved Changes",
+//       "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
+//       [
+//         {
+//           text: "Leave Anyway",
+//           style: "destructive",
+//           onPress: () => {
+//             clearTripData();
+//             navigation.dispatch(data.action);
+//           },
+//         },
+//         {
+//           text: "Stay",
+//           style: "cancel",
+//           onPress: () => {},
+//         },
+//       ],
+//     );
+//   } else {
+//     navigation.dispatch(data.action);
+//   }
+// });

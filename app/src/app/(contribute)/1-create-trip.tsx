@@ -5,14 +5,14 @@ import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
 
 import pin from "@assets/pin-purple.png";
 import Header from "@components/ui/Header";
+import SymbolMarker from "@components/map/SymbolMarker";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import StartEndSearchBar from "@components/StartEndSearchBar";
-import SymbolMarker from "@components/map/SymbolMarker";
 
-import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 import { reverseGeocode } from "@services/mapbox-service";
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 
+import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 // TODO: set initial camera to current location
@@ -71,6 +71,9 @@ export default function CustomTrip() {
     }
   };
 
+  // back function
+  const prevCallback = () => router.replace("/(tabs)/contribute");
+
   // Update zoom level when region changes.
   // FIXME: translation of device zoom tp map zoom level
   const handleZoomChange = (event: any) => {
@@ -79,7 +82,7 @@ export default function CustomTrip() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Custom Trips" />
+      <Header title="Custom Trips" prevCallback={prevCallback} />
 
       <View>
         {/*​FIXME: This is not being overwritten by the map. */}

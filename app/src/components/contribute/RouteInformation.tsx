@@ -1,10 +1,15 @@
-import React, { useRef, useMemo, useCallback } from "react";
-import { Text, Keyboard, View } from "react-native";
+import React, { useMemo, useCallback } from "react";
+import { Text, View } from "react-native";
 
 import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import TransportationModeSelection from "@components/contribute/TransportationModeSelection";
-import BottomSheet, { BottomSheetView, BottomSheetModal, BottomSheetBackgroundProps, BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import {
+  BottomSheetView,
+  BottomSheetModal,
+  BottomSheetBackgroundProps,
+  BottomSheetBackdrop,
+} from "@gorhom/bottom-sheet";
 
 interface RouteInformationProps {
   onRouteNameChange: (routeName: string) => void;
@@ -17,9 +22,7 @@ interface RouteInformationProps {
   cost: string;
   onSubmit: () => void;
   bottomSheetModalRef: React.RefObject<BottomSheetModal>;
-  handleSheetChanges: (index: number) => void;
   updateRoute: (updates: Partial<CreateSegment>) => void;
-  handleDismiss: () => void;
 }
 
 export default function RouteInformation({
@@ -33,9 +36,7 @@ export default function RouteInformation({
   cost,
   onSubmit,
   bottomSheetModalRef,
-  handleSheetChanges,
   updateRoute,
-  handleDismiss
 }: RouteInformationProps) {
   const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
   const renderBackdrop = useCallback(
@@ -47,7 +48,7 @@ export default function RouteInformation({
         pressBehavior={"close"}
       />
     ),
-    []
+    [],
   );
 
   return (
@@ -56,8 +57,6 @@ export default function RouteInformation({
         ref={bottomSheetModalRef}
         snapPoints={snapPoints}
         index={2}
-        onChange={handleSheetChanges}
-        onDismiss={handleDismiss}
         backdropComponent={renderBackdrop}
         keyboardBehavior={"extend"}
       >
@@ -68,14 +67,22 @@ export default function RouteInformation({
           />
           <View className="flex-row gap-3">
             <View className="flex-1">
-              <OutlinedTextInput label="Route Name" value={routeName} onChangeText={onRouteNameChange} />
+              <OutlinedTextInput
+                label="Route Name"
+                value={routeName}
+                onChangeText={onRouteNameChange}
+              />
             </View>
             <View className="flex-1">
               <OutlinedTextInput label="Cost" value={cost} onChangeText={onCostChange} />
             </View>
           </View>
           <OutlinedTextInput label="Landmark" value={landmark} onChangeText={onLandmarkChange} />
-          <OutlinedTextInput label="Instruction" value={instruction} onChangeText={onInstructionChange} />
+          <OutlinedTextInput
+            label="Instruction"
+            value={instruction}
+            onChangeText={onInstructionChange}
+          />
           <View className="z-50 flex p-5 w-100">
             <PrimaryButton label="Submit" onPress={onSubmit} />
           </View>

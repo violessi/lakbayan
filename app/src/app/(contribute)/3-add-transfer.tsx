@@ -1,12 +1,11 @@
 import { router } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { SafeAreaView, View, Alert } from "react-native";
-import { usePreventRemove } from "@react-navigation/native";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
 import Header from "@components/ui/Header";
-import PrimaryButton from "@components/ui/PrimaryButton";
 import CircleMarker from "@components/map/CircleMarker";
+import PrimaryButton from "@components/ui/PrimaryButton";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
@@ -16,9 +15,8 @@ import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteSelectInfo() {
-  // Destructure both trip and segments from context
-  const { trip, route, updateRoute } = useTripCreator();
   const cameraRef = useRef<Camera>(null);
+  const { trip, route, updateRoute, clearRouteData } = useTripCreator();
 
   // When user updates the destination using search bar
   const handleDestinationSearch = (endLocation: string, endCoords: Coordinates) => {
@@ -54,10 +52,15 @@ export default function RouteSelectInfo() {
       cameraRef.current.fitBounds(route.startCoords, trip.endCoords, [150, 150, 250, 150]);
     }
   };
-  
+
+  const prevCallback = () => {
+    clearRouteData();
+    router.replace("/(contribute)/2-review-trip");
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Route Information" />
+      <Header title="Route Information" prevCallback={prevCallback} />
 
       <View>
         <StartEndSearchBar

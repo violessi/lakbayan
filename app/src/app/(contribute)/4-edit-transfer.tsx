@@ -1,31 +1,30 @@
 import { router } from "expo-router";
-import React, { useRef, useState, useCallback } from "react";
-import { Alert, SafeAreaView, View } from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
-import { useLocalSearchParams, useNavigation } from "expo-router";
-import { usePreventRemove } from "@react-navigation/native";
+import { Alert, SafeAreaView, View } from "react-native";
+import React, { useRef, useState, useCallback } from "react";
 
 import Header from "@components/ui/Header";
-import DirectionsLine from "@components/ui/DirectionsLine";
 import CircleMarker from "@components/map/CircleMarker";
 import TripTitle from "@components/contribute/TripTitle";
-import RouteInformation from "@components/contribute/RouteInformation";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import DirectionsLine from "@components/ui/DirectionsLine";
+import RouteInformation from "@components/contribute/RouteInformation";
 
 import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 import { getDirections, paraphraseStep } from "@services/mapbox-service";
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
+import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteInput() {
   const cameraRef = useRef<Camera>(null);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const navigation = useNavigation();
   const [zoomLevel, setZoomLevel] = useState(13);
 
-  const { route, inEditMode, setInEditMode, updateRoute, addSegment } = useTripCreator();
+  const { route, inEditMode, setInEditMode, updateRoute, addSegment, clearRouteData } =
+    useTripCreator();
   const [customWaypoints, setCustomWaypoint] = useState<Coordinates[]>([]);
   const [isAddingWaypoints, setIsAddingWaypoints] = useState(false);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
@@ -77,7 +76,13 @@ export default function RouteInput() {
   }, []);
 
   const handleSubmit = () => {
-    if (!route.segmentMode || !route.segmentName || !route.cost || isNaN(route.cost) || route.waypoints.length === 0) {
+    if (
+      !route.segmentMode ||
+      !route.segmentName ||
+      !route.cost ||
+      isNaN(route.cost) ||
+      route.waypoints.length === 0
+    ) {
       Alert.alert("Please fill in all fields to proceed.");
       return;
     }
@@ -99,44 +104,32 @@ export default function RouteInput() {
     bottomSheetModalRef.current!.present();
   }, []);
 
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log('handleSheetChanges', index);
-  }, []);
-
-  const handleDismiss = useCallback(() => {
-    console.log('on dismiss');
-  }, []);
-
-  // back navigation
-  usePreventRemove(inEditMode, ({ data }) => {
+  const prevCallback = () => {
     Alert.alert(
-      'Unsaved Changes',
-      'You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?',
+      "Unsaved Changes",
+      "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
       [
         {
-          text: 'Leave Anyway',
-          style: 'destructive',
+          text: "Leave Anyway",
+          style: "destructive",
           onPress: () => {
-            navigation.dispatch(data.action);
+            clearRouteData();
             if (inEditMode) {
               setInEditMode(false);
-              console.log("inEditMode", inEditMode);
+              router.replace("/(contribute)/2-review-trip");
+            } else {
+              router.replace("/(contribute)/3-add-transfer");
             }
           },
         },
-        {
-          text: "Stay",
-          style: 'cancel',
-          onPress: () => {},
-        },
-      ]
+        { text: "Stay", style: "cancel" },
+      ],
     );
-  });
-  
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Route Input" />
+      <Header title="Route Input" prevCallback={prevCallback} />
       <View className="flex justify-center items-center">
         <TripTitle
           startLocation={route.startLocation}
@@ -193,10 +186,7 @@ export default function RouteInput() {
           label={isAddingWaypoints ? "Clear" : "Calculate"}
           onPress={isAddingWaypoints ? clearWaypoints : getRouteDirections}
         />
-        <PrimaryButton
-          label="Edit Details"
-          onPress={handlePresentModalPress}
-        />
+        <PrimaryButton label="Edit Details" onPress={handlePresentModalPress} />
       </View>
 
       <RouteInformation
@@ -210,9 +200,7 @@ export default function RouteInput() {
         cost={route.cost.toString()}
         onSubmit={handleSubmit}
         bottomSheetModalRef={bottomSheetModalRef}
-        handleSheetChanges={handleSheetChanges}
         updateRoute={updateRoute}
-        handleDismiss={handleDismiss}
       />
     </SafeAreaView>
   );

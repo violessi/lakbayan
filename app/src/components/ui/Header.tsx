@@ -10,14 +10,21 @@ interface HeaderProps {
   title: string;
   subtitle?: string;
   hasBack?: boolean;
+  prevCallback?: () => void;
 }
 
-export default function Header({ title, subtitle, hasBack = true }: HeaderProps) {
+export default function Header({ title, subtitle, hasBack = true, prevCallback }: HeaderProps) {
   return (
     <View className="h-24 bg-primary px-5 py-5 flex-col justify-end">
       <View className="flex-row gap-3 items-center">
         {hasBack && (
-          <TouchableOpacity testID="back-button" onPress={() => router.back()}>
+          <TouchableOpacity
+            testID="back-button"
+            onPress={() => {
+              if (prevCallback) prevCallback();
+              else router.back();
+            }}
+          >
             <Image source={back} className="w-5 h-5" />
           </TouchableOpacity>
         )}
