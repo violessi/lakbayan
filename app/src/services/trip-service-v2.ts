@@ -1,4 +1,4 @@
-import { insertData, updateData, fetchData, fetchDataRPC } from "@api/supabase";
+import { insertData, updateData, deleteData, fetchData, fetchDataRPC } from "@api/supabase";
 import {
   TransitJournalSchema,
   FullTripsSchema,
@@ -189,5 +189,23 @@ export async function updateProfile(profile: Partial<Profile>): Promise<void> {
     await updateData(payload, "profiles", { id: profile.id });
   } catch (error) {
     throw new Error("Error updating profile");
+  }
+}
+
+export async function updateTransitJournal(transitJournal: Partial<TransitJournal>): Promise<void> {
+  try {
+    const payload = convertKeysToSnakeCase(transitJournal);
+    await updateData(payload, "transit_journals_v2", { id: transitJournal.id });
+  } catch (error) {
+    throw new Error("Error updating transit journal");
+  }
+}
+
+export async function deleteSegments(segmentIds: string[]): Promise<void> {
+  if (segmentIds.length === 0) return;
+  try {
+    await deleteData("segments_v2", { id: segmentIds });
+  } catch (error) {
+    throw new Error("Error deleting segments");
   }
 }

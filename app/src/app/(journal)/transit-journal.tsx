@@ -24,9 +24,6 @@ export default function TransitJournal() {
   const { trip, segments } = useTransitJournal();
   if (!segments) throw new Error("Segments must be defined");
   if (!trip) throw new Error("Trip must be defined");
-  const steps = segments.flatMap((segment) => segment.navigationSteps);
-  const segmentRoutes = segments.map((segment) => segment.waypoints);
-  const segmentData = segments;
 
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
@@ -35,6 +32,10 @@ export default function TransitJournal() {
 
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
+
+  const segmentRoutes = segments.map((segment) => segment.waypoints);
+  const steps = segments[currentSegmentIndex].navigationSteps;
+  const segmentData = segments;
 
   // Request location permission and get initial location
   useEffect(() => {
@@ -80,9 +81,9 @@ export default function TransitJournal() {
       setCurrentStepIndex((prevStepIndex) => {
         let newStepIndex = prevStepIndex;
 
-        for (let i = prevStepIndex; i < steps.length; i++) {
+        for (let i = 0; i < steps.length; i++) {
           if (isNearLocation(newCoords, steps[i].location)) {
-            newStepIndex = i;
+            newStepIndex = i + 1;
             break;
           }
         }

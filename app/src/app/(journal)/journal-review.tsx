@@ -20,7 +20,7 @@ export default function JournalReview() {
   const cameraRef = useRef<Camera>(null);
 
   const { user } = useSession();
-  const { trip, segments } = useTransitJournal();
+  const { trip, segments, transitJournal } = useTransitJournal();
 
   if (!trip) throw new Error("Trip must be defined");
   if (!segments) throw new Error("Segments must be defined");
@@ -113,6 +113,7 @@ export default function JournalReview() {
           currentUserId={user.id}
           onCommentPress={handleCommentPress}
           isGpsVerified={true}
+          transitJournal={transitJournal}
         />
       )}
     </SafeAreaView>

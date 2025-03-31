@@ -11,7 +11,7 @@ import {
 
 interface TransitJournalContextType {
   hasActiveTransitJournal: boolean;
-  transitJournalData: any | null;
+  transitJournal: any | null;
   trip: Trip | null;
   segments: Segment[] | null;
   loading: boolean;
@@ -26,7 +26,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
 
   const [loading, setLoading] = useState(true);
   const [transitJournalId, setTransitJournalId] = useState<string | null>(null);
-  const [transitJournalData, setTransitJournalData] = useState<any | null>(null);
+  const [transitJournal, setTransitJournal] = useState<any | null>(null);
   const [trip, setTrip] = useState<Trip | null>(null);
   const [segments, setSegments] = useState<Segment[] | null>(null);
 
@@ -67,7 +67,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     if (!transitJournalId) {
       setTrip(null);
       setSegments(null);
-      setTransitJournalData(null);
+      setTransitJournal(null);
       setLoading(false);
       return;
     }
@@ -89,7 +89,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
 
         setTrip(trip);
         setSegments(segments);
-        setTransitJournalData(journalData);
+        setTransitJournal(journalData);
       } catch (error) {
         throw new Error("Error fetching transit journal data");
       }
@@ -116,7 +116,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
 
   const value = {
     hasActiveTransitJournal,
-    transitJournalData,
+    transitJournal,
     trip,
     segments,
     loading,
