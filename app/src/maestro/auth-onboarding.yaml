@@ -1,0 +1,12 @@
+appId: com.lakbayan
+---
+- launchApp
+- assertVisible: "Navigating the Unknown?"
+- tapOn: "Next"
+- assertVisible: "Find Your Way"
+- tapOn: "Next"
+- assertVisible: "Powered by Commuters"
+- tapOn: "Next"
+- assertVisible: "Let’s Get Moving!"
+- tapOn: "Get Started"
+- assertVisible: "Log in"

@@ -17,7 +17,7 @@ export default function Header({ title, subtitle, hasBack = true }: HeaderProps)
     <View className="h-24 bg-primary px-5 py-5 flex-col justify-end">
       <View className="flex-row gap-3 items-center">
         {hasBack && (
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity testID="back-button" onPress={() => router.back()}>
             <Image source={back} className="w-5 h-5" />
           </TouchableOpacity>
         )}

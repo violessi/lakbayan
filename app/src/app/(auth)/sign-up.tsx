@@ -54,7 +54,10 @@ export default function SignUp() {
     if (!isValid) return;
 
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({ email: form.email, password: form.password });
+    const { data, error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+    });
 
     if (error) {
       Alert.alert(error.message);
@@ -89,7 +92,9 @@ export default function SignUp() {
         <TouchableOpacity onPress={() => router.back()}>
           <View className="flex flex-row justify-start gap-2 px-5">
             <Image source={back} className="w-5 h-5" style={{ tintColor: "white" }} />
-            <Text style={styles.whiteText}>Back</Text>
+            <Text style={styles.whiteText} testID="back-button">
+              Back
+            </Text>
           </View>
         </TouchableOpacity>
         <View className="flex flex-col gap-0 px-5 pb-5">
@@ -109,6 +114,7 @@ export default function SignUp() {
             onChangeText={(text) => handleChange("username", text)}
             placeholder="Choose a username"
             autoCapitalize="none"
+            testID="username-input"
           />
           <OutlinedTextInput
             label="Email"
@@ -117,6 +123,7 @@ export default function SignUp() {
             placeholder="email@address.com"
             autoCapitalize="none"
             keyboardType="email-address"
+            testID="email-input"
           />
           <OutlinedTextInput
             label="Password"
@@ -125,10 +132,15 @@ export default function SignUp() {
             placeholder="Password"
             autoCapitalize="none"
             secureTextEntry
+            testID="password-input"
           />
           <View className="flex flex-row items-center justify-center gap-5">
             <Text className="text-md">Are you a commuter?</Text>
-            <Switch value={form.isCommuter} onValueChange={(value) => handleChange("isCommuter", value)} />
+            <Switch
+              accessibilityLabel="Are you a commuter?"
+              value={form.isCommuter}
+              onValueChange={(value) => handleChange("isCommuter", value)}
+            />
           </View>
         </View>
         <View className="flex flex-col w-full">

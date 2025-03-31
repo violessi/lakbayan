@@ -16,6 +16,20 @@
     "preview4": {
       "distribution": "internal"
     },
-    "production": {}
+    "production": {
+    
+    },
+    "build-and-maestro-test": {
+      "withoutCredentials": true,
+      "config": "build-and-maestro-test.yaml",
+      "ios": {
+        "simulator": true,
+        "image": "latest"
+      },
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      }
+    }
   }
 }
