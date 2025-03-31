@@ -55,9 +55,9 @@ export default function CustomTrip() {
       "Confirm Location",
       `Do you want to set ${location} as your source or destination?`,
       [
+        { text: "Cancel", onPress: () => setMapCoordinates(null) },
         { text: "Source", onPress: () => handleStartChange(location, coords) },
         { text: "Destination", onPress: () => handleEndChange(location, coords) },
-        { text: "Cancel", onPress: () => setMapCoordinates(null) },
       ],
     );
   };
@@ -65,7 +65,7 @@ export default function CustomTrip() {
   // When the user presses Confirm, navigate to the next screen if both locations are set.
   const handleConfirmLocation = () => {
     if (trip.startLocation && trip.endLocation) {
-      router.push("/(contribute)/2-review-trip");
+      router.replace("/(contribute)/2-review-trip");
     } else {
       Alert.alert("Please select both a source and destination.");
     }

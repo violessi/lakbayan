@@ -1,13 +1,13 @@
 import { router } from "expo-router";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { SafeAreaView, View, Alert } from "react-native";
+import { usePreventRemove } from "@react-navigation/native";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
 import Header from "@components/ui/Header";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import CircleMarker from "@components/map/CircleMarker";
 import StartEndSearchBar from "@components/StartEndSearchBar";
-import TransportationModeSelection from "@components/contribute/TransportationModeSelection";
 
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 import { reverseGeocode } from "@services/mapbox-service";
@@ -37,21 +37,16 @@ export default function RouteSelectInfo() {
   // Prefill the final segment with the trip's end location
   const handleFinalTransfer = () => {
     updateRoute({ endLocation: trip.endLocation, endCoords: trip.endCoords });
-    if (!route.segmentMode) {
-      Alert.alert("Missing Information", "Please fill in all fields to proceed.");
-      return;
-    }
-    router.push("/(contribute)/4-edit-transfer");
+    router.replace("/(contribute)/4-edit-transfer");
   };
 
   // Once we have all necessary information, navigate to the next screen.
   const handleAddTransfer = () => {
-    if (!route.endLocation || !route.endCoords || !route.segmentMode) {
     if (!route.endLocation || !route.endCoords) {
       Alert.alert("Missing Information", "Please fill in all fields to proceed.");
       return;
     }
-    router.push("/(contribute)/4-edit-transfer");
+    router.replace("/(contribute)/4-edit-transfer");
   };
 
   const handleMapLoaded = () => {
@@ -59,7 +54,7 @@ export default function RouteSelectInfo() {
       cameraRef.current.fitBounds(route.startCoords, trip.endCoords, [150, 150, 250, 150]);
     }
   };
-
+  
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Route Information" />
@@ -104,11 +99,6 @@ export default function RouteSelectInfo() {
         />
       </MapView>
 
-      <TransportationModeSelection
-        onTransportationModeChange={(segmentMode) => updateRoute({ segmentMode })}
-      />
-
-      <View className="z-50 flex flex-row gap-4 p-5 justify-center">
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
         <PrimaryButton label="Final Location" onPress={handleFinalTransfer} />
         <PrimaryButton label="Add Transfer" onPress={handleAddTransfer} />

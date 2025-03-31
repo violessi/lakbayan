@@ -8,10 +8,14 @@ interface TripCreatorContextType {
   trip: CreateTrip;
   route: CreateSegment;
   segments: CreateSegment[];
-  addSegment: () => void;
+  inEditMode: boolean;
+  setInEditMode: (editMode: boolean) => void;
+  addSegment: (index: number) => void;
   updateRoute: (updates: Partial<CreateSegment>) => void;
   updateTrip: (updates: Partial<CreateTrip>) => void;
   submitTrip: () => Promise<{ tripId: string; segmentIds: string[]; linkIds: string[] }>;
+  getSegment: (index: number) => CreateSegment;
+  emptyTrip: () => void;
 }
 
 interface TripCreatorProviderProps {
@@ -30,6 +34,7 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
   const [trip, setTrip] = useState<CreateTrip>(TRIP_INITIAL_STATE);
   const [route, setRoute] = useState<CreateSegment>(SEGMENT_INITIAL_STATE);
   const [segments, setSegments] = useState<CreateSegment[]>([]);
+  const [inEditMode, setInEditMode] = useState(false);
 
   const updateRoute = (updates: Partial<CreateSegment>) => {
     setRoute((prevRoute) => ({ ...prevRoute, ...updates }));
@@ -39,11 +44,41 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     setTrip((prevTrip) => ({ ...prevTrip, ...updates }));
   };
 
-  const addSegment = () => {
+  const addSegment = (index: number) => {
     const segment = { ...route, contributorId: user.id };
     setRoute(SEGMENT_INITIAL_STATE);
-    setSegments((prevSegments) => [...prevSegments, segment]);
+    console.log(route);
+    // if (inEditMode && index >= 0) {
+    //   console.log("Updating segment", segment);
+    //   console.log("route", route);
+    //   setSegments((prevSegments) =>
+    //     prevSegments.map((s, i) => (i === index ? segment : s))
+    //   );      
+    //   setInEditMode(false);
+
+    // } else {
+    // console.log("Adding segment", segment);
+    // setSegments((prevSegments) => [...prevSegments, segment])
+    // };
+
+    // const lastSegment = segments.length > 0 ? segments[segments.length - 1] : null;
+    // updateRoute({
+    //   ...route,
+    //   startLocation: lastSegment ? lastSegment.endLocation : trip.startLocation,
+    //   startCoords: lastSegment ? lastSegment.endCoords : trip.startCoords,
+    // });
   };
+
+  const getSegment = (index: number) => {
+    if (index < 0 || index >= segments.length) {
+      throw new Error("Index out of bounds");
+    }
+    return segments[index];
+  }
+  
+  const emptyTrip = () => {
+    setTrip(TRIP_INITIAL_STATE);
+  }
 
   // Handles the submission of the trip, segments, and junction table
   const submitTrip = async () => {
@@ -76,7 +111,7 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     });
   }, [segments, trip]);
 
-  const value = { trip, route, segments, addSegment, updateRoute, updateTrip, submitTrip };
+  const value = { trip, route, segments, inEditMode, setInEditMode, addSegment, updateRoute, updateTrip, submitTrip, getSegment, emptyTrip };
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;
 }
 

@@ -1,7 +1,9 @@
 import { router } from "expo-router";
-import React, { useRef } from "react";
-import { SafeAreaView, View, Alert } from "react-native";
+import React, { useRef, useCallback } from "react";
+import { SafeAreaView, View, Alert, BackHandler } from "react-native";
 import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
+import { useLocalSearchParams, useNavigation } from "expo-router";
+import { usePreventRemove, useFocusEffect } from "@react-navigation/native";
 
 import Header from "@components/ui/Header";
 import TripTitle from "@components/contribute/TripTitle";
@@ -23,7 +25,10 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
-  const { trip, segments, submitTrip } = useTripCreator();
+  const navigation = useNavigation();
+  const { trip, segments, submitTrip, getSegment, updateRoute, setInEditMode, emptyTrip } = useTripCreator();
+
+  const hasAddedSegment = segments.length > 0;
 
   // transformation/calculations we need
   const segmentCoordinates = segments.map(({ waypoints }) => waypoints);
@@ -51,6 +56,47 @@ export default function TripReview() {
       Alert.alert("Error submitting trip");
     }
   };
+
+  const handleEditSegment = (index: number) => {
+    setInEditMode(true);
+    const segment = getSegment(index);
+    updateRoute(segment);
+    // navigate to the edit transfer page
+    router.push({
+      pathname: "/(contribute)/4-edit-transfer",
+      params: { index },
+    });
+    console.log("Editing segment:", segment);
+  };
+
+  // back navigation
+  usePreventRemove(hasAddedSegment, ({ data }) => {
+    if (hasAddedSegment) {
+      Alert.alert(
+        'Unsaved Changes',
+        'You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?',
+        [
+          {
+            text: 'Leave Anyway',
+            style: 'destructive',
+            onPress: () => {
+              navigation.dispatch(data.action);
+
+            },
+          },
+          {
+            text: 'Stay',
+            style: 'cancel',
+            onPress: () => {},
+          },
+        ]
+      );
+    } else {
+      navigation.dispatch(data.action);
+    }
+  });
+
+  
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -86,7 +132,7 @@ export default function TripReview() {
         ))}
       </MapView>
 
-      <View className="px-10 py-20 z-10">
+      <View className="p-5 z-10">
         <PrimaryButton
           label={isSameEndLocation ? "Submit" : "Add Transfers"}
           onPress={isSameEndLocation ? handleSubmitTrip : handleNavigateToRouteInput}
@@ -97,6 +143,7 @@ export default function TripReview() {
         startLocation={trip.startLocation}
         endLocation={trip.endLocation}
         segments={segments}
+        onSegmentPress={handleEditSegment}
       />
     </SafeAreaView>
   );

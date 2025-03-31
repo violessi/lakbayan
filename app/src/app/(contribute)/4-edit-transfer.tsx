@@ -1,7 +1,9 @@
 import { router } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { Alert, SafeAreaView, View } from "react-native";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
+import { useLocalSearchParams, useNavigation } from "expo-router";
+import { usePreventRemove } from "@react-navigation/native";
 
 import Header from "@components/ui/Header";
 import DirectionsLine from "@components/ui/DirectionsLine";
@@ -20,12 +22,16 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 export default function RouteInput() {
   const cameraRef = useRef<Camera>(null);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const navigation = useNavigation();
   const [zoomLevel, setZoomLevel] = useState(13);
 
-  const { route, updateRoute, addSegment } = useTripCreator();
+  const { route, inEditMode, setInEditMode, updateRoute, addSegment } = useTripCreator();
   const [customWaypoints, setCustomWaypoint] = useState<Coordinates[]>([]);
-  const [isEditingRoute, setIsEditingRoute] = useState(false);
+  const [isAddingWaypoints, setIsAddingWaypoints] = useState(false);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+
+  const { index } = useLocalSearchParams<{ index: string }>();
+  const segmentIndex = index !== undefined && index !== null ? parseInt(String(index), 10) : -1;
 
   const getRouteDirections = async () => {
     setIsLoadingRoute(true);
@@ -57,24 +63,27 @@ export default function RouteInput() {
   };
 
   const handleMapClick = async (event: any) => {
-    if (!isEditingRoute) return;
+    if (!isAddingWaypoints) return;
     setCustomWaypoint((prev) => [...prev, event.geometry.coordinates]);
   };
 
   const handleToggleMode = async () => {
-    if (isEditingRoute) await getRouteDirections();
-    setIsEditingRoute((prev) => !prev);
+    if (isAddingWaypoints) await getRouteDirections();
+    setIsAddingWaypoints((prev) => !prev);
   };
 
+  const handleDismissPress = useCallback(() => {
+    bottomSheetModalRef.current?.dismiss();
+  }, []);
+
   const handleSubmit = () => {
-    if (!route.segmentName || !route.cost || isNaN(route.cost) || route.waypoints.length === 0) {
     if (!route.segmentMode || !route.segmentName || !route.cost || isNaN(route.cost) || route.waypoints.length === 0) {
       Alert.alert("Please fill in all fields to proceed.");
       return;
     }
-    addSegment();
-    router.push("/(contribute)/2-review-trip");
     handleDismissPress();
+    addSegment(segmentIndex);
+    router.replace("/(contribute)/2-review-trip");
   };
 
   const clearWaypoints = () => setCustomWaypoint([]);
@@ -97,6 +106,34 @@ export default function RouteInput() {
   const handleDismiss = useCallback(() => {
     console.log('on dismiss');
   }, []);
+
+  // back navigation
+  usePreventRemove(inEditMode, ({ data }) => {
+    Alert.alert(
+      'Unsaved Changes',
+      'You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?',
+      [
+        {
+          text: 'Leave Anyway',
+          style: 'destructive',
+          onPress: () => {
+            navigation.dispatch(data.action);
+            if (inEditMode) {
+              setInEditMode(false);
+              console.log("inEditMode", inEditMode);
+            }
+          },
+        },
+        {
+          text: "Stay",
+          style: 'cancel',
+          onPress: () => {},
+        },
+      ]
+    );
+  });
+  
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Route Input" />
@@ -142,7 +179,7 @@ export default function RouteInput() {
           />
         ))}
 
-        {!isLoadingRoute && !isEditingRoute && route.waypoints.length > 0 && (
+        {!isLoadingRoute && !isAddingWaypoints && route.waypoints.length > 0 && (
           <DirectionsLine coordinates={route.waypoints} />
         )}
       </MapView>
@@ -168,8 +205,6 @@ export default function RouteInput() {
         onInstructionChange={(instruction) => updateRoute({ instruction })}
         onCostChange={(cost) => updateRoute({ cost: Number(cost) })}
         routeName={route.segmentName}
-        landmark={route.landmark}
-        instruction={route.instruction}
         landmark={route.landmark ?? ""}
         instruction={route.instruction ?? ""}
         cost={route.cost.toString()}
