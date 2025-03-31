@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - ayen/tests
+      - dev
   pull_request:
 
 jobs:
