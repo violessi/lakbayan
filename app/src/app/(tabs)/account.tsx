@@ -1,18 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Text, SafeAreaView, View, Alert } from "react-native";
 
 import { logoutUser } from "@services/account-service";
-import {
-  getUsername,
-  getUserRole,
-  getUserPoints,
-  getUserJoinedDate,
-} from "@services/account-service";
 import { useSession } from "@contexts/SessionContext";
 
 import Option from "@components/ContributeOption";
 import SecondaryButton from "@components/ui/SecondaryButton";
 import UserHeader from "@components/account/UserHeader";
+
+import { useAccountDetails } from "@hooks/use-account-details";
 
 const bookmarkIcon = require("@assets/option-bookmark.png");
 const submissionIcon = require("@assets/option-submissions.png");
@@ -21,29 +17,7 @@ const tagIcon = require("@assets/option-tag.png");
 
 export default function Account() {
   const { user } = useSession();
-
-  const [username, setUsername] = useState<string>("");
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [points, setPoints] = useState<number>(0);
-  const [joinedDate, setJoinedDate] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchUserDetails() {
-      if (user) {
-        const role = await getUserRole(user.id);
-        setUserRole(role || "User");
-
-        const username = await getUsername(user.id);
-        setUsername(username || "User");
-
-        const points = await getUserPoints(user.id);
-        const joinedDate = await getUserJoinedDate(user.id);
-        setPoints(points);
-        setJoinedDate(joinedDate);
-      }
-    }
-    fetchUserDetails();
-  }, [user]);
+  const { username, userRole, points, joinedDate, loading } = useAccountDetails(user?.id);
 
   async function handleLogout() {
     try {
@@ -59,12 +33,18 @@ export default function Account() {
 
   return (
     <SafeAreaView className="flex-1">
-      <UserHeader
-        username={username || "User"}
-        role={userRole || "User"}
-        points={points}
-        joinedDate={joinedDate}
-      />
+      {loading ? (
+        <View className="h-24 bg-primary px-5 pb-7 flex flex-row justify-center items-end">
+          <Text className="text-white">Loading user details...</Text>
+        </View>
+      ) : (
+        <UserHeader
+          username={username || "User"}
+          role={userRole || "User"}
+          points={points}
+          joinedDate={joinedDate}
+        />
+      )}
 
       <View className="flex-1 p-4 justify-between">
         <View>

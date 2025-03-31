@@ -4,7 +4,6 @@ import Option from "@components/ContributeOption";
 
 const customTripIcon = require("@assets/option-custom-trip.png");
 const todaStopsIcon = require("@assets/option-pin.png");
-const jeepRoutesIcon = require("@assets/option-jeep-routes.png");
 
 export default function Contribute() {
   return (
