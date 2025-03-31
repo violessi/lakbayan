@@ -4,12 +4,16 @@ on:
   push:
     branches:
       - main
-      - ayen/tests
+      - dev
   pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: app
 
     steps:
       - name: Checkout repository
@@ -22,7 +26,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: cd app && npm install
+        run: npm install
 
       - name: Run Jest tests
-        run: cd app && npm test
+        run: npm test
