@@ -14,7 +14,7 @@ export default function CommentsList() {
   const tripId = Array.isArray(params.tripId) ? params.tripId[0] : params.tripId;
   const isGpsVerified = params.is_gps_verified === "true";
 
-  const [comments, setComments] = useState<CommentData[]>([]);
+  const [comments, setComments] = useState<CommentWithUsername[]>([]);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +24,7 @@ export default function CommentsList() {
       try {
         const fetchedComments = await getComments(tripId);
         setComments(fetchedComments || []);
-      } catch (error) {
+      } catch {
         Alert.alert("Error", "Failed to get comments. Please try again later.");
       } finally {
         setLoading(false);
@@ -60,10 +60,11 @@ export default function CommentsList() {
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <CommentItem
-                userId={item.user_id}
+                userId={item.userId}
+                username={item.username}
                 content={item.content}
-                createdAt={item.created_at}
-                isGpsVerified={item.is_gps_verified}
+                createdAt={item.createdAt}
+                isGpsVerified={item.isGpsVerified}
               />
             )}
           />

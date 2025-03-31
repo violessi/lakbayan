@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   SafeAreaView,
   View,
@@ -9,34 +9,23 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 
-import { useSession } from "@contexts/SessionContext";
-import { useUserTrips } from "@hooks/use-trip-data";
-
 import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
 
-export default function SubmittedTrips() {
-  const { user } = useSession();
+interface TripListScreenProps {
+  title: string;
+  trips: TripSearch[];
+  loading: boolean;
+  emptyText?: string;
+}
+
+export default function TripListScreen({
+  title,
+  trips,
+  loading,
+  emptyText = "No trips found",
+}: TripListScreenProps) {
   const router = useRouter();
-
-  const { userTrips, loading: tripsLoading } = useUserTrips(user?.id || "");
-  const [loading, setLoading] = useState(true);
-  const [submittedTrips, setSubmittedTrips] = useState<TripSearch[]>([]);
-
-  useEffect(() => {
-    if (!user || tripsLoading) return;
-
-    setLoading(true);
-
-    const preparedTrips: TripSearch[] = userTrips.map((trip) => ({
-      ...trip,
-      preSegment: null,
-      postSegment: null,
-    }));
-
-    setSubmittedTrips(preparedTrips);
-    setLoading(false);
-  }, [user, userTrips, tripsLoading]);
 
   function handleTripPress(trip: TripSearch) {
     router.push({
@@ -47,17 +36,17 @@ export default function SubmittedTrips() {
 
   return (
     <SafeAreaView className="flex-1">
-      <Header title="Submitted Trips" />
+      <Header title={title} />
       <View className="flex-1 p-4">
-        {loading || tripsLoading ? (
+        {loading ? (
           <ActivityIndicator size="small" />
-        ) : submittedTrips.length === 0 ? (
+        ) : trips.length === 0 ? (
           <View className="flex-1 justify-center items-center">
-            <Text>No submitted trips</Text>
+            <Text>{emptyText}</Text>
           </View>
         ) : (
           <FlatList
-            data={submittedTrips}
+            data={trips}
             keyExtractor={(trip) => trip.id}
             renderItem={({ item: trip }) => (
               <View className="flex flex-col justify-center mt-5">
@@ -67,9 +56,7 @@ export default function SubmittedTrips() {
                       {trip.startLocation} to {trip.endLocation}
                     </Text>
                   </View>
-                  <View>
-                    <TripPreview trip={trip} />
-                  </View>
+                  <TripPreview trip={trip} />
                 </TouchableOpacity>
               </View>
             )}

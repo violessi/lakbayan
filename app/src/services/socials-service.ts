@@ -1,4 +1,6 @@
 import { supabase } from "@utils/supabase";
+import { fetchTrip } from "@services/trip-service-v2";
+import { getUsername } from "@services/account-service";
 
 // Votes
 
@@ -95,7 +97,20 @@ export async function getComments(tripId: string): Promise<CommentData[] | null>
     return null;
   }
 
-  return data;
+  if (!data) return null;
+
+  const dataWithUsername = await Promise.all(
+    data.map(async (comment) => ({
+      id: comment.id,
+      userId: comment.user_id,
+      username: (await getUsername(comment.user_id)) || "Unknown User",
+      content: comment.content,
+      createdAt: comment.created_at,
+      isGpsVerified: comment.is_gps_verified,
+    })),
+  );
+
+  return dataWithUsername;
 }
 
 export async function addComment(
@@ -148,6 +163,26 @@ export async function getBookmarks(userId: string) {
   return data.map((b) => b.trip_id);
 }
 
+export async function fetchBookmarks(userId: string): Promise<FullTrip[]> {
+  try {
+    const bookmarkIds = await getBookmarks(userId);
+    const trips: FullTrip[] = [];
+
+    for (const id of bookmarkIds) {
+      try {
+        const trip = await fetchTrip(id);
+        trips.push(trip);
+      } catch (err) {
+        console.warn(`Skipping invalid or failed trip: ${id}`);
+      }
+    }
+
+    return trips;
+  } catch (error) {
+    console.error("Failed to fetch bookmarks", error);
+    return [];
+  }
+}
 export async function addBookmark(userId: string, tripId: string) {
   const { error } = await supabase.from("bookmarks").insert([{ user_id: userId, trip_id: tripId }]);
 

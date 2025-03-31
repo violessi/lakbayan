@@ -5,18 +5,9 @@ import { render, fireEvent, screen, waitFor, act } from "@testing-library/react-
 
 import { supabase } from "@utils/supabase";
 import { createUserProfile, checkUsernameExists } from "@services/account-service";
-import SignUp from "../sign-up";
+import SignUp from "@app/(auth)/sign-up";
 
 jest.spyOn(Alert, "alert").mockImplementation(() => {});
-
-jest.mock("expo-router", () => ({ useRouter: jest.fn() }));
-jest.mock("@services/account-service", () => ({
-  checkUsernameExists: jest.fn(),
-  createUserProfile: jest.fn(),
-}));
-jest.mock("@utils/supabase", () => ({
-  supabase: { auth: { signUp: jest.fn() } },
-}));
 
 beforeEach(() => {
   jest.useFakeTimers();

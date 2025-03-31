@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, Modal } from "react-native";
-
-import { getUsername } from "@services/account-service";
 
 const gpsBadge = require("@assets/verified-gps.png");
 
 interface CommentItemProps {
   userId: string;
+  username: string;
   content: string;
   createdAt: string;
   isGpsVerified: boolean;
@@ -14,21 +13,12 @@ interface CommentItemProps {
 
 export default function CommentItem({
   userId,
+  username,
   content,
   createdAt,
   isGpsVerified,
 }: CommentItemProps) {
-  const [username, setUsername] = useState<string | null>(null);
   const [showPopover, setShowPopover] = useState(false);
-
-  useEffect(() => {
-    const fetchUsername = async () => {
-      const username = await getUsername(userId);
-      setUsername(username);
-    };
-
-    fetchUsername();
-  }, [userId]);
 
   return (
     <View className="flex mb-3 gap-1">
@@ -38,7 +28,12 @@ export default function CommentItem({
 
         {isGpsVerified && (
           <TouchableOpacity onPress={() => setShowPopover(true)}>
-            <Image source={gpsBadge} className="w-4 h-4" accessibilityLabel="GPS Verified" />
+            <Image
+              source={gpsBadge}
+              className="w-4 h-4"
+              accessibilityLabel="GPS Verified"
+              testID="gps-verified-badge"
+            />
           </TouchableOpacity>
         )}
       </View>

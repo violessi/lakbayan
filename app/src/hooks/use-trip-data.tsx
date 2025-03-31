@@ -1,82 +1,50 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase";
 
-export function useTripData() {
-  const [tripData, setTripData] = useState<Trip[]>([]);
-  const [segmentData, setSegmentData] = useState<Record<string, Segment[]>>({});
+import { fetchTrip } from "@services/trip-service-v2";
+
+export function useUserTrips(contributorId: string) {
+  const [userTrips, setUserTrips] = useState<FullTrip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchTripData = async () => {
+    if (!contributorId) return;
+
+    const fetchUserTrips = async () => {
+      setLoading(true);
       try {
-        const { data: trips, error: tripError } = await supabase
-          .from("trips")
-          .select(
-            `id, contributor_id, name, start_location, start_coords, end_location, end_coords, gps_verified, mod_verified, upvotes, downvotes`,
-          );
+        // Get trip IDs for the contributor
+        const { data, error: tripError } = await supabase
+          .from("trips_v2")
+          .select("id")
+          .eq("contributor_id", contributorId);
 
         if (tripError) throw tripError;
-        setTripData(trips);
 
-        // Fetch all segments related to these trips
-        const { data: segments, error: segmentsError } = await supabase
-          .from("segments-to-trips")
-          .select(
-            `
-            segment_order,
-            trip_id,
-            trip-segments (
-              id,
-              segment_mode,
-              segment_name,
-              landmark,
-              instruction,
-              waypoints,
-              duration,
-              start_location,
-              start_coords,
-              end_location,
-              end_coords,
-              cost
-            )
-          `,
-          )
-          .order("segment_order", { ascending: true });
+        const tripIds = data.map((t) => t.id);
 
-        if (segmentsError) throw segmentsError;
-
-        // Process segments and group them by trip_id
-        const segmentMap: Record<string, Segment[]> = {};
-        segments.forEach((item) => {
-          const segment = item["trip-segments"];
-
-          // ✅ Ensure waypoints are properly parsed
-          let parsedWaypoints: number[][] = [];
+        // Fetch each trip by ID
+        const fetchedTrips: FullTrip[] = [];
+        for (const id of tripIds) {
           try {
-            parsedWaypoints = segment.waypoints ? JSON.parse(segment.waypoints) : [];
+            const fullTrip = await fetchTrip(id);
+            fetchedTrips.push(fullTrip);
           } catch (err) {
+            console.warn(`Skipping invalid trip ID: ${id} - ${err}`);
           }
+        }
 
-          if (!segmentMap[item.trip_id]) segmentMap[item.trip_id] = [];
-
-          segmentMap[item.trip_id].push({
-            ...segment,
-            segment_order: item.segment_order,
-            waypoints: Array.isArray(parsedWaypoints) ? parsedWaypoints : [],
-          });
-        });
-
-        setSegmentData(segmentMap);
+        setUserTrips(fetchedTrips);
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message || "Failed to load user trips");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTripData();
-  }, []);
+    fetchUserTrips();
+  }, [contributorId]);
 
-  return { tripData, segmentData, loading, error };
+  return { userTrips, loading, error };
 }

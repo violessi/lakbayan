@@ -1,10 +1,11 @@
 declare global {
   export interface CommentData {
     id: string;
-    user_id: string;
+    userId: string;
+    username: string;
     content: string;
-    created_at: string;
-    is_gps_verified: boolean;
+    createdAt: string;
+    isGpsVerified: boolean;
   }
 }
 
