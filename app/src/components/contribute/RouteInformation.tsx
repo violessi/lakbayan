@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useRef, useMemo, useCallback } from "react";
 import { Text, Keyboard, View } from "react-native";
 
 import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import TransportationModeSelection from "@components/contribute/TransportationModeSelection";
+import BottomSheet, { BottomSheetView, BottomSheetModal, BottomSheetBackgroundProps, BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 
 interface RouteInformationProps {
   onRouteNameChange: (routeName: string) => void;
@@ -15,10 +16,10 @@ interface RouteInformationProps {
   instruction: string;
   cost: string;
   onSubmit: () => void;
-  isEditingRoute: boolean;
-  handleToggleMode: () => void;
-  clearWaypoints: () => void;
-  getRouteDirections: () => void;
+  bottomSheetModalRef: React.RefObject<BottomSheetModal>;
+  handleSheetChanges: (index: number) => void;
+  updateRoute: (updates: Partial<CreateSegment>) => void;
+  handleDismiss: () => void;
 }
 
 export default function RouteInformation({
@@ -31,39 +32,40 @@ export default function RouteInformation({
   instruction,
   cost,
   onSubmit,
-  isEditingRoute,
-  handleToggleMode,
-  clearWaypoints,
-  getRouteDirections,
+  bottomSheetModalRef,
+  handleSheetChanges,
+  updateRoute,
+  handleDismiss
 }: RouteInformationProps) {
-  const snapPoints = ["40%"];
+  const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackgroundProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        pressBehavior={"close"}
+      />
+    ),
+    []
+  );
 
   return (
-    <>
-      <View className="absolute bottom-[350px] flex flex-col gap-4 w-full z-0">
-        <View className="flex-row z-10">
-          <View className="flex-1 pl-3 pr-[5px]">
-            <PrimaryButton
-              label={isEditingRoute ? "Recalculate" : "Edit Route"}
-              onPress={handleToggleMode}
-            />
-          </View>
-          <View className="flex-1 pr-3 pl-[5px]">
-            <PrimaryButton
-              label={isEditingRoute ? "Clear" : "Calculate"}
-              onPress={isEditingRoute ? clearWaypoints : getRouteDirections}
-            />
-          </View>
-        </View>
-      </View>
-      <BottomSheet 
-        snapPoints={snapPoints} index={1} 
-        enablePanDownToClose={false} // Prevent closing by dragging
-        enableContentPanningGesture={false} // Disable user dragging
-        enableHandlePanningGesture={false} // Disable handle dragging
+    <View>
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        snapPoints={snapPoints}
+        index={2}
+        onChange={handleSheetChanges}
+        onDismiss={handleDismiss}
+        backdropComponent={renderBackdrop}
+        keyboardBehavior={"extend"}
       >
-        <BottomSheetView className="flex flex-col px-5 gap-2">
+        <BottomSheetView className="flex flex-col px-5 gap-4">
           <Text className="text-xl font-bold">Route Information</Text>
+          <TransportationModeSelection
+            onTransportationModeChange={(segmentMode) => updateRoute({ segmentMode })}
+          />
           <View className="flex-row gap-3">
             <View className="flex-1">
               <OutlinedTextInput label="Route Name" value={routeName} onChangeText={onRouteNameChange} />
@@ -74,11 +76,11 @@ export default function RouteInformation({
           </View>
           <OutlinedTextInput label="Landmark" value={landmark} onChangeText={onLandmarkChange} />
           <OutlinedTextInput label="Instruction" value={instruction} onChangeText={onInstructionChange} />
+          <View className="z-50 flex p-5 w-100">
+            <PrimaryButton label="Submit" onPress={onSubmit} />
+          </View>
         </BottomSheetView>
-      </BottomSheet>
-      <View className="z-50 flex p-5 w-100">
-        <PrimaryButton label="Submit" onPress={onSubmit} />
-      </View>
-    </>
+      </BottomSheetModal>
+    </View>
   );
 }

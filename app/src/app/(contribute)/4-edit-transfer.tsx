@@ -8,6 +8,8 @@ import DirectionsLine from "@components/ui/DirectionsLine";
 import CircleMarker from "@components/map/CircleMarker";
 import TripTitle from "@components/contribute/TripTitle";
 import RouteInformation from "@components/contribute/RouteInformation";
+import PrimaryButton from "@components/ui/PrimaryButton";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 import { getDirections, paraphraseStep } from "@services/mapbox-service";
@@ -17,6 +19,7 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function RouteInput() {
   const cameraRef = useRef<Camera>(null);
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [zoomLevel, setZoomLevel] = useState(13);
 
   const { route, updateRoute, addSegment } = useTripCreator();
@@ -65,11 +68,13 @@ export default function RouteInput() {
 
   const handleSubmit = () => {
     if (!route.segmentName || !route.cost || isNaN(route.cost) || route.waypoints.length === 0) {
+    if (!route.segmentMode || !route.segmentName || !route.cost || isNaN(route.cost) || route.waypoints.length === 0) {
       Alert.alert("Please fill in all fields to proceed.");
       return;
     }
     addSegment();
     router.push("/(contribute)/2-review-trip");
+    handleDismissPress();
   };
 
   const clearWaypoints = () => setCustomWaypoint([]);
@@ -80,6 +85,18 @@ export default function RouteInput() {
     }
   };
 
+  // bottom sheet
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current!.present();
+  }, []);
+
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log('handleSheetChanges', index);
+  }, []);
+
+  const handleDismiss = useCallback(() => {
+    console.log('on dismiss');
+  }, []);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Route Input" />
@@ -130,6 +147,21 @@ export default function RouteInput() {
         )}
       </MapView>
 
+      <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
+        <PrimaryButton
+          label={isAddingWaypoints ? "Recalculate" : "Edit Route"}
+          onPress={handleToggleMode}
+        />
+        <PrimaryButton
+          label={isAddingWaypoints ? "Clear" : "Calculate"}
+          onPress={isAddingWaypoints ? clearWaypoints : getRouteDirections}
+        />
+        <PrimaryButton
+          label="Edit Details"
+          onPress={handlePresentModalPress}
+        />
+      </View>
+
       <RouteInformation
         onRouteNameChange={(segmentName) => updateRoute({ segmentName })}
         onLandmarkChange={(landmark) => updateRoute({ landmark })}
@@ -138,12 +170,14 @@ export default function RouteInput() {
         routeName={route.segmentName}
         landmark={route.landmark}
         instruction={route.instruction}
+        landmark={route.landmark ?? ""}
+        instruction={route.instruction ?? ""}
         cost={route.cost.toString()}
         onSubmit={handleSubmit}
-        isEditingRoute={isEditingRoute}
-        handleToggleMode={handleToggleMode}
-        clearWaypoints={clearWaypoints}
-        getRouteDirections={getRouteDirections}
+        bottomSheetModalRef={bottomSheetModalRef}
+        handleSheetChanges={handleSheetChanges}
+        updateRoute={updateRoute}
+        handleDismiss={handleDismiss}
       />
     </SafeAreaView>
   );

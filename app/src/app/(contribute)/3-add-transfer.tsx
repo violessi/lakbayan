@@ -47,6 +47,7 @@ export default function RouteSelectInfo() {
   // Once we have all necessary information, navigate to the next screen.
   const handleAddTransfer = () => {
     if (!route.endLocation || !route.endCoords || !route.segmentMode) {
+    if (!route.endLocation || !route.endCoords) {
       Alert.alert("Missing Information", "Please fill in all fields to proceed.");
       return;
     }
@@ -108,6 +109,7 @@ export default function RouteSelectInfo() {
       />
 
       <View className="z-50 flex flex-row gap-4 p-5 justify-center">
+      <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
         <PrimaryButton label="Final Location" onPress={handleFinalTransfer} />
         <PrimaryButton label="Add Transfer" onPress={handleAddTransfer} />
       </View>
