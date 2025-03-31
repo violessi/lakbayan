@@ -42,11 +42,11 @@ export type GtfsRoute = z.infer<typeof GtfsRoute>;
 
 export const TransportationModeSchema = z.enum(["Train", "Bus", "Jeep", "UV", "Tricycle", "Walk"]);
 
-export const TransitJournalStatusSchema = z.enum(["Success", "Cancelled", "Ongoing"]);
+export const TransitJournalStatusSchema = z.enum(["success", "cancelled", "ongoing"]);
+
+export const LiveUpdateTypeSchema = z.enum(["Traffic", "Disruption", "Long Line"]);
 
 export const CoordinatesSchema = z.tuple([z.number(), z.number()]);
-
-export const LiveStatusSchema = z.object({ type: z.string(), coordinates: CoordinatesSchema });
 
 export const NavigationStepsSchema = z.object({
   instruction: z.string(),
@@ -93,7 +93,6 @@ export const SegmentSchema = z.object({
   duration: z.number(),
   distance: z.number(),
   cost: z.number(),
-  liveStatus: z.array(LiveStatusSchema),
   waypoints: z.array(CoordinatesSchema),
   navigationSteps: z.array(NavigationStepsSchema),
   startLocation: z.string(),
@@ -151,6 +150,19 @@ export const TransitJournalSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
 });
+
+export const LiveUpdateSchema = z.object({
+  id: z.string(),
+  contributorId: z.string(),
+  transitJournalId: z.string(),
+  type: LiveUpdateTypeSchema,
+  coordinate: CoordinatesSchema,
+  expirationDate: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const LiveUpdatesSchema = z.array(LiveUpdateSchema);
 
 export const ProfileSchema = z.object({
   id: z.string(),

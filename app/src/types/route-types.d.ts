@@ -5,8 +5,8 @@ import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
 import type {
   TransportationModeSchema,
   TransitJournalStatusSchema,
+  LiveUpdateTypeSchema,
   CoordinatesSchema,
-  LiveStatusSchema,
   NavigationStepsSchema,
   TripEndpointsSchema,
   TripSchema,
@@ -15,6 +15,7 @@ import type {
   TripSearchSchema,
   TripSegmentLinkSchema,
   TransitJournalSchema,
+  LiveUpdateSchema,
   ProfileSchema,
 } from "./schema";
 
@@ -48,9 +49,9 @@ declare global {
 
   export type TransportationMode = z.infer<typeof TransportationModeSchema>;
   export type TransitJournalStatus = z.infer<typeof TransitJournalStatusSchema>;
+  export type LiveUpdateType = z.infer<typeof LiveUpdateTypeSchema>;
 
   export type Coordinates = z.infer<typeof CoordinatesSchema>;
-  export type LiveStatus = z.infer<typeof LiveStatusSchema>;
   export type NavigationSteps = z.infer<typeof NavigationStepsSchema>;
 
   export type TripEndpoints = z.infer<typeof TripEndpointsSchema>;
@@ -72,6 +73,12 @@ declare global {
   export type CreateTransitJournal = Omit<
     TransitJournal,
     "id" | "createdAt" | "updatedAt" | "startTime" | "endTime" | "status"
+  >;
+
+  export type LiveUpdate = z.infer<typeof LiveUpdateSchema>;
+  export type CreateLiveUpdate = Omit<
+    LiveUpdate,
+    "id" | "createdAt" | "updatedAt" | "expirationDate"
   >;
 
   export type Profile = z.infer<typeof ProfileSchema>;

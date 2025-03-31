@@ -1,51 +1,38 @@
-import React, { useEffect, useRef, useMemo, Fragment } from "react";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { SafeAreaView, Text, ActivityIndicator } from "react-native";
+import { useRouter } from "expo-router";
+import { SafeAreaView, Text } from "react-native";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
-
-import { useSession } from "@contexts/SessionContext";
-import { useFetchSegmentDirections } from "@hooks/use-fetch-segment-directions";
+import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+import React, { useEffect, useRef, Fragment } from "react";
 
 import Header from "@components/ui/Header";
 import DirectionsLine from "@components/ui/DirectionsLine";
 import LocationMarker from "@components/ui/LocationMarker";
 import JournalFeedback from "@components/journal/JournalFeedback";
 
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-
+import { useSession } from "@contexts/SessionContext";
+import { useTransitJournal } from "@contexts/TransitJournal";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function JournalReview() {
-  const cameraRef = useRef<Camera>(null);
   const router = useRouter();
+  const cameraRef = useRef<Camera>(null);
 
   const { user } = useSession();
+  const { trip, segments } = useTransitJournal();
 
-  const { trip, segments } = useLocalSearchParams();
-  const tripData: Trip = useMemo(() => {
-    const tripString = Array.isArray(trip) ? trip[0] : trip;
-    return tripString ? JSON.parse(tripString) : null;
-  }, [trip]);
-  const segmentData: Segment[] = useMemo(() => {
-    const segmentString = Array.isArray(segments) ? segments[0] : segments;
-    return segmentString ? JSON.parse(segmentString) : [];
-  }, [segments]);
+  if (!trip) throw new Error("Trip must be defined");
+  if (!segments) throw new Error("Segments must be defined");
 
-  const startCoordinates = tripData.start_coords || null;
-  const endCoordinates = tripData.end_coords || null;
-  const startLocation = tripData.start_location || "Start";
-  const endLocation = tripData.end_location || "End";
-
-  const { segmentRoutes, loading } = useFetchSegmentDirections(segmentData);
+  const segmentRoutes = segments.map((segment) => segment.waypoints);
 
   // Camera
   useEffect(() => {
-    if (startCoordinates && endCoordinates && cameraRef.current) {
-      cameraRef.current.fitBounds(startCoordinates, endCoordinates, [150, 150, 250, 150]);
+    if (trip.startCoords && trip.endCoords && cameraRef.current) {
+      cameraRef.current.fitBounds(trip.startCoords, trip.endCoords, [150, 150, 250, 150]);
     }
-  }, [segmentRoutes, startCoordinates, endCoordinates]);
+  }, [segmentRoutes, trip.endCoords, trip.startCoords]);
 
   function handleCommentPress(tripId: string) {
     router.push({
@@ -65,43 +52,46 @@ export default function JournalReview() {
       >
         <Camera
           ref={cameraRef}
-          centerCoordinate={endCoordinates}
+          centerCoordinate={trip.startCoords}
           animationMode="easeTo"
           zoomLevel={10}
         />
 
         <LocationMarker
-          coordinates={startCoordinates}
-          label={startLocation}
+          id="start"
+          coordinates={trip.startCoords}
+          label={trip.startLocation}
           color="red"
           radius={8}
         />
-        <LocationMarker coordinates={endCoordinates} label={endLocation} color="red" radius={8} />
+        <LocationMarker
+          id="end"
+          coordinates={trip.endCoords}
+          label={trip.endLocation}
+          color="red"
+          radius={8}
+        />
 
-        {segmentData.map((segment, index) => (
+        {segments.map((segment, index) => (
           <Fragment key={`segment-markers-${index}`}>
             <LocationMarker
-              coordinates={segment.start_coords}
-              label={segment.start_location}
+              id={`start-${index}`}
+              coordinates={segment.startCoords}
+              label={segment.startLocation}
               color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
               radius={6}
             />
             <LocationMarker
-              coordinates={segment.end_coords}
-              label={segment.end_location}
+              id={`end-${index}`}
+              coordinates={segment.endCoords}
+              label={segment.endLocation}
               color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
               radius={6}
             />
           </Fragment>
         ))}
 
-        {loading ? (
-          <ActivityIndicator
-            size="large"
-            color="#0000ff"
-            style={{ position: "absolute", top: "50%", left: "50%" }}
-          />
-        ) : segmentRoutes.length > 0 ? (
+        {segmentRoutes.length > 0 ? (
           segmentRoutes.map((coordinates, index) => (
             <DirectionsLine
               key={index}
@@ -116,10 +106,10 @@ export default function JournalReview() {
 
       {user && (
         <JournalFeedback
-          startLocation={startLocation}
-          endLocation={endLocation}
-          trip={tripData}
-          segments={segmentData}
+          startLocation={trip.startLocation}
+          endLocation={trip.endLocation}
+          trip={trip}
+          segments={segments}
           currentUserId={user.id}
           onCommentPress={handleCommentPress}
           isGpsVerified={true}

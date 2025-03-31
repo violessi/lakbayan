@@ -9,8 +9,6 @@ declare global {
     };
   }
 
-  export type Coordinates = [number, number];
-
   export interface MapboxDirectionsResponse {
     routes: MapboxRoute[];
     waypoints: MapboxWaypoint[];
