@@ -153,6 +153,7 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
           <TouchableOpacity onPress={toggleBookmark}>
             <Image
               source={bookmarked ? bookmarkedIcon : bookmarkIcon}
+              testID={bookmarked ? "bookmarked-icon" : "bookmark-icon"}
               style={{ width: 15, height: 15, tintColor: "#7F55D9" }}
               resizeMode="contain"
             />
