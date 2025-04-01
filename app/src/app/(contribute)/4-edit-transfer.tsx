@@ -76,7 +76,7 @@ export default function RouteInput() {
 
   const handleDoneAddingWaypoint = () => {
     setIsAddingWaypoints((prev) => !prev);
-  }
+  };
 
   const handleDismissPress = useCallback(() => {
     bottomSheetModalRef.current?.dismiss();
@@ -99,13 +99,13 @@ export default function RouteInput() {
   };
 
   const clearWaypoints = () => {
-    setCustomWaypoint([])
+    setCustomWaypoint([]);
     updateRoute({
       ...route,
       waypoints: [],
       duration: 0,
       distance: 0,
-      navigationSteps: []
+      navigationSteps: [],
     });
   };
   const handleZoomChange = (event: any) => setZoomLevel(event.properties.zoom);
@@ -164,17 +164,17 @@ export default function RouteInput() {
               },
             },
             { text: "Stay", style: "cancel" },
-          ]
+          ],
         );
-  
+
         return true; // Prevents default back button behavior
       };
-  
+
       // Add event listener
       const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
-  
+
       return () => backHandler.remove(); // Cleanup when screen loses focus
-    }, [inEditMode]) // Re-run if `inEditMode` changes
+    }, [inEditMode]), // Re-run if `inEditMode` changes
   );
 
   return (
@@ -228,19 +228,15 @@ export default function RouteInput() {
       </MapView>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
-        <PrimaryButton 
+        <PrimaryButton
           label={isAddingWaypoints ? "Recalculate" : "Edit Details"}
-          onPress={isAddingWaypoints? handleToggleMode: handlePresentModalPress} 
+          onPress={isAddingWaypoints ? handleToggleMode : handlePresentModalPress}
         />
-        <PrimaryButton 
-          label={isAddingWaypoints ? "Clear" : "Submit"} 
-          onPress={isAddingWaypoints? clearWaypoints: handleSubmit} />
-        {isAddingWaypoints && (
-          <PrimaryButton 
-            label="Done"
-            onPress={handleDoneAddingWaypoint} 
-          />
-        )}
+        <PrimaryButton
+          label={isAddingWaypoints ? "Clear" : "Submit"}
+          onPress={isAddingWaypoints ? clearWaypoints : handleSubmit}
+        />
+        {isAddingWaypoints && <PrimaryButton label="Done" onPress={handleDoneAddingWaypoint} />}
       </View>
 
       <RouteInformation
