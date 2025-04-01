@@ -26,6 +26,7 @@
     "@react-navigation/native": "^7.0.14",
     "@rnmapbox/maps": "^10.1.33",
     "@supabase/supabase-js": "^2.47.7",
+    "@turf/turf": "^7.2.0",
     "dotenv": "^16.4.7",
     "expo": "~52.0.35",
     "expo-constants": "~17.0.3",
