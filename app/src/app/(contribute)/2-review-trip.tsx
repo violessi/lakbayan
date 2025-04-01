@@ -24,6 +24,7 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
   const { trip, segments, submitTrip, updateRoute, setInEditMode, clearTripData } =
+  const { trip, segments, clearRouteData, submitTrip, updateRoute, setInEditMode, clearTripData } =
     useTripCreator();
 
   // transformation/calculations we need
@@ -52,6 +53,7 @@ export default function TripReview() {
   };
 
   const handleCreateSegment = () => {
+    clearRouteData()
     return router.replace("/(contribute)/3-add-transfer");
   };
 

@@ -48,7 +48,7 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     const segment = { ...route, contributorId: user.id };
 
     // handle case when editing a segment or adding a new one
-    if (inEditMode) {
+    if (inEditMode && index >= 0) {
       setSegments((prevSegments) => {
         prevSegments.splice(index, 1, segment);
         return prevSegments;
@@ -57,14 +57,6 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     } else {
       setSegments((prevSegments) => [...prevSegments, segment]);
     }
-
-    // Reset the route to the last segment's end location
-    const lastSegment = segments.length > 0 ? segments[segments.length - 1] : null;
-    updateRoute({
-      ...SEGMENT_INITIAL_STATE,
-      startLocation: lastSegment ? lastSegment.endLocation : trip.startLocation,
-      startCoords: lastSegment ? lastSegment.endCoords : trip.startCoords,
-    });
   };
 
   // Handles the submission of the trip, segments, and junction table

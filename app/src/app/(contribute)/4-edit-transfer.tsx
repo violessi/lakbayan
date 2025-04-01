@@ -25,12 +25,14 @@ export default function RouteInput() {
 
   const { route, inEditMode, setInEditMode, updateRoute, addSegment, clearRouteData } =
     useTripCreator();
+  console.log(inEditMode);
   const [customWaypoints, setCustomWaypoint] = useState<Coordinates[]>([]);
   const [isAddingWaypoints, setIsAddingWaypoints] = useState(false);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
 
   const { index } = useLocalSearchParams<{ index: string }>();
   const segmentIndex = index !== undefined && index !== null ? parseInt(String(index), 10) : -1;
+  console.log(segmentIndex);
 
   const getRouteDirections = async () => {
     setIsLoadingRoute(true);
