@@ -16,6 +16,7 @@ interface TripCreatorContextType {
   submitTrip: () => Promise<{ tripId: string; segmentIds: string[]; linkIds: string[] }>;
   clearTripData: () => void;
   clearRouteData: () => void;
+  deleteSegment: () => void;
 }
 
 interface TripCreatorProviderProps {
@@ -103,6 +104,11 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     });
   };
 
+  // remove the most recently added segment in segments
+  const deleteSegment = () =>{
+    setSegments((prevSegments) => prevSegments.slice(0, -1));
+  }
+
   const value = {
     trip,
     route,
@@ -115,6 +121,7 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     submitTrip,
     clearTripData,
     clearRouteData,
+    deleteSegment
   };
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;
 }

@@ -25,6 +25,7 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
   const { trip, segments, clearRouteData, submitTrip, updateRoute, setInEditMode, clearTripData } =
+  const { trip, segments, clearRouteData, submitTrip, updateRoute, setInEditMode, clearTripData, deleteSegment } =
     useTripCreator();
     
   // transformation/calculations we need
@@ -67,6 +68,23 @@ export default function TripReview() {
     });
   };
 
+  const handleUndo = () => {
+    Alert.alert(
+      "Undo",
+      "Do you want to remove the last transfer you added?",
+      [
+        {
+          text: "Yes",
+          style: "destructive",
+          onPress: () => deleteSegment(),
+        },
+        {
+          text: "No",
+          style: "cancel",
+        }
+      ]
+    )
+  }
 
   // for back in header
   const prevCallback = () => {
@@ -174,6 +192,7 @@ export default function TripReview() {
         endLocation={trip.endLocation}
         segments={segments}
         onSegmentPress={handleEditSegment}
+        undo={handleUndo}
       />
     </SafeAreaView>
   );
