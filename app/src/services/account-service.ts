@@ -77,18 +77,7 @@ export async function getUserJoinedDate(userId: string) {
     : null;
 }
 
-export async function fetchUserProfile(userId: string) {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("username")
-    .eq("id", userId)
-    .single();
-
-  if (error) throw new Error(error.message);
-  return data;
-}
-
-export async function updateUserProfile(userId: string, username: string) {
+export async function updateUsername(userId: string, username: string): Promise<void> {
   const updates = {
     id: userId,
     username,

@@ -1,16 +1,9 @@
-import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Text } from "react-native-paper";
 
 import { useSession } from "@contexts/SessionContext";
-import {
-  getBookmarks,
-  addBookmark,
-  removeBookmark,
-  countModVerifications,
-  countGpsVerifications,
-  countComments,
-} from "@services/socials-service";
+import { useTripPreviewData } from "@hooks/use-trip-preview-data";
+import { getImageSource } from "@utils/transpo-utils";
 
 import VotingBar from "@components/VotingBar";
 
@@ -20,75 +13,10 @@ const comment = require("@assets/social-comment.png");
 const bookmarkIcon = require("@assets/social-bookmark.png");
 const bookmarkedIcon = require("@assets/social-bookmarked.png");
 
-const jeep = require("@assets/transpo-jeep.png");
-const bus = require("@assets/transpo-bus.png");
-const train = require("@assets/transpo-train.png");
-const tricycle = require("@assets/transpo-tricycle.png");
-const uv = require("@assets/transpo-uv.png");
-const walk = require("@assets/transpo-walk.png");
-
-const getImageSource = (mode: TransportationMode) => {
-  switch (mode) {
-    case "Jeep":
-      return jeep;
-    case "Bus":
-      return bus;
-    case "Train":
-      return train;
-    case "Tricycle":
-      return tricycle;
-    case "UV":
-      return uv;
-    case "Walk":
-      return walk;
-    default:
-      return null;
-  }
-};
-
 export default function TripPreview({ trip }: { trip: FullTrip }) {
   const { user } = useSession();
-
-  const [bookmarked, setBookmarked] = useState(false);
-  const [modVerifications, setModVerifications] = useState(0);
-  const [gpsVerifications, setGpsVerifications] = useState(0);
-  const [commentCount, setCommentCount] = useState(0);
-
-  useEffect(() => {
-    async function fetchData() {
-      if (!user) return;
-
-      const segmentIds = trip.segments
-        .filter((seg) => !seg.id.startsWith("walk-"))
-        .map((seg) => seg.id);
-
-      const [bookmarks, modCount, gpsCount, commentCountTemp] = await Promise.all([
-        getBookmarks(user.id),
-        countModVerifications(trip.id),
-        countGpsVerifications(segmentIds),
-        countComments(trip.id),
-      ]);
-
-      setBookmarked(bookmarks.includes(trip.id));
-      setModVerifications(modCount);
-      // TODO test GPS verification count
-      setGpsVerifications(gpsCount);
-      setCommentCount(commentCountTemp);
-    }
-
-    fetchData();
-  }, [user, trip]);
-
-  const toggleBookmark = async () => {
-    if (!user) return;
-
-    if (bookmarked) {
-      await removeBookmark(user.id, trip.id);
-    } else {
-      await addBookmark(user.id, trip.id);
-    }
-    setBookmarked(!bookmarked);
-  };
+  const { bookmarked, modVerifications, gpsVerifications, commentCount, toggleBookmark } =
+    useTripPreviewData(user?.id || null, trip);
 
   const totalDuration = trip.segments.reduce((sum, seg) => sum + seg.duration, 0);
   const totalCost = trip.segments.reduce((sum, seg) => sum + seg.cost, 0);
@@ -153,6 +81,7 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
           <TouchableOpacity onPress={toggleBookmark}>
             <Image
               source={bookmarked ? bookmarkedIcon : bookmarkIcon}
+              testID={bookmarked ? "bookmarked-icon" : "bookmark-icon"}
               style={{ width: 15, height: 15, tintColor: "#7F55D9" }}
               resizeMode="contain"
             />

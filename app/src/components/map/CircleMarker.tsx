@@ -8,10 +8,18 @@ interface CircleMarkerProps {
   coordinates: Coordinates | null | undefined;
   color?: string;
   radius?: number;
+  testID?: string;
 }
 
 // FIXME: duplicate source layers
-function CircleMarker({ id, label, coordinates, color = "red", radius = 8 }: CircleMarkerProps) {
+function CircleMarker({
+  id,
+  label,
+  coordinates,
+  color = "red",
+  radius = 8,
+  testID = "circle-marker",
+}: CircleMarkerProps) {
   if (!coordinates) return null;
 
   return (
@@ -22,6 +30,7 @@ function CircleMarker({ id, label, coordinates, color = "red", radius = 8 }: Cir
           circleRadius: radius,
           circleColor: color,
         }}
+        testID={testID}
       />
       {label ? (
         <SymbolLayer

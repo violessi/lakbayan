@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   SafeAreaView,
   View,
@@ -10,32 +10,15 @@ import {
 import { useRouter } from "expo-router";
 
 import { useSession } from "@contexts/SessionContext";
-import { fetchBookmarks } from "@services/socials-service";
+import { useBookmarks } from "@hooks/use-bookmarks";
 
 import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
 
 export default function BookmarkedTrips() {
   const { user } = useSession();
-
-  const [bookmarkedTrips, setBookmarkedTrips] = useState<FullTrip[]>([]);
-  const [loading, setLoading] = useState(true);
-
+  const { bookmarks, loading } = useBookmarks(user?.id || null);
   const router = useRouter();
-
-  useEffect(() => {
-    const loadBookmarks = async () => {
-      if (!user) return;
-      setLoading(true);
-
-      const trips = await fetchBookmarks(user.id);
-      setBookmarkedTrips(trips);
-
-      setLoading(false);
-    };
-
-    loadBookmarks();
-  }, [user]);
 
   function handleTripPress(trip: FullTrip) {
     const tripSearch: TripSearch = {
@@ -56,14 +39,14 @@ export default function BookmarkedTrips() {
       <Header title="Bookmarked Trips" />
       <View className="flex-1 p-4">
         {loading ? (
-          <ActivityIndicator size="small" />
-        ) : bookmarkedTrips.length === 0 ? (
+          <ActivityIndicator size="small" testID="activity-indicator" />
+        ) : bookmarks.length === 0 ? (
           <View className="flex-1 justify-center items-center">
             <Text>No bookmarked trips</Text>
           </View>
         ) : (
           <FlatList
-            data={bookmarkedTrips}
+            data={bookmarks}
             keyExtractor={(trip) => trip.id}
             renderItem={({ item: trip }) => (
               <View className="flex flex-col justify-center mt-5">

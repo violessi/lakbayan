@@ -42,7 +42,7 @@ export default function VotingBar({ tripId, userId }: VotingProps) {
   };
 
   return (
-    <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+    <View style={{ flexDirection: "row", gap: 7, alignItems: "center" }}>
       <TouchableOpacity
         onPress={() => handleVote("upvote")}
         style={{ flexDirection: "row", alignItems: "center" }}
