@@ -2,8 +2,9 @@ import { router } from "expo-router";
 import { useLocalSearchParams } from "expo-router";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
-import { Alert, SafeAreaView, View } from "react-native";
+import { Alert, SafeAreaView, View, BackHandler } from "react-native";
 import React, { useRef, useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 import Header from "@components/ui/Header";
 import CircleMarker from "@components/map/CircleMarker";
@@ -25,14 +26,12 @@ export default function RouteInput() {
 
   const { route, inEditMode, setInEditMode, updateRoute, addSegment, clearRouteData } =
     useTripCreator();
-  console.log(inEditMode);
   const [customWaypoints, setCustomWaypoint] = useState<Coordinates[]>([]);
   const [isAddingWaypoints, setIsAddingWaypoints] = useState(false);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
 
   const { index } = useLocalSearchParams<{ index: string }>();
   const segmentIndex = index !== undefined && index !== null ? parseInt(String(index), 10) : -1;
-  console.log(segmentIndex);
 
   const getRouteDirections = async () => {
     handleDismissPress();
@@ -72,7 +71,6 @@ export default function RouteInput() {
   const handleToggleMode = async () => {
     handleDismissPress();
     if (isAddingWaypoints) await getRouteDirections();
-    setIsAddingWaypoints((prev) => !prev);
     if (!isAddingWaypoints) setIsAddingWaypoints((prev) => !prev);
   };
 
@@ -100,7 +98,6 @@ export default function RouteInput() {
     router.replace("/(contribute)/2-review-trip");
   };
 
-  const clearWaypoints = () => setCustomWaypoint([]);
   const clearWaypoints = () => {
     setCustomWaypoint([])
     updateRoute({
@@ -145,6 +142,40 @@ export default function RouteInput() {
       ],
     );
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      const backAction = () => {
+        Alert.alert(
+          "Unsaved Changes",
+          "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
+          [
+            {
+              text: "Leave Anyway",
+              style: "destructive",
+              onPress: () => {
+                clearRouteData();
+                if (inEditMode) {
+                  setInEditMode(false);
+                  router.replace("/(contribute)/2-review-trip");
+                } else {
+                  router.replace("/(contribute)/3-add-transfer");
+                }
+              },
+            },
+            { text: "Stay", style: "cancel" },
+          ]
+        );
+  
+        return true; // Prevents default back button behavior
+      };
+  
+      // Add event listener
+      const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+  
+      return () => backHandler.remove(); // Cleanup when screen loses focus
+    }, [inEditMode]) // Re-run if `inEditMode` changes
+  );
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -191,25 +222,16 @@ export default function RouteInput() {
           />
         ))}
 
-        {!isLoadingRoute && !isAddingWaypoints && route.waypoints.length > 0 && (
         {!isLoadingRoute && route.waypoints.length > 0 && (
           <DirectionsLine coordinates={route.waypoints} />
         )}
       </MapView>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
-        <PrimaryButton
-          label={isAddingWaypoints ? "Recalculate" : "Edit Route"}
-          onPress={handleToggleMode}
-        />
-        <PrimaryButton
-          label={isAddingWaypoints ? "Clear" : "Calculate"}
-          onPress={isAddingWaypoints ? clearWaypoints : getRouteDirections}
         <PrimaryButton 
           label={isAddingWaypoints ? "Recalculate" : "Edit Details"}
           onPress={isAddingWaypoints? handleToggleMode: handlePresentModalPress} 
         />
-        <PrimaryButton label="Edit Details" onPress={handlePresentModalPress} />
         <PrimaryButton 
           label={isAddingWaypoints ? "Clear" : "Submit"} 
           onPress={isAddingWaypoints? clearWaypoints: handleSubmit} />
@@ -230,7 +252,6 @@ export default function RouteInput() {
         landmark={route.landmark ?? ""}
         instruction={route.instruction ?? ""}
         cost={route.cost.toString()}
-        onSubmit={handleSubmit}
         bottomSheetModalRef={bottomSheetModalRef}
         updateRoute={updateRoute}
         isAddingWaypoints={isAddingWaypoints}

@@ -1,7 +1,8 @@
 import { router } from "expo-router";
-import React, { useRef } from "react";
-import { SafeAreaView, View, Alert } from "react-native";
+import React, { useRef, useCallback } from "react";
+import { SafeAreaView, View, Alert, BackHandler } from "react-native";
 import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
+import { useFocusEffect } from "@react-navigation/native";
 
 import Header from "@components/ui/Header";
 import SymbolMarker from "@components/map/SymbolMarker";
@@ -23,14 +24,14 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
-  const { trip, segments, submitTrip, updateRoute, setInEditMode, clearTripData } =
   const { trip, segments, clearRouteData, submitTrip, updateRoute, setInEditMode, clearTripData } =
     useTripCreator();
-
+    
   // transformation/calculations we need
   const len = segments.length;
   const segmentCoordinates = segments.map(({ waypoints }) => waypoints);
   const isSameEndLocation = len > 0 && trip.endLocation === segments[len - 1].endLocation;
+  const hasEmptySegments = segments.length === 0;
 
   // When the map is loaded, fit the camera to the pins
   const handleMapLoaded = () => {
@@ -66,9 +67,10 @@ export default function TripReview() {
     });
   };
 
-  const prevCallback = () => {
-    const hasEmptySegments = segments.length === 0;
 
+  // for back in header
+  const prevCallback = () => {
+    
     if (hasEmptySegments) {
       clearTripData();
       router.replace("/(contribute)/1-create-trip");
@@ -90,6 +92,41 @@ export default function TripReview() {
       );
     }
   };
+
+  // for back in android
+  useFocusEffect(
+    useCallback(() => {
+      const backAction = () => {
+        if (hasEmptySegments) {
+          clearTripData();
+          router.replace("/(contribute)/1-create-trip");
+          return true; // Prevent default back behavior
+        } else {
+          Alert.alert(
+            "Unsaved Changes",
+            "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
+            [
+              {
+                text: "Leave Anyway",
+                style: "destructive",
+                onPress: () => {
+                  clearTripData();
+                  router.replace("/(contribute)/1-create-trip");
+                },
+              },
+              { text: "Stay", style: "cancel" },
+            ]
+          );
+          return true; // Prevent default back behavior while alert is open
+        }
+      };
+  
+      // Add event listener
+      const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+  
+      return () => backHandler.remove(); // Cleanup when screen loses focus
+    }, [hasEmptySegments]) // Re-run if hasEmptySegments changes
+  );
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
