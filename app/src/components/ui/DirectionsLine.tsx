@@ -7,12 +7,17 @@ interface DirectionsLineProps {
   width?: number;
 }
 
-export default function DirectionsLine({ coordinates, color = "red", width = 3 }: DirectionsLineProps) {
+export default function DirectionsLine({
+  coordinates,
+  color = "red",
+  width = 3,
+}: DirectionsLineProps) {
   const lineId = `directions-line-${JSON.stringify(coordinates)}`;
 
   return (
     <ShapeSource
       id={lineId}
+      testID="directions-line-source"
       shape={{
         type: "FeatureCollection",
         features: [

@@ -70,7 +70,11 @@ export async function addTripToModeration(tripId: string) {
   }
 }
 
-export async function updateModerationStatus(moderatorId: string, tripId: string, status: string) {
+export async function updateModerationStatus(
+  moderatorId: string,
+  tripId: string,
+  status: string,
+): Promise<void> {
   const { error } = await supabase
     .from("moderation-reviews")
     .update({ status })

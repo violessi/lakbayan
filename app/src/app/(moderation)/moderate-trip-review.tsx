@@ -71,6 +71,7 @@ export default function ModerateTripReview() {
         styleURL="mapbox://styles/mapbox/streets-v12"
         projection="mercator"
         onDidFinishLoadingMap={handleMapLoaded}
+        testID="map-view"
       >
         <Camera ref={cameraRef} animationMode="easeTo" zoomLevel={10} />
 
@@ -81,6 +82,7 @@ export default function ModerateTripReview() {
           label={trip.startLocation}
           color="green"
           radius={8}
+          testID="start-marker"
         />
         <CircleMarker
           id="end"
@@ -88,6 +90,7 @@ export default function ModerateTripReview() {
           label={trip.endLocation}
           color="red"
           radius={8}
+          testID="end-marker"
         />
 
         {trip.segments.map((segment: Segment, index: number) => (

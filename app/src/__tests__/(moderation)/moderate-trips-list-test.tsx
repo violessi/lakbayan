@@ -1,5 +1,3 @@
-// src/__tests__/(moderation)/moderate-trips-list-test.tsx
-
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
