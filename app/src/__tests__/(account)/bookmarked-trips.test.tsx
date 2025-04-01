@@ -17,6 +17,15 @@ describe("BookmarkedTrips Screen", () => {
     (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
   });
 
+  it("renders correctly", () => {
+    (useBookmarks as jest.Mock).mockReturnValue({
+      bookmarks: [],
+      loading: true,
+    });
+    const { getByText } = render(<BookmarkedTrips />);
+    expect(getByText("Bookmarked Trips")).toBeTruthy();
+  });
+
   it("shows loading indicator when loading", () => {
     (useBookmarks as jest.Mock).mockReturnValue({
       bookmarks: [],
