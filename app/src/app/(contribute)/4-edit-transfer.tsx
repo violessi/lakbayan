@@ -248,6 +248,7 @@ export default function RouteInput() {
         landmark={route.landmark ?? ""}
         instruction={route.instruction ?? ""}
         cost={route.cost.toString()}
+        segmentMode={route.segmentMode}
         bottomSheetModalRef={bottomSheetModalRef}
         updateRoute={updateRoute}
         isAddingWaypoints={isAddingWaypoints}

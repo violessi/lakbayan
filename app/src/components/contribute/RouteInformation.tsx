@@ -20,6 +20,7 @@ interface RouteInformationProps {
   landmark: string;
   instruction: string;
   cost: string;
+  segmentMode: string;
   bottomSheetModalRef: React.RefObject<BottomSheetModal>;
   updateRoute: (updates: Partial<CreateSegment>) => void;
   isAddingWaypoints: boolean;
@@ -37,12 +38,13 @@ export default function RouteInformation({
   landmark,
   instruction,
   cost,
+  segmentMode,
   bottomSheetModalRef,
   updateRoute,
   isAddingWaypoints,
   handleToggleMode,
   clearWaypoints,
-  getRouteDirections
+  getRouteDirections,
 }: RouteInformationProps) {
   const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
   const renderBackdrop = useCallback(
@@ -80,7 +82,16 @@ export default function RouteInformation({
               />
             </View>
             <View className="flex-1">
-              <OutlinedTextInput label="Cost" value={cost} onChangeText={onCostChange} />
+              {segmentMode == "Walk" ? (
+                <OutlinedTextInput
+                  label="Cost"
+                  value={cost}
+                  disabled={true}
+                  onChangeText={onCostChange}
+                />
+              ) : (
+                <OutlinedTextInput label="Cost" value={cost} onChangeText={onCostChange} />
+              )}
             </View>
           </View>
           <OutlinedTextInput label="Landmark" value={landmark} onChangeText={onLandmarkChange} />

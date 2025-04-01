@@ -6,6 +6,7 @@ interface OutlinedTextInputProps {
   label: string;
   value: string;
   onChangeText?: (text: string) => void;
+  onBlur?: () => void;
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
   secureTextEntry?: boolean;
@@ -18,6 +19,7 @@ export default function OutlinedTextInput({
   label,
   value,
   onChangeText,
+  onBlur,
   autoCapitalize = "none",
   keyboardType = "default",
   secureTextEntry = false,
@@ -40,6 +42,7 @@ export default function OutlinedTextInput({
       placeholder={placeholder}
       disabled={disabled}
       testID={testID}
+      onBlur={onBlur}
     />
   );
 }
