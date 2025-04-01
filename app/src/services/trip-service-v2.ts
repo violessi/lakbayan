@@ -66,7 +66,7 @@ export async function insertLiveUpdate(status: CreateLiveUpdate): Promise<string
   try {
     const payload = convertKeysToSnakeCase(status);
     payload.coordinate = convertToPointWKT(payload.coordinate);
-    const res = await insertData("live_status_v2", [payload]);
+    const res = await insertData("live_updates_v2", [payload]);
     return res[0].id;
   } catch (error) {
     throw new Error("Error inserting live status");

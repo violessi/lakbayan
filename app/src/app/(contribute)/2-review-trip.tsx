@@ -58,7 +58,10 @@ export default function TripReview() {
   const handleEditSegment = (index: number) => {
     setInEditMode(true);
     updateRoute(segments[index]);
-    router.replace("/(contribute)/4-edit-transfer");
+    router.replace({
+      pathname: "/(contribute)/4-edit-transfer",
+      params: { index },
+    });
   };
 
   const prevCallback = () => {
