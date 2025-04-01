@@ -24,7 +24,6 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
-  const { trip, segments, clearRouteData, submitTrip, updateRoute, setInEditMode, clearTripData } =
   const { trip, segments, clearRouteData, submitTrip, updateRoute, setInEditMode, clearTripData, deleteSegment } =
     useTripCreator();
     
@@ -179,14 +178,6 @@ export default function TripReview() {
           />
         ))}
       </MapView>
-
-      <View className="p-5 z-10">
-        <PrimaryButton
-          label={isSameEndLocation ? "Submit" : "Add Transfers"}
-          onPress={isSameEndLocation ? handleSubmitTrip : handleCreateSegment}
-        />
-      </View>
-
       <TripSummary
         startLocation={trip.startLocation}
         endLocation={trip.endLocation}
@@ -194,33 +185,12 @@ export default function TripReview() {
         onSegmentPress={handleEditSegment}
         undo={handleUndo}
       />
+      <View className="absolute bottom-0 z-50 p-5 w-full justify-center">
+        <PrimaryButton
+          label={isSameEndLocation ? "Submit" : "Add Transfers"}
+          onPress={isSameEndLocation ? handleSubmitTrip : handleCreateSegment}
+        />
+      </View>
     </SafeAreaView>
   );
 }
-
-// back navigation for android
-// usePreventRemove(hasAddedSegment, ({ data }) => {
-//   if (hasAddedSegment) {
-//     Alert.alert(
-//       "Unsaved Changes",
-//       "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
-//       [
-//         {
-//           text: "Leave Anyway",
-//           style: "destructive",
-//           onPress: () => {
-//             clearTripData();
-//             navigation.dispatch(data.action);
-//           },
-//         },
-//         {
-//           text: "Stay",
-//           style: "cancel",
-//           onPress: () => {},
-//         },
-//       ],
-//     );
-//   } else {
-//     navigation.dispatch(data.action);
-//   }
-// });
