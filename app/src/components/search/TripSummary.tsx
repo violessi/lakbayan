@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Text, View, FlatList, Image, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-
-import { getUsername } from "@services/account-service";
-import { getPoints } from "@services/socials-service";
+import { useTripSummaryData } from "@hooks/use-trip-summary-data";
 
 import RouteItem from "@components/ui/RouteItem";
 import VotingBar from "@components/VotingBar";
@@ -30,23 +28,7 @@ export default function TripSummary({
 }: TripSummaryProps) {
   const router = useRouter();
 
-  const [contributor, setContributor] = useState<string | null>(null);
-  const [points, setPoints] = useState<number>(0);
-
-  useEffect(() => {
-    async function fetchContributor() {
-      const username = await getUsername(trip.contributorId);
-      setContributor(username);
-    }
-
-    async function fetchPoints() {
-      const points = await getPoints(trip.id);
-      setPoints(points || 0);
-    }
-
-    fetchContributor();
-    fetchPoints();
-  }, [trip.contributorId, trip.id]);
+  const { contributor } = useTripSummaryData(trip.contributorId, trip.id);
 
   const handleContributorPress = (contributorId: string, contributorUsername: string) => {
     router.push({
@@ -54,6 +36,7 @@ export default function TripSummary({
       params: { contributorId, contributorUsername },
     });
   };
+
   return (
     <BottomSheet snapPoints={snapPoints} index={2}>
       <BottomSheetView className="flex flex-col px-5 gap-6">

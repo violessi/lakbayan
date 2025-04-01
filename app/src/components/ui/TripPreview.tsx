@@ -3,6 +3,7 @@ import { Text } from "react-native-paper";
 
 import { useSession } from "@contexts/SessionContext";
 import { useTripPreviewData } from "@hooks/use-trip-preview-data";
+import { getImageSource } from "@utils/transpo-utils";
 
 import VotingBar from "@components/VotingBar";
 
@@ -11,32 +12,6 @@ const verifiedGPS = require("@assets/verified-gps.png");
 const comment = require("@assets/social-comment.png");
 const bookmarkIcon = require("@assets/social-bookmark.png");
 const bookmarkedIcon = require("@assets/social-bookmarked.png");
-
-const jeep = require("@assets/transpo-jeep.png");
-const bus = require("@assets/transpo-bus.png");
-const train = require("@assets/transpo-train.png");
-const tricycle = require("@assets/transpo-tricycle.png");
-const uv = require("@assets/transpo-uv.png");
-const walk = require("@assets/transpo-walk.png");
-
-const getImageSource = (mode: TransportationMode) => {
-  switch (mode) {
-    case "Jeep":
-      return jeep;
-    case "Bus":
-      return bus;
-    case "Train":
-      return train;
-    case "Tricycle":
-      return tricycle;
-    case "UV":
-      return uv;
-    case "Walk":
-      return walk;
-    default:
-      return null;
-  }
-};
 
 export default function TripPreview({ trip }: { trip: FullTrip }) {
   const { user } = useSession();
