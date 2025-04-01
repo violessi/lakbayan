@@ -35,6 +35,7 @@ export default function RouteInput() {
   console.log(segmentIndex);
 
   const getRouteDirections = async () => {
+    handleDismissPress();
     setIsLoadingRoute(true);
     try {
       const data = await getDirections(
@@ -69,9 +70,15 @@ export default function RouteInput() {
   };
 
   const handleToggleMode = async () => {
+    handleDismissPress();
     if (isAddingWaypoints) await getRouteDirections();
     setIsAddingWaypoints((prev) => !prev);
+    if (!isAddingWaypoints) setIsAddingWaypoints((prev) => !prev);
   };
+
+  const handleDoneAddingWaypoint = () => {
+    setIsAddingWaypoints((prev) => !prev);
+  }
 
   const handleDismissPress = useCallback(() => {
     bottomSheetModalRef.current?.dismiss();
@@ -94,6 +101,16 @@ export default function RouteInput() {
   };
 
   const clearWaypoints = () => setCustomWaypoint([]);
+  const clearWaypoints = () => {
+    setCustomWaypoint([])
+    updateRoute({
+      ...route,
+      waypoints: [],
+      duration: 0,
+      distance: 0,
+      navigationSteps: []
+    });
+  };
   const handleZoomChange = (event: any) => setZoomLevel(event.properties.zoom);
   const handleMapLoaded = () => {
     if (cameraRef.current) {
@@ -175,6 +192,7 @@ export default function RouteInput() {
         ))}
 
         {!isLoadingRoute && !isAddingWaypoints && route.waypoints.length > 0 && (
+        {!isLoadingRoute && route.waypoints.length > 0 && (
           <DirectionsLine coordinates={route.waypoints} />
         )}
       </MapView>
@@ -187,8 +205,20 @@ export default function RouteInput() {
         <PrimaryButton
           label={isAddingWaypoints ? "Clear" : "Calculate"}
           onPress={isAddingWaypoints ? clearWaypoints : getRouteDirections}
+        <PrimaryButton 
+          label={isAddingWaypoints ? "Recalculate" : "Edit Details"}
+          onPress={isAddingWaypoints? handleToggleMode: handlePresentModalPress} 
         />
         <PrimaryButton label="Edit Details" onPress={handlePresentModalPress} />
+        <PrimaryButton 
+          label={isAddingWaypoints ? "Clear" : "Submit"} 
+          onPress={isAddingWaypoints? clearWaypoints: handleSubmit} />
+        {isAddingWaypoints && (
+          <PrimaryButton 
+            label="Done"
+            onPress={handleDoneAddingWaypoint} 
+          />
+        )}
       </View>
 
       <RouteInformation
@@ -203,6 +233,10 @@ export default function RouteInput() {
         onSubmit={handleSubmit}
         bottomSheetModalRef={bottomSheetModalRef}
         updateRoute={updateRoute}
+        isAddingWaypoints={isAddingWaypoints}
+        handleToggleMode={handleToggleMode}
+        clearWaypoints={clearWaypoints}
+        getRouteDirections={getRouteDirections}
       />
     </SafeAreaView>
   );
