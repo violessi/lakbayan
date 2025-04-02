@@ -187,7 +187,6 @@ async function generateWalkingSegment(
     duration,
     distance,
     cost: 0,
-    liveStatus: [],
     waypoints,
     navigationSteps,
     startLocation,

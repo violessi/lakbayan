@@ -5,10 +5,14 @@ import { useRouter } from "expo-router";
 import { getPoints } from "@services/socials-service";
 import { addComment } from "@services/socials-service";
 import { insertJournalEntry } from "@services/journal-service";
+import { updateTransitJournal, updateProfile } from "@services/trip-service-v2";
 
 import VotingBar from "@components/VotingBar";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+
+import { useTransitJournal } from "@contexts/TransitJournal";
+import TransitJournal from "app/(journal)/transit-journal";
 
 const comment = require("@assets/social-comment.png");
 
@@ -20,6 +24,7 @@ interface JournalFeedbackProps {
   currentUserId: string;
   onCommentPress: (tripId: string) => void;
   isGpsVerified: boolean;
+  transitJournal: TransitJournal;
 }
 
 export default function JournalFeedback({
@@ -30,6 +35,7 @@ export default function JournalFeedback({
   currentUserId,
   onCommentPress,
   isGpsVerified,
+  transitJournal,
 }: JournalFeedbackProps) {
   const snapPoints = ["10%", "18%", "40%", "72%"];
   const router = useRouter();
@@ -45,7 +51,7 @@ export default function JournalFeedback({
     }
 
     fetchPoints();
-  }, [trip.contributor_id, trip.id]);
+  }, [trip.contributorId, trip.id]);
 
   const handleSubmit = async () => {
     if (!newComment.trim()) return;
@@ -69,6 +75,19 @@ export default function JournalFeedback({
       }
 
       console.log("Journal entries added successfully");
+
+      await updateTransitJournal({
+        id: transitJournal.id,
+        status: "success",
+        endTime: new Date().toISOString(),
+      });
+      console.log("Transit journal updated successfully");
+
+      await updateProfile({
+        id: currentUserId,
+        transitJournalId: null,
+      });
+      console.log("Profile updated successfully");
 
       Alert.alert("Success", "Your transit journal has been submitted!", [
         {

@@ -1,4 +1,5 @@
-import type { Feature, Geometry, GeoJsonProperties } from "geojson";
+import type { Feature, Point, Geometry, GeoJsonProperties } from "geojson";
+
 declare global {
   export interface Suggestion {
     id: string;
@@ -55,6 +56,16 @@ declare global {
   }
 
   export type MapPressFeature = Feature<Geometry, GeoJsonProperties>;
+
+  export type NearestPointProperties = {
+    dist: number;
+    index: number;
+    multiFeatureIndex: number;
+    location: number;
+    [key: string]: any;
+  };
+
+  export type NearestPoint = Feature<Point, NearestPointProperties>;
 }
 
 export {};

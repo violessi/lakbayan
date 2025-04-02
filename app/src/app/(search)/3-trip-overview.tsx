@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useRef, Fragment } from "react";
+import React, { useRef, Fragment, useEffect } from "react";
 import { Alert, View, SafeAreaView } from "react-native";
 import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
@@ -12,6 +12,7 @@ import DirectionsLine from "@components/ui/DirectionsLine";
 
 import { useTripSearch } from "@contexts/TripSearch";
 import { useSession } from "@contexts/SessionContext";
+import { useTransitJournal } from "@contexts/TransitJournal";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 import { insertSegments, insertTransitJournal, updateProfile } from "@services/trip-service-v2";
 
@@ -22,13 +23,15 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 export default function TripOverview() {
   const router = useRouter();
   const { user } = useSession();
+  const { hasActiveTransitJournal } = useTransitJournal();
   const cameraRef = useRef<Camera>(null);
 
   const { tripData } = useLocalSearchParams();
   const { trip: contextTrip } = useTripSearch();
 
   // Use contextTrip if available, otherwise parse tripData from params
-  const trip = contextTrip ?? (typeof tripData === "string" ? JSON.parse(tripData) : null);
+  const trip =
+    contextTrip ?? ((typeof tripData === "string" ? JSON.parse(tripData) : null) as TripSearch);
   if (!trip) throw new Error("Trip not found");
 
   const handleMapLoaded = () => {
@@ -61,15 +64,17 @@ export default function TripOverview() {
 
       // bind transit journal to user
       await updateProfile({ id: user!.id, transitJournalId });
-      // FIXME: should verify if journal context is updated before navigating
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      router.push("/(journal)/transit-journal");
     } catch (error) {
       Alert.alert("Error starting trip");
       console.error(error);
     }
   }
 
+  useEffect(() => {
+    if (hasActiveTransitJournal) {
+      router.replace("/(journal)/transit-journal");
+    }
+  }, [hasActiveTransitJournal]);
   return (
     <SafeAreaView className="flex-1">
       <Header title="Trip Overview" />

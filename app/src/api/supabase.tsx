@@ -37,6 +37,26 @@ export async function updateData(
   }
 }
 
+export async function deleteData(table: string, filters: Record<string, any[]>): Promise<string[]> {
+  const errMsg = `Failed to delete data from ${table}`;
+
+  try {
+    let query = supabase.from(table).delete();
+
+    // Apply filters dynamically
+    Object.entries(filters).forEach(([key, value]) => {
+      query = query.in(key, value);
+    });
+
+    const { data, error } = await query.select(); // Select returns deleted rows
+    if (error) throw new Error(error.message);
+    return data.map((row) => row.id);
+  } catch (error: Error | any) {
+    console.error("[API ERROR]", errMsg, error.message);
+    throw new Error(error.message || errMsg);
+  }
+}
+
 export async function fetchData(
   table: string,
   columns: string[] = ["*"],
