@@ -18,6 +18,7 @@ interface StartEndSearchProps {
   defaultEnd?: string | null;
 }
 
+// FIXME: map click doesnt override the search query
 export default function StartEndSearch({
   onStartChange,
   onEndChange,
