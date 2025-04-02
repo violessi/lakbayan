@@ -1,35 +1,37 @@
 import { router } from "expo-router";
-import React, { useRef } from "react";
 import { SafeAreaView, View, Alert } from "react-native";
-import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
 
 import Header from "@components/ui/Header";
+import { MapShell } from "@components/map/MapShell";
 import CircleMarker from "@components/map/CircleMarker";
+import SymbolMarker from "@components/map/SymbolMarker";
 import PrimaryButton from "@components/ui/PrimaryButton";
+import DirectionLines from "@components/map/DirectionLines";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+import { useMapView } from "@hooks/use-map-view";
 import { reverseGeocode } from "@services/mapbox-service";
 import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
-
 export default function RouteSelectInfo() {
-  const cameraRef = useRef<Camera>(null);
-  const { trip, route, updateRoute, clearRouteData } = useTripCreator();
+  const { cameraRef, handleMapPress } = useMapView();
+  const { trip, segments, route, updateRoute, clearRouteData } = useTripCreator();
+  const segmentCoordinates = segments.map(({ waypoints }) => waypoints);
 
-  // When user updates the destination using search bar
-  const handleDestinationSearch = (endLocation: string, endCoords: Coordinates) => {
+  // when user updates the end location
+  const handleEndChange = async (endCoords: Coordinates, endLocation?: string) => {
+    endLocation = endLocation ?? ((await reverseGeocode(endCoords)) as string);
     updateRoute({ endLocation, endCoords });
-    if (cameraRef.current) cameraRef.current.moveTo(endCoords, 1000);
+    cameraRef.current?.moveTo(endCoords, 1000);
   };
 
-  // When user updates the destination by pressing the map
-  const handleMapPress = async (event: any) => {
-    const coordinates = event.geometry.coordinates as [number, number];
-    const location = await reverseGeocode(coordinates);
-    updateRoute({ endLocation: location, endCoords: coordinates });
-    if (cameraRef.current) cameraRef.current.moveTo(coordinates, 1000);
+  // Once we have all necessary information, navigate to the next screen.
+  const handleAddTransfer = () => {
+    if (!route.endLocation || !route.endCoords) {
+      Alert.alert("Missing Information", "Please fill in all fields to proceed.");
+    } else {
+      router.replace("/(contribute)/4-edit-transfer");
+    }
   };
 
   // Prefill the final segment with the trip's end location
@@ -38,21 +40,7 @@ export default function RouteSelectInfo() {
     router.replace("/(contribute)/4-edit-transfer");
   };
 
-  // Once we have all necessary information, navigate to the next screen.
-  const handleAddTransfer = () => {
-    if (!route.endLocation || !route.endCoords) {
-      Alert.alert("Missing Information", "Please fill in all fields to proceed.");
-      return;
-    }
-    router.replace("/(contribute)/4-edit-transfer");
-  };
-
-  const handleMapLoaded = () => {
-    if (cameraRef.current) {
-      cameraRef.current.fitBounds(route.startCoords, trip.endCoords, [150, 150, 250, 150]);
-    }
-  };
-
+  // Navigate back to the previous screen.
   const prevCallback = () => {
     clearRouteData();
     router.replace("/(contribute)/2-review-trip");
@@ -64,43 +52,35 @@ export default function RouteSelectInfo() {
 
       <View>
         <StartEndSearchBar
-          onEndChange={handleDestinationSearch}
-          defaultStart={route.startLocation}
           isStartActive={false}
+          defaultStart={route.startLocation}
           defaultEnd={route.endLocation}
+          onEndChange={(l, c) => handleEndChange(c, l)}
         />
       </View>
 
-      <MapView
-        style={{ flex: 1 }}
-        styleURL="mapbox://styles/mapbox/streets-v12"
-        projection="mercator"
-        onDidFinishLoadingMap={handleMapLoaded}
-        onPress={handleMapPress}
+      <MapShell
+        cameraRef={cameraRef}
+        fitBounds={[route.startCoords, trip.endCoords]}
+        handleMapPress={(feature) => handleMapPress(feature, handleEndChange)}
       >
-        <Camera ref={cameraRef} zoomLevel={10} animationMode="easeTo" />
-        <CircleMarker
-          id="start-location"
-          coordinates={route.startCoords}
-          label={route.startLocation}
-          color="red"
-          radius={8}
+        <DirectionLines coordinates={segmentCoordinates} />
+        <SymbolMarker
+          id="trip-start-location"
+          coordinates={trip.startCoords}
+          label={trip.startLocation}
         />
-        <CircleMarker
-          id="next-location"
-          coordinates={route.endCoords}
-          label={route.endLocation}
-          color="blue"
-          radius={8}
-        />
-        <CircleMarker
-          id="end-location"
+        <SymbolMarker
+          id="trip-end-location"
           coordinates={trip.endCoords}
           label={trip.endLocation}
-          color="green"
-          radius={8}
         />
-      </MapView>
+        <CircleMarker
+          id="route-end-location"
+          coordinates={route.endCoords}
+          label={route.endLocation}
+        />
+      </MapShell>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
         <PrimaryButton label="Final Location" onPress={handleFinalTransfer} />

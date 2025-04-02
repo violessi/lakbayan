@@ -16,7 +16,7 @@ function CircleMarker({
   id,
   label,
   coordinates,
-  color = "red",
+  color = "purple",
   radius = 8,
   testID = "circle-marker",
 }: CircleMarkerProps) {
