@@ -4,7 +4,7 @@ import { Button } from "react-native-paper";
 
 interface PrimaryButtonProps {
   label: string;
-  onPress?: () => void;
+  onPress?: () => void | Promise<void>;
   disabled?: boolean;
   testID?: string;
 }

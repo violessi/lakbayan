@@ -55,7 +55,6 @@ declare global {
   export type NavigationSteps = z.infer<typeof NavigationStepsSchema>;
 
   export type TripEndpoints = z.infer<typeof TripEndpointsSchema>;
-
   export type Trip = z.infer<typeof TripSchema>;
   export type CreateTrip = Omit<Trip, "id" | "createdAt" | "updatedAt">;
 

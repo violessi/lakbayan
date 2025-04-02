@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
 import { SafeAreaView, View, Alert } from "react-native";
-import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
+import Mapbox, { MapView, Camera, Images, UserLocation } from "@rnmapbox/maps";
 
 import pin from "@assets/pin-purple.png";
 import Header from "@components/ui/Header";
@@ -11,6 +11,7 @@ import StartEndSearchBar from "@components/StartEndSearchBar";
 
 import { reverseGeocode } from "@services/mapbox-service";
 import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
+import { useUserLocation } from "@contexts/LocationContext";
 
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -24,6 +25,7 @@ export default function CustomTrip() {
   const [zoomLevel, setZoomLevel] = useState(15);
 
   const { trip, updateTrip } = useTripCreator();
+  const { userLocation } = useUserLocation();
   const [mapCoordinates, setMapCoordinates] = useState<Coordinates | null>(null);
 
   // When the user updates a location as "Source".
@@ -60,6 +62,16 @@ export default function CustomTrip() {
         { text: "Destination", onPress: () => handleEndChange(location, coords) },
       ],
     );
+  };
+
+  // Allow users to use current location as start or end location.
+  const handleUseCurrentLoc = async () => {
+    if (!userLocation) {
+      Alert.alert("Location not available", "Please enable location services.");
+      return;
+    }
+    const locationName = await reverseGeocode(userLocation);
+    confirmationAlert(userLocation, locationName);
   };
 
   // When the user presses Confirm, navigate to the next screen if both locations are set.
@@ -101,12 +113,8 @@ export default function CustomTrip() {
         onRegionDidChange={handleZoomChange}
         projection="mercator"
       >
-        <Camera
-          ref={cameraRef}
-          centerCoordinate={INITIAL_CENTER}
-          zoomLevel={zoomLevel}
-          animationMode="easeTo"
-        />
+        <Camera followZoomLevel={12} followUserLocation />
+        <UserLocation visible={true} showsUserHeadingIndicator={true} />
         <SymbolMarker id="map-onclick-location-c1" coordinates={mapCoordinates} />
         <SymbolMarker
           id="start-location-c1"
@@ -121,7 +129,8 @@ export default function CustomTrip() {
         <Images images={{ pin }} />
       </MapView>
 
-      <View className="z-50 p-5 absolute bottom-0 w-1/2 self-center">
+      <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
+        <PrimaryButton label="Use Current Location" onPress={handleUseCurrentLoc} />
         <PrimaryButton label="Confirm" onPress={handleConfirmLocation} />
       </View>
     </SafeAreaView>

@@ -1,7 +1,8 @@
 import { router } from "expo-router";
-import React, { useRef } from "react";
-import { SafeAreaView, View, Alert } from "react-native";
+import React, { useRef, useCallback } from "react";
+import { SafeAreaView, View, Alert, BackHandler } from "react-native";
 import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
+import { useFocusEffect } from "@react-navigation/native";
 
 import Header from "@components/ui/Header";
 import SymbolMarker from "@components/map/SymbolMarker";
@@ -23,13 +24,14 @@ const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
 
 export default function TripReview() {
   const cameraRef = useRef<Camera>(null);
-  const { trip, segments, submitTrip, updateRoute, setInEditMode, clearTripData } =
+  const { trip, segments, clearRouteData, submitTrip, updateRoute, setInEditMode, clearTripData, deleteSegment } =
     useTripCreator();
-
+    
   // transformation/calculations we need
   const len = segments.length;
   const segmentCoordinates = segments.map(({ waypoints }) => waypoints);
   const isSameEndLocation = len > 0 && trip.endLocation === segments[len - 1].endLocation;
+  const hasEmptySegments = segments.length === 0;
 
   // When the map is loaded, fit the camera to the pins
   const handleMapLoaded = () => {
@@ -52,6 +54,7 @@ export default function TripReview() {
   };
 
   const handleCreateSegment = () => {
+    clearRouteData()
     return router.replace("/(contribute)/3-add-transfer");
   };
 
@@ -64,9 +67,27 @@ export default function TripReview() {
     });
   };
 
-  const prevCallback = () => {
-    const hasEmptySegments = segments.length === 0;
+  const handleUndo = () => {
+    Alert.alert(
+      "Undo",
+      "Do you want to remove the last transfer you added?",
+      [
+        {
+          text: "Yes",
+          style: "destructive",
+          onPress: () => deleteSegment(),
+        },
+        {
+          text: "No",
+          style: "cancel",
+        }
+      ]
+    )
+  }
 
+  // for back in header
+  const prevCallback = () => {
+    
     if (hasEmptySegments) {
       clearTripData();
       router.replace("/(contribute)/1-create-trip");
@@ -88,6 +109,41 @@ export default function TripReview() {
       );
     }
   };
+
+  // for back in android
+  useFocusEffect(
+    useCallback(() => {
+      const backAction = () => {
+        if (hasEmptySegments) {
+          clearTripData();
+          router.replace("/(contribute)/1-create-trip");
+          return true; // Prevent default back behavior
+        } else {
+          Alert.alert(
+            "Unsaved Changes",
+            "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
+            [
+              {
+                text: "Leave Anyway",
+                style: "destructive",
+                onPress: () => {
+                  clearTripData();
+                  router.replace("/(contribute)/1-create-trip");
+                },
+              },
+              { text: "Stay", style: "cancel" },
+            ]
+          );
+          return true; // Prevent default back behavior while alert is open
+        }
+      };
+  
+      // Add event listener
+      const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+  
+      return () => backHandler.remove(); // Cleanup when screen loses focus
+    }, [hasEmptySegments]) // Re-run if hasEmptySegments changes
+  );
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -122,47 +178,19 @@ export default function TripReview() {
           />
         ))}
       </MapView>
-
-      <View className="p-5 z-10">
-        <PrimaryButton
-          label={isSameEndLocation ? "Submit" : "Add Transfers"}
-          onPress={isSameEndLocation ? handleSubmitTrip : handleCreateSegment}
-        />
-      </View>
-
       <TripSummary
         startLocation={trip.startLocation}
         endLocation={trip.endLocation}
         segments={segments}
         onSegmentPress={handleEditSegment}
+        undo={handleUndo}
       />
+      <View className="absolute bottom-0 z-50 p-5 w-full justify-center">
+        <PrimaryButton
+          label={isSameEndLocation ? "Submit" : "Add Transfers"}
+          onPress={isSameEndLocation ? handleSubmitTrip : handleCreateSegment}
+        />
+      </View>
     </SafeAreaView>
   );
 }
-
-// back navigation for android
-// usePreventRemove(hasAddedSegment, ({ data }) => {
-//   if (hasAddedSegment) {
-//     Alert.alert(
-//       "Unsaved Changes",
-//       "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
-//       [
-//         {
-//           text: "Leave Anyway",
-//           style: "destructive",
-//           onPress: () => {
-//             clearTripData();
-//             navigation.dispatch(data.action);
-//           },
-//         },
-//         {
-//           text: "Stay",
-//           style: "cancel",
-//           onPress: () => {},
-//         },
-//       ],
-//     );
-//   } else {
-//     navigation.dispatch(data.action);
-//   }
-// });

@@ -32,7 +32,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const transitJournalId = await fetchUserTransitJournal(user.id);
+        const transitJournalId = await fetchUserTransitJournal(user?.id ?? "");
         setTransitJournalId(transitJournalId);
       } catch (error) {
         throw new Error("Error fetching transit journal ID");
@@ -44,7 +44,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
       .channel("profiles")
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user?.id || ""}` },
         (payload: any) => {
           setTransitJournalId(payload.new.transit_journal_id);
         },
@@ -54,7 +54,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [user.id]);
+  }, [user?.id ?? ""]);
 
   useEffect(() => {
     if (!transitJournalId) {
@@ -97,7 +97,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
 
   const addLiveUpdate = async (status: { type: LiveUpdateType; coordinate: Coordinates }) => {
     const payload: CreateLiveUpdate = {
-      contributorId: user.id,
+      contributorId: user?.id ?? "",
       transitJournalId: transitJournalId!,
       type: status.type,
       coordinate: status.coordinate,

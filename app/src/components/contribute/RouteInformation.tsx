@@ -20,9 +20,13 @@ interface RouteInformationProps {
   landmark: string;
   instruction: string;
   cost: string;
-  onSubmit: () => void;
+  segmentMode: string;
   bottomSheetModalRef: React.RefObject<BottomSheetModal>;
   updateRoute: (updates: Partial<CreateSegment>) => void;
+  isAddingWaypoints: boolean;
+  handleToggleMode: () => Promise<void>;
+  clearWaypoints: () => void;
+  getRouteDirections: () => Promise<void>;
 }
 
 export default function RouteInformation({
@@ -34,9 +38,13 @@ export default function RouteInformation({
   landmark,
   instruction,
   cost,
-  onSubmit,
+  segmentMode,
   bottomSheetModalRef,
   updateRoute,
+  isAddingWaypoints,
+  handleToggleMode,
+  clearWaypoints,
+  getRouteDirections,
 }: RouteInformationProps) {
   const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
   const renderBackdrop = useCallback(
@@ -74,7 +82,16 @@ export default function RouteInformation({
               />
             </View>
             <View className="flex-1">
-              <OutlinedTextInput label="Cost" value={cost} onChangeText={onCostChange} />
+              {segmentMode == "Walk" ? (
+                <OutlinedTextInput
+                  label="Cost"
+                  value={cost}
+                  disabled={true}
+                  onChangeText={onCostChange}
+                />
+              ) : (
+                <OutlinedTextInput label="Cost" value={cost} onChangeText={onCostChange} />
+              )}
             </View>
           </View>
           <OutlinedTextInput label="Landmark" value={landmark} onChangeText={onLandmarkChange} />
@@ -83,8 +100,15 @@ export default function RouteInformation({
             value={instruction}
             onChangeText={onInstructionChange}
           />
-          <View className="z-50 flex p-5 w-100">
-            <PrimaryButton label="Submit" onPress={onSubmit} />
+          <View className="flex flex-row gap-2 p-5 w-full justify-center">
+            <PrimaryButton
+              label={isAddingWaypoints ? "Recalculate" : "Edit Route"}
+              onPress={handleToggleMode}
+            />
+            <PrimaryButton
+              label={isAddingWaypoints ? "Clear" : "Calculate"}
+              onPress={isAddingWaypoints ? clearWaypoints : getRouteDirections}
+            />
           </View>
         </BottomSheetView>
       </BottomSheetModal>
