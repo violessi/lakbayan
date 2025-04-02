@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
 import { SafeAreaView, View, Alert } from "react-native";
-import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
+import Mapbox, { MapView, Camera, Images, UserLocation } from "@rnmapbox/maps";
 
 import pin from "@assets/pin-purple.png";
 import Header from "@components/ui/Header";
@@ -101,12 +101,8 @@ export default function CustomTrip() {
         onRegionDidChange={handleZoomChange}
         projection="mercator"
       >
-        <Camera
-          ref={cameraRef}
-          centerCoordinate={INITIAL_CENTER}
-          zoomLevel={zoomLevel}
-          animationMode="easeTo"
-        />
+        <Camera followZoomLevel={12} followUserLocation />
+        <UserLocation visible={true} showsUserHeadingIndicator={true} />
         <SymbolMarker id="map-onclick-location-c1" coordinates={mapCoordinates} />
         <SymbolMarker
           id="start-location-c1"
