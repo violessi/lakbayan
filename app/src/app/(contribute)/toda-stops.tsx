@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView, View, Platform } from "react-native";
 
 import LocationSearchBar from "@components/LocationSearchBar";
@@ -7,7 +7,16 @@ import TodaInformation from "@components/contribute/TodaInformation";
 import TodaMarker from "@components/map/TodaMarker";
 import pin from "@assets/pin-purple.png";
 
-import Mapbox, { MapView, Camera, ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
+import { useMapView } from "@hooks/use-map-view";
+
+import Mapbox, {
+  MapView,
+  ShapeSource,
+  SymbolLayer,
+  Images,
+  UserLocation,
+  Camera,
+} from "@rnmapbox/maps";
 import { featureCollection, point } from "@turf/helpers";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 import { fetchStops } from "@services/toda-stop-service";
@@ -15,9 +24,15 @@ import { fetchStops } from "@services/toda-stop-service";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TodaStops() {
-  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
-  const [zoomLevel, setZoomLevel] = useState(12);
-  const cameraRef = useRef<Camera>(null);
+  const {
+    cameraRef,
+    coordinates,
+    zoomLevel,
+    handleMapPress,
+    centerMap,
+    handleUserLocation,
+    userCoords,
+  } = useMapView(12);
 
   const [stops, setStops] = useState<StopData[]>([]);
 
@@ -30,22 +45,13 @@ export default function TodaStops() {
     loadStops();
   }, []);
 
-  const handleMapPress = (feature: MapPressFeature) => {
-    if (!feature.geometry || feature.geometry.type !== "Point") return;
-    const coordinates = feature.geometry.coordinates as Coordinates;
-    setCoordinates(coordinates);
-    setZoomLevel(15);
-  };
-
   const handleSuggestionSelect = (longitude: number, latitude: number) => {
     const newCoordinates: [number, number] = [longitude, latitude];
-    setCoordinates(newCoordinates);
-    setZoomLevel(16);
+    centerMap(newCoordinates, 15);
   };
 
   const handleClear = () => {
-    setCoordinates(null);
-    setZoomLevel(12);
+    centerMap(userCoords, 12);
   };
 
   return (
@@ -64,9 +70,16 @@ export default function TodaStops() {
       >
         <Camera
           ref={cameraRef}
-          centerCoordinate={coordinates || [121.05, 14.63]}
+          centerCoordinate={coordinates || userCoords || [121.0303, 14.6563]}
           zoomLevel={zoomLevel}
           animationMode={Platform.OS === "android" ? "none" : "easeTo"}
+        />
+
+        <UserLocation
+          visible={true}
+          onUpdate={(location) => {
+            handleUserLocation(location);
+          }}
         />
 
         {stops.map((stop) => (
@@ -85,7 +98,6 @@ export default function TodaStops() {
             />
           </ShapeSource>
         )}
-
         <Images images={{ pin }} />
       </MapView>
 
