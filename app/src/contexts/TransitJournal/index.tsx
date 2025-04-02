@@ -14,7 +14,6 @@ interface TransitJournalContextType {
   transitJournal: any | null;
   trip: Trip | null;
   segments: Segment[] | null;
-  loading: boolean;
   addLiveUpdate: (status: { type: LiveUpdateType; coordinate: Coordinates }) => Promise<void>;
 }
 
@@ -22,15 +21,13 @@ const TransitJournalContext = createContext<TransitJournalContextType | null>(nu
 
 export function TransitJournalProvider({ children }: { children: ReactNode }) {
   const { user } = useSession();
-  if (!user) throw new Error("User must be logged");
+  if (!user) return <>{children}</>;
 
-  const [loading, setLoading] = useState(true);
   const [transitJournalId, setTransitJournalId] = useState<string | null>(null);
   const [transitJournal, setTransitJournal] = useState<any | null>(null);
   const [trip, setTrip] = useState<Trip | null>(null);
   const [segments, setSegments] = useState<Segment[] | null>(null);
-
-  const hasActiveTransitJournal = !!transitJournalId;
+  const [hasActiveTransitJournal, setHasActiveTransitJournal] = useState(false);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -41,6 +38,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
         throw new Error("Error fetching transit journal ID");
       }
     };
+    fetchInitialData();
 
     const subscription = supabase
       .channel("profiles")
@@ -48,13 +46,10 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
         (payload: any) => {
-          setLoading(true);
-          setTransitJournalId(payload.new.transit_journal_id ?? null);
+          setTransitJournalId(payload.new.transit_journal_id);
         },
       )
       .subscribe();
-
-    fetchInitialData();
 
     return () => {
       subscription.unsubscribe();
@@ -62,13 +57,11 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   }, [user.id]);
 
   useEffect(() => {
-    setLoading(true);
-    console.log("Transit Journal ID!", transitJournalId);
     if (!transitJournalId) {
       setTrip(null);
       setSegments(null);
       setTransitJournal(null);
-      setLoading(false);
+      setHasActiveTransitJournal(false);
       return;
     }
 
@@ -90,13 +83,16 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
         setTrip(trip);
         setSegments(segments);
         setTransitJournal(journalData);
+        setHasActiveTransitJournal(true);
       } catch (error) {
-        throw new Error("Error fetching transit journal data");
+        console.error("Error fetching transit journal data:", error);
+        setTrip(null);
+        setSegments(null);
+        setTransitJournal(null);
+        setHasActiveTransitJournal(false);
       }
     };
-
     fetchTransitJournalData();
-    setLoading(false);
   }, [transitJournalId]);
 
   const addLiveUpdate = async (status: { type: LiveUpdateType; coordinate: Coordinates }) => {
@@ -115,11 +111,10 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   };
 
   const value = {
-    hasActiveTransitJournal,
-    transitJournal,
     trip,
     segments,
-    loading,
+    transitJournal,
+    hasActiveTransitJournal,
     addLiveUpdate,
   };
   return <TransitJournalContext.Provider value={value}>{children}</TransitJournalContext.Provider>;
