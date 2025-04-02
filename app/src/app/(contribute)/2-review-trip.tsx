@@ -1,61 +1,31 @@
+import React from "react";
 import { router } from "expo-router";
-import React, { useRef, useCallback } from "react";
-import { SafeAreaView, View, Alert, BackHandler } from "react-native";
-import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
 import { useFocusEffect } from "@react-navigation/native";
+import { SafeAreaView, View, Alert, BackHandler } from "react-native";
 
 import Header from "@components/ui/Header";
+import { MapShell } from "@components/map/MapShell";
 import SymbolMarker from "@components/map/SymbolMarker";
 import TripTitle from "@components/contribute/TripTitle";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import DirectionsLine from "@components/ui/DirectionsLine";
+import DirectionLines from "@components/map/DirectionLines";
 import TripSummary from "@components/contribute/TripSummary";
+import UnsavedChangesAlert from "@components/contribute/UnsavedChangesAlert";
 
-import pin from "@assets/pin-purple.png";
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-import { addToPendingModeratorReview } from "@services/moderation-service";
-import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
+import { useMapView } from "@hooks/use-map-view";
 import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
-
-// TODO: set initial camera to current location
-const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
-
 export default function TripReview() {
-  const cameraRef = useRef<Camera>(null);
-  const { trip, segments, clearRouteData, submitTrip, updateRoute, setInEditMode, clearTripData, deleteSegment } =
-    useTripCreator();
-    
-  // transformation/calculations we need
-  const len = segments.length;
+  const { cameraRef } = useMapView();
+  const { updateRoute, setInEditMode, deleteSegment } = useTripCreator();
+  const { clearTripData, clearRouteData, submitTrip } = useTripCreator();
+  const { trip, segments, isSegmentEmpty, isSegmentComplete } = useTripCreator();
+
   const segmentCoordinates = segments.map(({ waypoints }) => waypoints);
-  const isSameEndLocation = len > 0 && trip.endLocation === segments[len - 1].endLocation;
-  const hasEmptySegments = segments.length === 0;
-
-  // When the map is loaded, fit the camera to the pins
-  const handleMapLoaded = () => {
-    if (cameraRef.current) {
-      const frame = [150, 150, 150, 150];
-      cameraRef.current.fitBounds(trip.startCoords, trip.endCoords, frame);
-    }
-  };
-
-  const handleSubmitTrip = async () => {
-    try {
-      const { tripId } = await submitTrip();
-      await addToPendingModeratorReview(tripId, "trip");
-      Alert.alert("Trip Submitted");
-      router.replace("/(tabs)");
-    } catch (error) {
-      console.error("Error submitting trip", error);
-      Alert.alert("Error submitting trip");
-    }
-  };
 
   const handleCreateSegment = () => {
-    clearRouteData()
-    return router.replace("/(contribute)/3-add-transfer");
+    clearRouteData();
+    router.replace("/(contribute)/3-add-transfer");
   };
 
   const handleEditSegment = (index: number) => {
@@ -67,83 +37,46 @@ export default function TripReview() {
     });
   };
 
-  const handleUndo = () => {
-    Alert.alert(
-      "Undo",
-      "Do you want to remove the last transfer you added?",
-      [
-        {
-          text: "Yes",
-          style: "destructive",
-          onPress: () => deleteSegment(),
-        },
-        {
-          text: "No",
-          style: "cancel",
-        }
-      ]
-    )
-  }
+  const handleDeleteSegment = () => {
+    Alert.alert("Undo", "Do you want to remove the last transfer you added?", [
+      { text: "Yes", style: "destructive", onPress: () => deleteSegment() },
+      { text: "No", style: "cancel" },
+    ]);
+  };
 
-  // for back in header
-  const prevCallback = () => {
-    
-    if (hasEmptySegments) {
-      clearTripData();
-      router.replace("/(contribute)/1-create-trip");
-    } else {
-      Alert.alert(
-        "Unsaved Changes",
-        "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
-        [
-          {
-            text: "Leave Anyway",
-            style: "destructive",
-            onPress: () => {
-              clearTripData();
-              router.replace("/(contribute)/1-create-trip");
-            },
-          },
-          { text: "Stay", style: "cancel" },
-        ],
-      );
+  const handleSubmitTrip = async () => {
+    try {
+      await submitTrip();
+      Alert.alert("Trip Submitted");
+      router.replace("/(tabs)");
+    } catch (error) {
+      Alert.alert("Error submitting trip");
     }
   };
 
-  // for back in android
-  useFocusEffect(
-    useCallback(() => {
-      const backAction = () => {
-        if (hasEmptySegments) {
-          clearTripData();
-          router.replace("/(contribute)/1-create-trip");
-          return true; // Prevent default back behavior
-        } else {
-          Alert.alert(
-            "Unsaved Changes",
-            "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
-            [
-              {
-                text: "Leave Anyway",
-                style: "destructive",
-                onPress: () => {
-                  clearTripData();
-                  router.replace("/(contribute)/1-create-trip");
-                },
-              },
-              { text: "Stay", style: "cancel" },
-            ]
-          );
-          return true; // Prevent default back behavior while alert is open
-        }
-      };
-  
-      // Add event listener
-      const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
-  
-      return () => backHandler.remove(); // Cleanup when screen loses focus
-    }, [hasEmptySegments]) // Re-run if hasEmptySegments changes
-  );
+  // Clear data when navigating back to the first screen
+  const handleBackNavigation = () => {
+    clearTripData();
+    router.replace("/(contribute)/1-create-trip");
+  };
+
+  // Handle back navigation from the header
+  const prevCallback = () => {
+    if (isSegmentEmpty) handleBackNavigation();
+    else UnsavedChangesAlert(handleBackNavigation);
+  };
+
+  // Handle android native back button
+  useFocusEffect(() => {
+    const backAction = () => {
+      if (isSegmentEmpty) handleBackNavigation();
+      else UnsavedChangesAlert(handleBackNavigation);
+      return true;
+    };
+    const action = "hardwareBackPress";
+    const backHandler = BackHandler.addEventListener(action, backAction);
+    return () => backHandler.remove();
+  });
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -153,42 +86,22 @@ export default function TripReview() {
         <TripTitle startLocation={trip.startLocation} endLocation={trip.endLocation} />
       </View>
 
-      <MapView
-        style={{ flex: 1 }}
-        styleURL="mapbox://styles/mapbox/streets-v12"
-        projection="mercator"
-        onDidFinishLoadingMap={handleMapLoaded}
-      >
-        {/* FIXME: initial camera center */}
-        {/* TODO: add markers on transfer locations */}
-        <Camera ref={cameraRef} centerCoordinate={INITIAL_CENTER} animationMode="easeTo" />
-        <SymbolMarker
-          id="start-location-c2"
-          label={trip.startLocation}
-          coordinates={trip.startCoords}
-        />
-        <SymbolMarker id="end-location-c2" label={trip.endLocation} coordinates={trip.endCoords} />
-        <Images images={{ pin }} />
+      <MapShell cameraRef={cameraRef} fitBounds={[trip.startCoords, trip.endCoords]}>
+        <DirectionLines coordinates={segmentCoordinates} />
+        <SymbolMarker id="start-loc" label={trip.startLocation} coordinates={trip.startCoords} />
+        <SymbolMarker id="end-loc" label={trip.endLocation} coordinates={trip.endCoords} />
+      </MapShell>
 
-        {segmentCoordinates.map((coordinates, index) => (
-          <DirectionsLine
-            key={index}
-            coordinates={coordinates}
-            color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
-          />
-        ))}
-      </MapView>
       <TripSummary
-        startLocation={trip.startLocation}
-        endLocation={trip.endLocation}
         segments={segments}
-        onSegmentPress={handleEditSegment}
-        undo={handleUndo}
+        editSegment={handleEditSegment}
+        deleteSegment={handleDeleteSegment}
       />
+
       <View className="absolute bottom-0 z-50 p-5 w-full justify-center">
         <PrimaryButton
-          label={isSameEndLocation ? "Submit" : "Add Transfers"}
-          onPress={isSameEndLocation ? handleSubmitTrip : handleCreateSegment}
+          label={isSegmentComplete ? "Submit" : "Add Transfers"}
+          onPress={isSegmentComplete ? handleSubmitTrip : handleCreateSegment}
         />
       </View>
     </SafeAreaView>

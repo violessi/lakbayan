@@ -9,11 +9,12 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 interface MapShellProps {
   children?: React.ReactNode;
-  center: Coordinates | null;
-  zoomLevel: number;
-  cameraRef: React.RefObject<Camera>;
-  handleMapPress: (feature: MapPressFeature) => void;
-  handleUserLocation: (location: Location) => void;
+  center?: Coordinates | null;
+  zoomLevel?: number;
+  cameraRef?: React.RefObject<Camera>;
+  fitBounds?: Coordinates[];
+  handleMapPress?: (feature: MapPressFeature) => void;
+  handleUserLocation?: (location: Location) => void;
 }
 
 export const MapShell = ({
@@ -21,10 +22,18 @@ export const MapShell = ({
   center,
   zoomLevel,
   cameraRef,
+  fitBounds,
   handleMapPress,
   handleUserLocation,
 }: MapShellProps) => {
   const finalCenter = center ?? [121.05, 14.63]; // Fallback to QC
+
+  const handleMapLoaded = () => {
+    if (cameraRef?.current && fitBounds) {
+      const frame = [50, 100, 50, 100];
+      cameraRef.current.fitBounds(fitBounds[0], fitBounds[1], frame);
+    }
+  };
 
   return (
     <MapView
@@ -32,6 +41,7 @@ export const MapShell = ({
       styleURL="mapbox://styles/mapbox/streets-v12"
       onPress={handleMapPress}
       projection="mercator"
+      onDidFinishLoadingMap={handleMapLoaded}
     >
       <Camera
         ref={cameraRef}
