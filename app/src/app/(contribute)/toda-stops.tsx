@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, View, Platform } from "react-native";
+import { SafeAreaView, View } from "react-native";
 
 import LocationSearchBar from "@components/LocationSearchBar";
 import Header from "@components/ui/Header";
@@ -7,16 +7,11 @@ import TodaInformation from "@components/contribute/TodaInformation";
 import TodaMarker from "@components/map/TodaMarker";
 import pin from "@assets/pin-purple.png";
 
+import { MapShell } from "@components/map/MapShell";
+
 import { useMapView } from "@hooks/use-map-view";
 
-import Mapbox, {
-  MapView,
-  ShapeSource,
-  SymbolLayer,
-  Images,
-  UserLocation,
-  Camera,
-} from "@rnmapbox/maps";
+import Mapbox, { ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
 import { featureCollection, point } from "@turf/helpers";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 import { fetchStops } from "@services/toda-stop-service";
@@ -25,13 +20,14 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TodaStops() {
   const {
-    cameraRef,
     coordinates,
+    center,
     zoomLevel,
+    cameraRef,
     handleMapPress,
-    centerMap,
+    handleSuggestionSelect,
+    handleClear,
     handleUserLocation,
-    userCoords,
   } = useMapView(12);
 
   const [stops, setStops] = useState<StopData[]>([]);
@@ -45,15 +41,6 @@ export default function TodaStops() {
     loadStops();
   }, []);
 
-  const handleSuggestionSelect = (longitude: number, latitude: number) => {
-    const newCoordinates: [number, number] = [longitude, latitude];
-    centerMap(newCoordinates, 15);
-  };
-
-  const handleClear = () => {
-    centerMap(userCoords, 12);
-  };
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Pin Toda Stops" />
@@ -62,26 +49,13 @@ export default function TodaStops() {
         <LocationSearchBar onSuggestionSelect={handleSuggestionSelect} onClear={handleClear} />
       </View>
 
-      <MapView
-        style={{ flex: 1 }}
-        styleURL="mapbox://styles/mapbox/streets-v12"
-        onPress={handleMapPress}
-        projection="mercator"
+      <MapShell
+        center={center}
+        zoomLevel={zoomLevel}
+        cameraRef={cameraRef}
+        handleMapPress={handleMapPress}
+        handleUserLocation={handleUserLocation}
       >
-        <Camera
-          ref={cameraRef}
-          centerCoordinate={coordinates || userCoords || [121.0303, 14.6563]}
-          zoomLevel={zoomLevel}
-          animationMode={Platform.OS === "android" ? "none" : "easeTo"}
-        />
-
-        <UserLocation
-          visible={true}
-          onUpdate={(location) => {
-            handleUserLocation(location);
-          }}
-        />
-
         {stops.map((stop) => (
           <TodaMarker key={stop.id} stop={stop} />
         ))}
@@ -99,8 +73,7 @@ export default function TodaStops() {
           </ShapeSource>
         )}
         <Images images={{ pin }} />
-      </MapView>
-
+      </MapShell>
       <TodaInformation coordinates={coordinates} onNewStopAdded={loadStops} />
     </SafeAreaView>
   );
