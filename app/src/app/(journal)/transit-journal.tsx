@@ -2,8 +2,8 @@ import { useRouter } from "expo-router";
 import * as ExpoLocation from "expo-location";
 import { ShapeSource, LineLayer } from "@rnmapbox/maps";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, SafeAreaView, View, Text, Button, Pressable } from "react-native";
 import Mapbox, { MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
+import { Alert, SafeAreaView, View, Text, Button, Pressable } from "react-native";
 
 import Header from "@components/ui/Header";
 import ReportTab from "@components/journal/ReportTab";
@@ -11,22 +11,22 @@ import CircleMarker from "@components/map/CircleMarker";
 import TransferModal from "@components/journal/TransferModal";
 import CompleteModal from "@components/journal/CompleteModal";
 
-import { useTransitJournal } from "@contexts/TransitJournal";
 import {
   computeHeading,
   isNearLocation,
   getNearestSegment,
   getNearestStep,
 } from "@utils/map-utils";
-
+import { useTransitJournal } from "@contexts/TransitJournal";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TransitJournal() {
   const router = useRouter();
   const cameraRef = useRef<Camera>(null);
-  const routeSource = useRef<ShapeSource>(null);
+  const routeSourcesRef = useRef<{ [key: string]: ShapeSource | null }>({});
 
   const { hasActiveTransitJournal, segments } = useTransitJournal();
   const [currentSegment, setCurrentSegment] = useState<Segment | null>(null);
@@ -58,16 +58,22 @@ export default function TransitJournal() {
     ];
 
     // update the map to show active route
-    const activeRoutes = activeSegments.flatMap(({ waypoints }) => waypoints);
-    routeSource.current?.setNativeProps({
-      id: "routeSource",
-      shape: JSON.stringify({
-        type: "Feature",
-        geometry: {
-          type: "LineString",
-          coordinates: activeRoutes,
-        },
-      }),
+    segments.forEach((seg, index) => {
+      const segment = activeSegments.find((aseg) => aseg.id === seg.id);
+      if (!segment) return;
+      routeSourcesRef.current[`${segment.id}`]?.setNativeProps({
+        id: `${segment.id}`,
+        shape: JSON.stringify({
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates: segment.waypoints,
+          },
+          properties: {
+            color: TRANSPORTATION_COLORS[index],
+          },
+        }),
+      });
     });
 
     // update the camera to follow the user and face the next point
@@ -120,7 +126,7 @@ export default function TransitJournal() {
     getInitialLocation();
   }, []);
 
-  if (!hasActiveTransitJournal) {
+  if (!hasActiveTransitJournal || !segments) {
     return (
       <SafeAreaView className="flex-1 justify-center items-center">
         <Text>No active trip found.</Text>
@@ -143,42 +149,37 @@ export default function TransitJournal() {
             animated={false}
           />
 
-          <CircleMarker
-            id="start"
-            coordinates={currentSegment?.startCoords}
-            label={currentSegment?.startLocation}
-          />
+          {/* Render All Transfer Points */}
+          {segments &&
+            segments.map((segment, index) => (
+              <CircleMarker
+                key={`start-${index}`}
+                id={`start-${index}`}
+                coordinates={segment.endCoords}
+                color={TRANSPORTATION_COLORS[index]}
+              />
+            ))}
 
-          <CircleMarker
-            id="end"
-            coordinates={currentSegment?.endCoords}
-            label={currentSegment?.endLocation}
-          />
-
-          {/* TODO: move this */}
-          <ShapeSource
-            id="routeSource"
-            ref={routeSource}
-            shape={{
-              type: "Feature",
-              geometry: {
-                type: "LineString",
-                coordinates: [],
-              },
-              properties: {},
-            }}
-          >
-            <LineLayer
-              id="routeLayer"
-              style={{
-                lineColor: "blue",
-                lineWidth: 5,
-              }}
-            />
-          </ShapeSource>
+          {/* Render active segments with different color */}
+          {segments &&
+            segments.map((segment) => (
+              <ShapeSource
+                key={`${segment.id}`}
+                id={`${segment.id}`}
+                ref={(ref) => (routeSourcesRef.current[`${segment.id}`] = ref)}
+              >
+                <LineLayer
+                  id={`${segment.id}`}
+                  style={{
+                    lineColor: ["get", "color"],
+                    lineWidth: 5,
+                  }}
+                />
+              </ShapeSource>
+            ))}
         </MapView>
 
-        {/* TODO: move this */}
+        {/* Render Information section on top of screen */}
         <View className="absolute top-0 w-full bg-white p-4">
           {currentStep ? (
             <Text className="font-bold text-lg mb-2">{currentStep.instruction}</Text>
@@ -192,16 +193,17 @@ export default function TransitJournal() {
             <Text className="text-sm mb-2">Instruction: {currentSegment?.instruction}</Text>
           )}
         </View>
-      </View>
 
-      {showCompleteButton && (
-        <Pressable
-          className="absolute bottom-60 right-6 bg-primary px-4 py-2 rounded-full shadow-lg active:bg-primary/50"
-          onPress={() => setShowTripFinishedModal(true)}
-        >
-          <Text className="text-white font-bold text-lg">Done</Text>
-        </Pressable>
-      )}
+        {/* Render Complete Button if near destination */}
+        {showCompleteButton && (
+          <Pressable
+            className="absolute bottom-44 right-6 bg-primary px-4 py-2 rounded-full shadow-lg active:bg-primary/50"
+            onPress={() => setShowTripFinishedModal(true)}
+          >
+            <Text className="text-white font-bold text-lg">Done</Text>
+          </Pressable>
+        )}
+      </View>
 
       <ReportTab />
 
