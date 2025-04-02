@@ -7,7 +7,7 @@ import {
   fetchTrip,
   fetchSegments,
   insertLiveUpdate,
-} from "@services/trip-service-v2";
+} from "@services/trip-service";
 
 interface TransitJournalContextType {
   hasActiveTransitJournal: boolean;

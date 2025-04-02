@@ -19,7 +19,7 @@ export async function insertTrip(trip: CreateTrip): Promise<string> {
     const payload = convertKeysToSnakeCase(trip);
     payload.start_coords = convertToPointWKT(payload.start_coords);
     payload.end_coords = convertToPointWKT(payload.end_coords);
-    const res = await insertData("trips_v2", [payload]);
+    const res = await insertData("trips", [payload]);
     return res[0].id;
   } catch (error) {
     throw new Error("Error inserting trip");
@@ -36,7 +36,7 @@ export async function insertSegments(segments: CreateSegment[]): Promise<string[
       end_coords: convertToPointWKT(segment.end_coords),
       waypoints: convertToMultiPointWKT(segment.waypoints),
     }));
-    const res = await insertData("segments_v2", payload);
+    const res = await insertData("segments", payload);
     return res.map(({ id }) => id);
   } catch (error) {
     throw new Error("Error inserting segments");
@@ -54,7 +54,7 @@ export async function insertTripSegmentLinks(
       segment_id: segmentId,
       segment_order: segmentOrder,
     }));
-    const res = await insertData("trip_segment_links_v2", payload);
+    const res = await insertData("trip_segment_links", payload);
     return res.map(({ id }) => id);
   } catch (error: Error | any) {
     throw new Error("Error inserting trip-segment links");
@@ -66,7 +66,7 @@ export async function insertLiveUpdate(status: CreateLiveUpdate): Promise<string
   try {
     const payload = convertKeysToSnakeCase(status);
     payload.coordinate = convertToPointWKT(payload.coordinate);
-    const res = await insertData("live_updates_v2", [payload]);
+    const res = await insertData("live_updates", [payload]);
     return res[0].id;
   } catch (error) {
     throw new Error("Error inserting live status");
@@ -77,7 +77,7 @@ export async function insertLiveUpdate(status: CreateLiveUpdate): Promise<string
 export async function insertTransitJournal(journal: CreateTransitJournal): Promise<string> {
   try {
     const payload = convertKeysToSnakeCase(journal);
-    const res = await insertData("transit_journals_v2", [payload]);
+    const res = await insertData("transit_journals", [payload]);
     return res[0].id;
   } catch (error) {
     throw new Error("Error inserting transit journal");
@@ -98,7 +98,7 @@ export async function fetchUserTransitJournal(userId: string): Promise<string | 
 // Fetches the transit journal data for a given journal ID
 export async function fetchTransitJournal(journalId: string): Promise<TransitJournal> {
   try {
-    const [data, ...rest] = await fetchData("transit_journals_v2", ["*"], { id: journalId });
+    const [data, ...rest] = await fetchData("transit_journals", ["*"], { id: journalId });
     if (rest.length > 0) throw new Error("Multiple transit journals found");
 
     // Validate the response data
@@ -195,7 +195,7 @@ export async function updateProfile(profile: Partial<Profile>): Promise<void> {
 export async function updateTransitJournal(transitJournal: Partial<TransitJournal>): Promise<void> {
   try {
     const payload = convertKeysToSnakeCase(transitJournal);
-    await updateData(payload, "transit_journals_v2", { id: transitJournal.id });
+    await updateData(payload, "transit_journals", { id: transitJournal.id });
   } catch (error) {
     throw new Error("Error updating transit journal");
   }
@@ -204,7 +204,7 @@ export async function updateTransitJournal(transitJournal: Partial<TransitJourna
 export async function deleteSegments(segmentIds: string[]): Promise<void> {
   if (segmentIds.length === 0) return;
   try {
-    await deleteData("segments_v2", { id: segmentIds });
+    await deleteData("segments", { id: segmentIds });
   } catch (error) {
     throw new Error("Error deleting segments");
   }

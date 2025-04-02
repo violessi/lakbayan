@@ -1,7 +1,7 @@
 import React, { createContext, useState, ReactNode, useEffect } from "react";
 
 import { useSession } from "@contexts/SessionContext";
-import { insertTrip, insertSegments, insertTripSegmentLinks } from "@services/trip-service-v2";
+import { insertTrip, insertSegments, insertTripSegmentLinks } from "@services/trip-service";
 import { TRIP_INITIAL_STATE, SEGMENT_INITIAL_STATE } from "@contexts/TripCreator/initialValues";
 
 interface TripCreatorContextType {
@@ -105,9 +105,9 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
   };
 
   // remove the most recently added segment in segments
-  const deleteSegment = () =>{
+  const deleteSegment = () => {
     setSegments((prevSegments) => prevSegments.slice(0, -1));
-  }
+  };
 
   const value = {
     trip,
@@ -121,7 +121,7 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     submitTrip,
     clearTripData,
     clearRouteData,
-    deleteSegment
+    deleteSegment,
   };
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;
 }

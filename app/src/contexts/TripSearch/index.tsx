@@ -4,7 +4,7 @@ import React, { createContext, useState, ReactNode, useMemo } from "react";
 import { isNearLocation } from "@utils/map-utils";
 import { TripEndpointsSchema } from "types/schema";
 import { useSession } from "@contexts/SessionContext";
-import { fetchTripData } from "@services/trip-service-v2";
+import { fetchTripData } from "@services/trip-service";
 
 const FILTER_INITIAL_STATE = {
   sortBy: "Verified by moderators",

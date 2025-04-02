@@ -1,5 +1,5 @@
 import { supabase } from "@utils/supabase";
-import { fetchTrip } from "@services/trip-service-v2";
+import { fetchTrip } from "@services/trip-service";
 import { getUsername } from "@services/account-service";
 
 // Votes

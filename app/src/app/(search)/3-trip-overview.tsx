@@ -14,7 +14,7 @@ import { useTripSearch } from "@contexts/TripSearch";
 import { useSession } from "@contexts/SessionContext";
 import { useTransitJournal } from "@contexts/TransitJournal";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
-import { insertSegments, insertTransitJournal, updateProfile } from "@services/trip-service-v2";
+import { insertSegments, insertTransitJournal, updateProfile } from "@services/trip-service";
 
 import { useLocalSearchParams } from "expo-router"; // for pages that redirect to this screen
 

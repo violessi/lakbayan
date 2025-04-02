@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { getPoints } from "@services/socials-service";
 import { addComment } from "@services/socials-service";
 import { insertJournalEntry } from "@services/journal-service";
-import { updateTransitJournal, updateProfile } from "@services/trip-service-v2";
+import { updateTransitJournal, updateProfile } from "@services/trip-service";
 
 import VotingBar from "@components/VotingBar";
 import PrimaryButton from "@components/ui/PrimaryButton";

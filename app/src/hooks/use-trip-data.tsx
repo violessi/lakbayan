@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase";
 
-import { fetchTrip } from "@services/trip-service-v2";
+import { fetchTrip } from "@services/trip-service";
 
 export function useUserTrips(contributorId: string) {
   const [userTrips, setUserTrips] = useState<FullTrip[]>([]);
@@ -16,7 +16,7 @@ export function useUserTrips(contributorId: string) {
       try {
         // Get trip IDs for the contributor
         const { data, error: tripError } = await supabase
-          .from("trips_v2")
+          .from("trips")
           .select("id")
           .eq("contributor_id", contributorId);
 

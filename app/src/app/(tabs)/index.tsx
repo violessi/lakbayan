@@ -11,7 +11,7 @@ import disruptionIcon from "@assets/report-disruption.png";
 import LiveUpdateMarker from "@components/map/LiveUpdateMarker";
 import Header from "@components/ui/Header";
 import RecentTrips from "@components/search/RecentTrips";
-import { fetchNearbyLiveUpdates } from "@services/trip-service-v2";
+import { fetchNearbyLiveUpdates } from "@services/trip-service";
 
 import { MAPBOX_ACCESS_TOKEN } from "../../utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
