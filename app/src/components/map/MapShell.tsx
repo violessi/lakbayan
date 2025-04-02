@@ -1,26 +1,27 @@
 import React from "react";
 import { Platform } from "react-native";
-import Mapbox, { MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
+import Mapbox, { Images, MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
 
+import pin from "@assets/pin-purple.png";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 interface MapShellProps {
+  children?: React.ReactNode;
   center: Coordinates | null;
   zoomLevel: number;
   cameraRef: React.RefObject<Camera>;
   handleMapPress: (feature: MapPressFeature) => void;
-  children?: React.ReactNode;
   handleUserLocation: (location: Location) => void;
 }
 
 export const MapShell = ({
+  children,
   center,
   zoomLevel,
   cameraRef,
   handleMapPress,
-  children,
   handleUserLocation,
 }: MapShellProps) => {
   const finalCenter = center ?? [121.05, 14.63]; // Fallback to QC
@@ -45,6 +46,7 @@ export const MapShell = ({
         onUpdate={handleUserLocation}
       />
       {children}
+      <Images images={{ pin }} />
     </MapView>
   );
 };
