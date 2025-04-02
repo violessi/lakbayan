@@ -11,14 +11,9 @@ import VotingBar from "@components/VotingBar";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
-import { useTransitJournal } from "@contexts/TransitJournal";
-import TransitJournal from "app/(journal)/transit-journal";
-
 const comment = require("@assets/social-comment.png");
 
 interface JournalFeedbackProps {
-  startLocation: string;
-  endLocation: string;
   trip: Trip;
   segments: Segment[];
   currentUserId: string;
@@ -28,8 +23,6 @@ interface JournalFeedbackProps {
 }
 
 export default function JournalFeedback({
-  startLocation,
-  endLocation,
   trip,
   segments,
   currentUserId,
@@ -76,25 +69,21 @@ export default function JournalFeedback({
 
       console.log("Journal entries added successfully");
 
+      // Update transit journal status to success
       await updateTransitJournal({
         id: transitJournal.id,
         status: "success",
         endTime: new Date().toISOString(),
       });
-      console.log("Transit journal updated successfully");
 
+      // Update user profile to remove transit journal
       await updateProfile({
         id: currentUserId,
         transitJournalId: null,
       });
-      console.log("Profile updated successfully");
 
-      Alert.alert("Success", "Your transit journal has been submitted!", [
-        {
-          text: "OK",
-          onPress: () => router.replace("/(tabs)"),
-        },
-      ]);
+      router.replace("/(tabs)");
+      Alert.alert("Success", "Your transit journal has been submitted!", [{ text: "OK" }]);
 
       setNewComment("");
     } catch (error) {
