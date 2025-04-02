@@ -1,23 +1,31 @@
 import { useRef, useState } from "react";
 import { Camera, Location } from "@rnmapbox/maps";
+import { useUserLocation } from "@contexts/LocationContext";
 
 export function useMapView(defaultZoom: number = 12) {
+  const { userLocation } = useUserLocation();
+
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
   const [userCoords, setUserCoords] = useState<Coordinates | null>(null);
 
-  const [center, setCenter] = useState<Coordinates | null>(null);
+  const [center, setCenter] = useState<Coordinates | null>(userLocation);
   const [zoomLevel, setZoomLevel] = useState(defaultZoom);
   const cameraRef = useRef<Camera>(null);
 
   const hasCenteredOnUser = useRef(false);
 
   // Center and zoom the map on pressed location
-  const handleMapPress = (feature: MapPressFeature) => {
+  const handleMapPress = (feature: MapPressFeature, callback?: (coords: Coordinates) => void) => {
     if (!feature.geometry || feature.geometry.type !== "Point") return;
     const coordinates = feature.geometry.coordinates as Coordinates;
     setCoordinates(coordinates);
     setCenter(coordinates);
     setZoomLevel(14);
+
+    // Invoke callback if provided
+    if (callback) {
+      callback(coordinates);
+    }
   };
 
   // Get & center the map on the user's location
@@ -44,6 +52,7 @@ export function useMapView(defaultZoom: number = 12) {
   };
 
   return {
+    userLocation,
     coordinates,
     cameraRef,
     zoomLevel,
