@@ -42,19 +42,17 @@ export async function getUserRole(userId: string): Promise<string | null> {
   return data?.role || null;
 }
 
-// TODO Point fetching
 export async function getUserPoints(userId: string) {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("points")
-    .eq("id", userId)
-    .single();
+  const { data, error } = await supabase.rpc("get_user_points", {
+    uid: userId,
+  });
 
   if (error) {
-    console.error("Error fetching user details:", error);
+    console.error("Failed to fetch points", error);
+    return null;
   }
 
-  return data?.points || 0;
+  return data.totalPoints || 0;
 }
 
 export async function getUserJoinedDate(userId: string) {
