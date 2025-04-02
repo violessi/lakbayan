@@ -60,7 +60,7 @@ export default function LogIn() {
   return (
     <View className="flex h-full">
       <SafeAreaView className="h-1/3 bg-primary px-5 py-5 flex-col justify-end">
-        <View className="flex flex-col gap-0 px-5 pb-5">
+        <View className="flex flex-col gap-0  pb-5">
           <Text style={styles.whiteText} className="text-4xl">
             Welcome!
           </Text>
