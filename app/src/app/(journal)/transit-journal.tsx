@@ -2,12 +2,14 @@ import { useRouter } from "expo-router";
 import * as ExpoLocation from "expo-location";
 import { ShapeSource, LineLayer } from "@rnmapbox/maps";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, SafeAreaView, View, Text, Modal, Button } from "react-native";
+import { Alert, SafeAreaView, View, Text, Button, Pressable } from "react-native";
 import Mapbox, { MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
 
 import Header from "@components/ui/Header";
 import ReportTab from "@components/journal/ReportTab";
 import CircleMarker from "@components/map/CircleMarker";
+import TransferModal from "@components/journal/TransferModal";
+import CompleteModal from "@components/journal/CompleteModal";
 
 import { useTransitJournal } from "@contexts/TransitJournal";
 import {
@@ -31,8 +33,7 @@ export default function TransitJournal() {
   const [currentStep, setCurrentStep] = useState<NavigationSteps | null>(null);
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
-
-  const destination: Coordinates = segments ? segments[segments.length - 1].endCoords : [0, 0];
+  const [showCompleteButton, setShowCompleteButton] = useState(false);
 
   function handleNavigateToReview() {
     setShowTripFinishedModal(false);
@@ -70,7 +71,6 @@ export default function TransitJournal() {
     });
 
     // update the camera to follow the user and face the next point
-    // TODO: make the heading smoother
     const nextPoint = activeSegments[0].waypoints[1] ?? newLocation;
     const computedHeading = computeHeading(newLocation, nextPoint);
     cameraRef.current?.setCamera({
@@ -81,18 +81,18 @@ export default function TransitJournal() {
       centerCoordinate: newLocation,
     });
 
-    // NOTE: Temporary implementation
-    // TODO: modal should not force user to end the trip, add cancel
-    // TODO: aside from modal, add button to end trip
-    // check if currentLocation is near destination
-    if (isNearLocation(newLocation, destination, 20)) {
-      setShowTripFinishedModal(true);
+    // Show transfer modal everytime segment changes
+    if (currentSegment?.id !== tripSegments[segmentIndex].id) {
+      setShowNextSegmentModal(true);
     }
 
-    // NOTE: Temporary implementation
-    // Show transfer modal everytime it changes segment
-    if (currentSegment && currentSegment?.id !== tripSegments[segmentIndex].id) {
-      setShowNextSegmentModal(true);
+    // check if currentLocation is near destination
+    const destination = segments[segments.length - 1].endCoords;
+    if (isNearLocation(newLocation, destination, 20)) {
+      setShowTripFinishedModal(true);
+      setShowCompleteButton(true);
+    } else {
+      setShowCompleteButton(false);
     }
 
     // update the current segment and step information
@@ -147,18 +147,15 @@ export default function TransitJournal() {
             id="start"
             coordinates={currentSegment?.startCoords}
             label={currentSegment?.startLocation}
-            color={TRANSPORTATION_COLORS[0]}
-            radius={7}
           />
 
           <CircleMarker
             id="end"
             coordinates={currentSegment?.endCoords}
             label={currentSegment?.endLocation}
-            color={TRANSPORTATION_COLORS[0]}
-            radius={7}
           />
 
+          {/* TODO: move this */}
           <ShapeSource
             id="routeSource"
             ref={routeSource}
@@ -181,6 +178,7 @@ export default function TransitJournal() {
           </ShapeSource>
         </MapView>
 
+        {/* TODO: move this */}
         <View className="absolute top-0 w-full bg-white p-4">
           {currentStep ? (
             <Text className="font-bold text-lg mb-2">{currentStep.instruction}</Text>
@@ -196,27 +194,27 @@ export default function TransitJournal() {
         </View>
       </View>
 
+      {showCompleteButton && (
+        <Pressable
+          className="absolute bottom-60 right-6 bg-primary px-4 py-2 rounded-full shadow-lg active:bg-primary/50"
+          onPress={() => setShowTripFinishedModal(true)}
+        >
+          <Text className="text-white font-bold text-lg">Done</Text>
+        </Pressable>
+      )}
+
       <ReportTab />
 
-      <Modal transparent={true} visible={showNextSegmentModal} animationType="slide">
-        <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white p-6 rounded-lg shadow-lg">
-            <Text className="text-lg font-bold mb-4">Segment completed!</Text>
-            <Text className="mb-4">Transfer to the next ride.</Text>
-            <Button title="Next" onPress={() => setShowNextSegmentModal(false)} />
-          </View>
-        </View>
-      </Modal>
-
-      <Modal transparent={true} visible={showTripFinishedModal} animationType="slide">
-        <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white p-6 rounded-lg shadow-lg">
-            <Text className="text-lg font-bold mb-4">Trip done!</Text>
-            <Text className="mb-4">Great job! You've arrived at your destination.</Text>
-            <Button title="Review trip" onPress={handleNavigateToReview} />
-          </View>
-        </View>
-      </Modal>
+      <TransferModal
+        isVisible={showNextSegmentModal}
+        currentSegment={currentSegment}
+        callback={() => setShowNextSegmentModal(false)}
+      />
+      <CompleteModal
+        isVisible={showTripFinishedModal}
+        nextCallback={() => handleNavigateToReview()}
+        cancelCallback={() => setShowTripFinishedModal(false)}
+      />
     </SafeAreaView>
   );
 }
