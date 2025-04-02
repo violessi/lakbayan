@@ -1,17 +1,10 @@
 import lo from "lodash";
-import { getDistance, getGreatCircleBearing } from "geolib";
+import * as turf from "@turf/turf";
+import { getGreatCircleBearing } from "geolib";
 
-// Change threshold to increase/decrease the radius of the circle
-export function isNearLocation(
-  userLoc: [number, number],
-  stepLoc: [number, number],
-  threshold = 5,
-): boolean {
-  const distance = getDistance(
-    { latitude: userLoc[1], longitude: userLoc[0] },
-    { latitude: stepLoc[1], longitude: stepLoc[0] },
-  );
-  return distance <= threshold;
+export function isNearLocation(start: Coordinates, end: Coordinates, threshold = 20): boolean {
+  const dist = turf.distance(turf.point(start), turf.point(end), { units: "meters" });
+  return dist < threshold;
 }
 
 // For camera POV
@@ -47,4 +40,46 @@ export function convertToMultiPointWKT(points: Coordinates[]): string | null {
   }
   const pointStrings = points.map(([lng, lat]) => `(${lng} ${lat})`).join(", ");
   return `SRID=4326;MULTIPOINT(${pointStrings})`;
+}
+
+export function getNearestSegment(
+  userLocation: Coordinates,
+  segments: Segment[],
+): { segmentIndex: number; nearestPoint: NearestPoint } {
+  let nearestPoint: NearestPoint | null = null;
+  let segmentIndex = 0;
+
+  const geoPoint = turf.point(userLocation);
+  segments.forEach((segment, index) => {
+    const geoLine = turf.lineString(segment.waypoints);
+    const closestLine = turf.nearestPointOnLine(geoLine, geoPoint);
+
+    if (!nearestPoint || closestLine.properties.dist < nearestPoint.properties.dist) {
+      nearestPoint = closestLine;
+      segmentIndex = index;
+    }
+  });
+
+  if (!nearestPoint) throw new Error("No nearest point found");
+  return { segmentIndex, nearestPoint };
+}
+
+export function getNearestStep(
+  userLocation: Coordinates,
+  steps: NavigationSteps[],
+): NavigationSteps {
+  let stepIndex = 0;
+  let minDistance = Infinity;
+
+  const geoPoint = turf.point(userLocation);
+  steps.forEach((step, index) => {
+    const geoStepPoint = turf.point(step.location);
+    const distance = turf.distance(geoPoint, geoStepPoint);
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      stepIndex = index;
+    }
+  });
+  return steps[stepIndex];
 }

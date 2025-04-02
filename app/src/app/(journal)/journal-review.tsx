@@ -22,23 +22,30 @@ export default function JournalReview() {
   const { user } = useSession();
   const { trip, segments, transitJournal } = useTransitJournal();
 
-  if (!trip) throw new Error("Trip must be defined");
-  if (!segments) throw new Error("Segments must be defined");
-
-  const segmentRoutes = segments.map((segment) => segment.waypoints);
+  const segmentRoutes = segments?.map((segment) => segment.waypoints) ?? [];
 
   // Camera
   useEffect(() => {
+    if (!trip) return;
     if (trip.startCoords && trip.endCoords && cameraRef.current) {
       cameraRef.current.fitBounds(trip.startCoords, trip.endCoords, [150, 150, 250, 150]);
     }
-  }, [segmentRoutes, trip.endCoords, trip.startCoords]);
+  }, [segmentRoutes, trip]);
 
   function handleCommentPress(tripId: string) {
     router.push({
       pathname: "/(social)/comments-list",
       params: { tripId, is_gps_verified: "true" },
     });
+  }
+
+  if (!trip || !segments) {
+    return (
+      <SafeAreaView className="flex-1">
+        <Header title="Journal Review" />
+        <Text>Loading...</Text>
+      </SafeAreaView>
+    );
   }
 
   return (
