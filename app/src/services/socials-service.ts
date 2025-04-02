@@ -215,7 +215,8 @@ export async function countModVerifications(tripId: string): Promise<number> {
   const { count, error } = await supabase
     .from("moderation-reviews")
     .select("*", { count: "exact", head: true })
-    .eq("trip_id", tripId);
+    .eq("trip_toda_id", tripId)
+    .eq("type", "trip");
 
   if (error) {
     console.error("Error fetching mod verifications count:", error);

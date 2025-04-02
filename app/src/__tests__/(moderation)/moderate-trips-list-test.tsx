@@ -2,12 +2,12 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 import ModerateTripsList from "@app/(moderation)/moderate-trips-list";
-import { usePendingVerificationsVerifications } from "@hooks/use-pending-verifications";
+import { usePendingVerifications } from "@hooks/use-pending-verifications";
 
 jest.mock("@contexts/SessionContext");
 
-jest.mock("@hooks/use-trip-pending-verifications", () => ({
-  usePendingVerificationsVerifications: jest.fn(),
+jest.mock("@hooks/use-pending-verifications", () => ({
+  usePendingVerifications: jest.fn(),
 }));
 
 jest.mock("expo-router");
@@ -21,8 +21,9 @@ describe("ModerateTripsList", () => {
   });
 
   it("renders correctly", () => {
-    (usePendingVerificationsVerifications as jest.Mock).mockReturnValue({
-      loading: true,
+    (usePendingVerifications as jest.Mock).mockReturnValue({
+      loading: false,
+      pendingTodas: [],
       pendingTrips: [],
       refetch: jest.fn(),
     });
@@ -33,9 +34,11 @@ describe("ModerateTripsList", () => {
   });
 
   it("displays a loading spinner while fetching data", async () => {
-    (usePendingVerificationsVerifications as jest.Mock).mockReturnValue({
+    (usePendingVerifications as jest.Mock).mockReturnValue({
       loading: true,
       pendingTrips: [],
+      pendingTodas: [],
+
       refetch: jest.fn(),
     });
 
@@ -47,9 +50,11 @@ describe("ModerateTripsList", () => {
   });
 
   it("shows message when no pending trips exist", async () => {
-    (usePendingVerificationsVerifications as jest.Mock).mockReturnValue({
+    (usePendingVerifications as jest.Mock).mockReturnValue({
       loading: false,
       pendingTrips: [],
+      pendingTodas: [],
+
       refetch: jest.fn(),
     });
 
@@ -70,9 +75,11 @@ describe("ModerateTripsList", () => {
       },
     ];
 
-    (usePendingVerificationsVerifications as jest.Mock).mockReturnValue({
+    (usePendingVerifications as jest.Mock).mockReturnValue({
       loading: false,
       pendingTrips: trips,
+      pendingTodas: [],
+
       refetch: jest.fn(),
     });
     const { getByText } = render(<ModerateTripsList />);
@@ -90,9 +97,11 @@ describe("ModerateTripsList", () => {
       segments: [],
     };
 
-    (usePendingVerificationsVerifications as jest.Mock).mockReturnValue({
+    (usePendingVerifications as jest.Mock).mockReturnValue({
       loading: false,
       pendingTrips: [trip],
+      pendingTodas: [],
+
       refetch: jest.fn(),
     });
 
