@@ -14,6 +14,7 @@ const bookmarkIcon = require("@assets/option-bookmark.png");
 const submissionIcon = require("@assets/option-submissions.png");
 const accountIcon = require("@assets/option-account.png");
 const tagIcon = require("@assets/option-tag.png");
+const todaIcon = require("@assets/transpo-tricycle.png");
 
 export default function Account() {
   const { user } = useSession();
@@ -77,6 +78,12 @@ export default function Account() {
                 description="Tag user-submitted routes as verified!"
                 link="/(moderation)/moderate-trips-list"
                 icon={tagIcon}
+              />
+              <Option
+                title="Tag TODAs as verified"
+                description="Tag toda stops as verified!"
+                link="/(moderation)/moderate-todas-list-review"
+                icon={todaIcon}
               />
             </View>
           )}

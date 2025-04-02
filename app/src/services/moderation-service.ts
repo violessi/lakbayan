@@ -8,7 +8,7 @@ export const ModerationReviewSchema = z.object({
   id: z.string(),
   tripTodaId: z.string(),
   moderatorId: z.string(),
-  status: z.enum(["pending", "approved", "rejected"]),
+  status: z.enum(["pending", "approved", "dismissed"]),
   type: z.enum(["trip", "toda"]),
 });
 
