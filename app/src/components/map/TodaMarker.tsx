@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
 import { point, featureCollection } from "@turf/helpers";
 import { TodaMarkerModal } from "@components/map/TodaMarkerModal";
-
-import { getUsername } from "@services/account-service";
 
 const iconMap: Record<string, any> = {
   none: require("@assets/toda-none.png"),
@@ -27,22 +25,9 @@ export default function TodaMarker({
   disableDefaultModal = false,
 }: TodaMarkerProps) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [username, setUsername] = useState("Anonymous");
 
   const iconKey = stop.color?.toLowerCase() || "none";
   const iconImage = iconMap[iconKey] || iconMap["none"];
-
-  useEffect(() => {
-    const fetchUsername = async () => {
-      try {
-        const fetchedUsername = await getUsername(stop.contributor_id);
-        setUsername(fetchedUsername || "Anonymous");
-      } catch (error) {
-        console.error("Error fetching username:", error);
-      }
-    };
-    fetchUsername();
-  });
 
   const stopGeoJSON = featureCollection([
     point([stop.longitude, stop.latitude], { id: stop.id, name: stop.name }),
@@ -70,7 +55,6 @@ export default function TodaMarker({
           stop={stop}
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
-          username={username}
         />
       )}
     </>
