@@ -11,12 +11,9 @@ import { MapShell } from "@components/map/MapShell";
 
 import { useMapView } from "@hooks/use-map-view";
 
-import Mapbox, { ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
+import { ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
 import { featureCollection, point } from "@turf/helpers";
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 import { fetchStops } from "@services/toda-stop-service";
-
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TodaStops() {
   const {

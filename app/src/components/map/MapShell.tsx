@@ -1,6 +1,10 @@
 import React from "react";
 import { Platform } from "react-native";
-import { MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
+import Mapbox, { MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
+
+import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+
+Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 interface MapShellProps {
   center: Coordinates | null;

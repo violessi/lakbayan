@@ -2,12 +2,12 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 import ModerateTripsList from "@app/(moderation)/moderate-trips-list";
-import { useTripPendingVerifications } from "@hooks/use-trip-pending-verifications";
+import { usePendingVerificationsVerifications } from "@hooks/use-pending-verifications";
 
 jest.mock("@contexts/SessionContext");
 
 jest.mock("@hooks/use-trip-pending-verifications", () => ({
-  useTripPendingVerifications: jest.fn(),
+  usePendingVerificationsVerifications: jest.fn(),
 }));
 
 jest.mock("expo-router");
@@ -21,7 +21,7 @@ describe("ModerateTripsList", () => {
   });
 
   it("renders correctly", () => {
-    (useTripPendingVerifications as jest.Mock).mockReturnValue({
+    (usePendingVerificationsVerifications as jest.Mock).mockReturnValue({
       loading: true,
       pendingTrips: [],
       refetch: jest.fn(),
@@ -33,7 +33,7 @@ describe("ModerateTripsList", () => {
   });
 
   it("displays a loading spinner while fetching data", async () => {
-    (useTripPendingVerifications as jest.Mock).mockReturnValue({
+    (usePendingVerificationsVerifications as jest.Mock).mockReturnValue({
       loading: true,
       pendingTrips: [],
       refetch: jest.fn(),
@@ -47,7 +47,7 @@ describe("ModerateTripsList", () => {
   });
 
   it("shows message when no pending trips exist", async () => {
-    (useTripPendingVerifications as jest.Mock).mockReturnValue({
+    (usePendingVerificationsVerifications as jest.Mock).mockReturnValue({
       loading: false,
       pendingTrips: [],
       refetch: jest.fn(),
@@ -70,7 +70,7 @@ describe("ModerateTripsList", () => {
       },
     ];
 
-    (useTripPendingVerifications as jest.Mock).mockReturnValue({
+    (usePendingVerificationsVerifications as jest.Mock).mockReturnValue({
       loading: false,
       pendingTrips: trips,
       refetch: jest.fn(),
@@ -90,7 +90,7 @@ describe("ModerateTripsList", () => {
       segments: [],
     };
 
-    (useTripPendingVerifications as jest.Mock).mockReturnValue({
+    (usePendingVerificationsVerifications as jest.Mock).mockReturnValue({
       loading: false,
       pendingTrips: [trip],
       refetch: jest.fn(),

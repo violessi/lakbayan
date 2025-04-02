@@ -10,8 +10,14 @@ export const insertStop = async (stopData: StopData) => {
   return data;
 };
 
-export const fetchStops = async () => {
-  const { data, error } = await supabase.from("toda-stops").select();
+// This function fetches all stops by default or list of specific stops by ID
+export const fetchStops = async (ids?: string[]): Promise<StopData[]> => {
+  const query = supabase.from("toda-stops").select();
+  if (ids && ids.length > 0) {
+    query.in("id", ids);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(error.message);

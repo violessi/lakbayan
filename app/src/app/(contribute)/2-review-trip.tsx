@@ -12,7 +12,7 @@ import TripSummary from "@components/contribute/TripSummary";
 
 import pin from "@assets/pin-purple.png";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-import { addTripToModeration } from "@services/moderation-service";
+import { addToPendingModeratorReview } from "@services/moderation-service";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 
@@ -42,7 +42,7 @@ export default function TripReview() {
   const handleSubmitTrip = async () => {
     try {
       const { tripId } = await submitTrip();
-      await addTripToModeration(tripId);
+      await addToPendingModeratorReview(tripId, "trip");
       Alert.alert("Trip Submitted");
       router.replace("/(tabs)");
     } catch (error) {

@@ -10,14 +10,16 @@ import {
 } from "react-native";
 
 import { useSession } from "@contexts/SessionContext";
-import { useTripPendingVerifications } from "@hooks/use-trip-pending-verifications";
+import { usePendingVerifications } from "@hooks/use-pending-verifications";
 
 import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
 
 export default function ModerateTripsList() {
   const { user } = useSession();
-  const { pendingTrips, loading, refetch } = useTripPendingVerifications(user?.id || null);
+  const { pendingTrips, pendingTodas, loading, refetch } = usePendingVerifications(
+    user?.id || null,
+  );
   const router = useRouter();
 
   useFocusEffect(
@@ -70,6 +72,23 @@ export default function ModerateTripsList() {
               </View>
             )}
           />
+        )}
+
+        {pendingTodas.length > 0 && (
+          <>
+            <Text className="text-black text-xl font-bold mt-4 mb-4">
+              Pending TODA Verifications
+            </Text>
+            <FlatList
+              data={pendingTodas}
+              keyExtractor={(stop) => stop.id}
+              renderItem={({ item: stop }) => (
+                <View className="p-2 border-b border-gray-200">
+                  <Text className="text-sm text-gray-700">TODA Stop ID: {stop.id}</Text>
+                </View>
+              )}
+            />
+          </>
         )}
       </View>
     </SafeAreaView>

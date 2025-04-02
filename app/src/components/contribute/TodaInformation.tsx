@@ -12,6 +12,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { insertStop } from "@services/toda-stop-service";
 import { useSession } from "@contexts/SessionContext";
+import { addToPendingModeratorReview } from "@services/moderation-service";
 
 const todaStopSchema = z.object({
   name: z.string().min(1, "Please provide a name for the TODA stop!"),
@@ -68,8 +69,17 @@ export default function TodaStops({ coordinates, onNewStopAdded }: TodaStopsProp
       return Alert.alert("Validation Error", errorMessage);
     }
 
+    const moderationReview = {
+      id: uuid.v4(),
+      trip_toda_id: stopData.id,
+      moderator_id: user?.id || "",
+      status: "pending",
+      type: "toda",
+    };
+
     try {
       await insertStop(stopData);
+      await addToPendingModeratorReview(moderationReview.trip_toda_id, moderationReview.type);
       Alert.alert("Success!", "TODA stop information submitted successfully!");
       resetForm();
       onNewStopAdded();
@@ -94,7 +104,10 @@ export default function TodaStops({ coordinates, onNewStopAdded }: TodaStopsProp
                 />
               </View>
               <View className="flex-[2]">
-                <SecondaryButton label={form.color || "Select Color"} onPress={() => setDialogVisible(true)} />
+                <SecondaryButton
+                  label={form.color || "Select Color"}
+                  onPress={() => setDialogVisible(true)}
+                />
               </View>
             </View>
             <View>
