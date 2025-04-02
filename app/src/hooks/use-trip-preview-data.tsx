@@ -27,7 +27,7 @@ export function useTripPreviewData(userId: string | null, trip: FullTrip) {
 
       const [bookmarks, modCount, gpsCount, commentCountTemp] = await Promise.all([
         getBookmarks(userId),
-        countModVerifications(trip.id),
+        countModVerifications(trip.id, "trip"),
         countGpsVerifications(segmentIds),
         countComments(trip.id),
       ]);

@@ -9,6 +9,7 @@ export default function ModerationLayout() {
     <Stack>
       <Stack.Screen name="moderate-trips-list" options={{ headerShown: false }} />
       <Stack.Screen name="moderate-trip-review" options={{ headerShown: false }} />
+      <Stack.Screen name="moderate-todas-list-review" options={{ headerShown: false }} />
     </Stack>
   );
 }

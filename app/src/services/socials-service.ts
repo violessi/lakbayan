@@ -211,11 +211,13 @@ export async function removeBookmark(userId: string, tripId: string) {
 
 // Moderator Verifications
 
-export async function countModVerifications(tripId: string): Promise<number> {
+export async function countModVerifications(tripId: string, type: string): Promise<number> {
   const { count, error } = await supabase
     .from("moderation-reviews")
     .select("*", { count: "exact", head: true })
-    .eq("trip_id", tripId);
+    .eq("trip_toda_id", tripId)
+    .eq("type", type)
+    .eq("status", "verified");
 
   if (error) {
     console.error("Error fetching mod verifications count:", error);

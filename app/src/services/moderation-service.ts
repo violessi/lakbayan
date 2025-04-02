@@ -1,19 +1,33 @@
 import { supabase } from "@utils/supabase";
 import { fetchTrip } from "@services/trip-service-v2";
 
-export async function getPendingVerifications(moderatorId: string): Promise<FullTrip[]> {
+import { z } from "zod";
+import { fetchStops } from "./toda-stop-service";
+
+export const ModerationReviewSchema = z.object({
+  id: z.string(),
+  tripTodaId: z.string(),
+  moderatorId: z.string(),
+  status: z.enum(["pending", "approved", "dismissed"]),
+  type: z.enum(["trip", "toda"]),
+});
+
+export type ModerationReview = z.infer<typeof ModerationReviewSchema>;
+
+export async function getPendingTripVerifications(moderatorId: string): Promise<FullTrip[]> {
   const { data: reviewData, error: reviewError } = await supabase
     .from("moderation-reviews")
-    .select("trip_id")
+    .select("trip_toda_id")
     .eq("moderator_id", moderatorId)
-    .eq("status", "pending");
+    .eq("status", "pending")
+    .eq("type", "trip");
 
   if (reviewError) {
     console.error("Error fetching moderation reviews:", reviewError);
     return [];
   }
 
-  const tripIds = reviewData.map((review) => review.trip_id);
+  const tripIds = reviewData.map((review) => review.trip_toda_id);
   if (tripIds.length === 0) return [];
 
   const trips = await Promise.all(
@@ -30,7 +44,27 @@ export async function getPendingVerifications(moderatorId: string): Promise<Full
   return trips.filter((trip): trip is FullTrip => trip !== null);
 }
 
-export async function getAllModerators() {
+export async function getPendingTodaVerifications(moderatorId: string): Promise<StopData[]> {
+  const { data: reviewData, error: reviewError } = await supabase
+    .from("moderation-reviews")
+    .select("trip_toda_id")
+    .eq("moderator_id", moderatorId)
+    .eq("status", "pending")
+    .eq("type", "toda");
+
+  if (reviewError) {
+    console.error("Error fetching moderation reviews:", reviewError);
+    return [];
+  }
+
+  const todaIds = reviewData.map((review) => review.trip_toda_id);
+  if (todaIds.length === 0) return [];
+
+  const todas = await fetchStops(todaIds);
+  return todas;
+}
+
+export async function getAllModerators(): Promise<{ id: string }[]> {
   const { data, error } = await supabase.from("profiles").select("id").eq("role", "moderator");
 
   if (error) {
@@ -42,7 +76,7 @@ export async function getAllModerators() {
   return data || [];
 }
 
-export async function addTripToModeration(tripId: string) {
+export async function addToPendingModeratorReview(tripId: string, type: string): Promise<void> {
   try {
     const moderators = await getAllModerators();
 
@@ -52,9 +86,10 @@ export async function addTripToModeration(tripId: string) {
     }
 
     const moderationEntries = moderators.map((mod) => ({
-      trip_id: tripId,
+      trip_toda_id: tripId,
       moderator_id: mod.id,
       status: "pending",
+      type,
     }));
 
     const { error } = await supabase.from("moderation-reviews").insert(moderationEntries);
@@ -79,7 +114,7 @@ export async function updateModerationStatus(
     .from("moderation-reviews")
     .update({ status })
     .eq("moderator_id", moderatorId)
-    .eq("trip_id", tripId);
+    .eq("trip_toda_id", tripId);
 
   if (error) {
     console.error("Error updating moderation status:", error);
