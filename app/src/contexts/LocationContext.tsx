@@ -3,7 +3,7 @@ import * as ExpoLocation from "expo-location";
 
 // Define the context type
 interface LocationContextType {
-  userLocation: [number, number] | null;
+  userLocation: Coordinates | null;
   permissionGranted: boolean;
 }
 
@@ -15,7 +15,7 @@ export const LocationContext = createContext<LocationContextType>({
 
 // Provider component
 export const LocationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({ children }
       if (status === "granted") {
         setPermissionGranted(true);
         const location = await ExpoLocation.getCurrentPositionAsync({});
-        const newCoords: [number, number] = [location.coords.longitude, location.coords.latitude];
+        const newCoords: Coordinates = [location.coords.longitude, location.coords.latitude];
         setUserLocation(newCoords);
       } else {
         console.warn("Permission to access location was denied");
@@ -38,4 +38,12 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({ children }
       {children}
     </LocationContext.Provider>
   );
+};
+
+export const useUserLocation = (): LocationContextType => {
+  const context = React.useContext(LocationContext);
+  if (!context) {
+    throw new Error("useLocation must be used within a LocationProvider");
+  }
+  return context;
 };
