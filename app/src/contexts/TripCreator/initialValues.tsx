@@ -25,7 +25,6 @@ export const SEGMENT_INITIAL_STATE: CreateSegment = {
   duration: 0,
   distance: 0,
   cost: 0,
-  liveStatus: [],
   waypoints: [],
   navigationSteps: [],
   startLocation: "",

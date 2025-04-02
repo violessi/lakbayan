@@ -113,7 +113,7 @@ export async function fetchTransitJournal(journalId: string): Promise<TransitJou
 
 export async function fetchSegments(segmentIds: string[]): Promise<Segment[]> {
   try {
-    const segments = Promise.all(
+    const segments = await Promise.all(
       segmentIds.map(async (segmentId) => {
         const data = await fetchDataRPC("fetch_segment", { segment_id: segmentId });
         return data;
