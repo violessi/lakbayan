@@ -6,6 +6,8 @@ import { fetchSuggestions } from "@services/mapbox-service";
 import Mapbox from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "../utils/mapbox-config";
 
+import { SuggestionListItem } from "./ui/SuggestionsList";
+
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 interface StartEndSearchProps {
@@ -107,14 +109,10 @@ export default function StartEndSearch({
               <FlatList
                 data={startSuggestions.slice(0, 8)}
                 keyExtractor={(item) => item.id}
-                style={{ paddingTop: 10, paddingBottom: 10 }}
+                style={{ paddingTop: 8, paddingBottom: 8 }}
                 renderItem={({ item }) => (
-                  <List.Item
-                    title={item.place_name}
-                    description={item.address || ""}
-                    titleStyle={{ fontSize: 13, fontWeight: "bold", color: "#333" }}
-                    descriptionStyle={{ fontSize: 11, color: "gray" }}
-                    style={{ height: 45 }}
+                  <SuggestionListItem
+                    item={item}
                     onPress={() => handleSuggestionPress(item, "start")}
                   />
                 )}
@@ -128,14 +126,10 @@ export default function StartEndSearch({
               <FlatList
                 data={endSuggestions.slice(0, 8)}
                 keyExtractor={(item) => item.id}
-                style={{ paddingTop: 10, paddingBottom: 10 }}
+                style={{ paddingTop: 8, paddingBottom: 8 }}
                 renderItem={({ item }) => (
-                  <List.Item
-                    title={item.place_name}
-                    description={item.address || ""}
-                    titleStyle={{ fontSize: 13, fontWeight: "bold", color: "#333" }}
-                    descriptionStyle={{ fontSize: 11, color: "gray" }}
-                    style={{ height: 45 }}
+                  <SuggestionListItem
+                    item={item}
                     onPress={() => handleSuggestionPress(item, "end")}
                   />
                 )}

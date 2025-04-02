@@ -41,7 +41,7 @@ export default function TripSummary({
     <BottomSheet snapPoints={snapPoints} index={2}>
       <BottomSheetView className="flex flex-col px-5 gap-6">
         <View className="flex flex-row justify-between">
-          <View className="flex flex-row">
+          <View className="flex flex-row gap-2">
             <Text>Contributed by</Text>
             <TouchableOpacity
               onPress={() => handleContributorPress(trip.contributorId, contributor || "")}
