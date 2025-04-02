@@ -1,5 +1,5 @@
 import { Tabs, Redirect } from "expo-router";
-import { Image, ImageSourcePropType, StyleSheet } from "react-native";
+import { Image, ImageSourcePropType, StyleSheet, Platform } from "react-native";
 
 import { useSession } from "@contexts/SessionContext";
 
@@ -33,7 +33,9 @@ export default function TabLayout() {
         tabBarActiveTintColor: "#7F55D9",
         headerShown: false,
         tabBarStyle: {
+          height: Platform.OS === "ios" ? 75 : 60,
           paddingTop: 4,
+          paddingBottom: 10,
         },
       }}
     >

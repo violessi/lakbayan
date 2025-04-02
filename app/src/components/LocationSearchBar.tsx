@@ -5,6 +5,8 @@ import { TextInput, List, IconButton } from "react-native-paper";
 
 import { fetchSuggestions } from "@services/mapbox-service";
 
+import { SuggestionListItem } from "./ui/SuggestionsList";
+
 import Mapbox from "@rnmapbox/maps";
 import { MAPBOX_ACCESS_TOKEN } from "../utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -64,16 +66,9 @@ export default function LocationSearchBar({ onSuggestionSelect, onClear }: Locat
           <FlatList
             data={suggestions.slice(0, 8)}
             keyExtractor={(item) => item.id}
-            style={{ paddingTop: 10, paddingBottom: 10 }}
+            style={{ paddingTop: 8, paddingBottom: 8 }}
             renderItem={({ item }) => (
-              <List.Item
-                title={item.place_name}
-                description={item.address || ""}
-                titleStyle={{ fontSize: 13, fontWeight: "bold", color: "#333" }}
-                descriptionStyle={{ fontSize: 11, color: "gray" }}
-                style={{ height: 45 }}
-                onPress={() => handleSuggestionPress(item)}
-              />
+              <SuggestionListItem item={item} onPress={() => handleSuggestionPress(item)} />
             )}
           />
         )}

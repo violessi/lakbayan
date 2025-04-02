@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { PaperProvider } from "react-native-paper";
+import { PaperProvider, MD3LightTheme } from "react-native-paper";
 import { useTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
@@ -17,7 +17,7 @@ export default function RootLayout() {
       <TransitJournalProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <BottomSheetModalProvider>
-            <PaperProvider>
+            <PaperProvider theme={MD3LightTheme}>
               <Stack>
                 <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
