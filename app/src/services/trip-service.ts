@@ -166,6 +166,7 @@ export async function fetchTripData(endpoints: TripEndpoints, radius: number): P
 }
 
 export async function fetchLiveUpdatesBBox(coordinates: Coordinates[]) {
+  console.log("Fetching bounding box live updates");
   try {
     const args = {
       min_lat: coordinates[0][1],
@@ -185,6 +186,7 @@ export async function fetchLiveUpdatesBBox(coordinates: Coordinates[]) {
 }
 
 export async function fetchLiveUpdatesLine(line: Coordinates[], distance: number) {
+  console.log("Fetching line live updates");
   try {
     const args = { line: convertToLineStringWKT(line), distance };
     const res = await fetchDataRPC("fetch_live_updates_line", args);

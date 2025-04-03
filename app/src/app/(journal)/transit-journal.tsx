@@ -3,6 +3,7 @@ import type { Location } from "@rnmapbox/maps";
 import { ShapeSource, LineLayer } from "@rnmapbox/maps";
 import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView, View, Text, Button, Pressable } from "react-native";
+import * as turf from "@turf/turf";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -24,22 +25,24 @@ import { useTransitJournal } from "@contexts/TransitJournal";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 import { useLiveUpdates } from "@hooks/use-live-updates";
 
+import LineSource, { type LineSourceRef } from "@components/map/LineSource";
+
 // TODO: cleanup this file
 // TODO: cleanup this file
 // TODO: cleanup this file
 export default function TransitJournal() {
   const { userLocation, cameraRef } = useMapView();
   const router = useRouter();
-  const routeSourcesRef = useRef<{ [key: string]: ShapeSource | null }>({});
+  const LineRef = useRef<LineSourceRef>(null);
 
-  const { hasActiveTransitJournal, segments } = useTransitJournal();
+  const { segments, hasActiveTransitJournal } = useTransitJournal();
+  const { liveUpdates, setUpdateCoords } = useLiveUpdates("line", 30);
+
   const [currentSegment, setCurrentSegment] = useState<Segment | null>(null);
   const [currentStep, setCurrentStep] = useState<NavigationSteps | null>(null);
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
   const [showCompleteButton, setShowCompleteButton] = useState(false);
-
-  const { liveUpdates, setUpdateCoords } = useLiveUpdates("line", 30);
 
   function handleNavigateToReview() {
     setShowTripFinishedModal(false);
@@ -48,7 +51,8 @@ export default function TransitJournal() {
 
   // TODO: move this!!!!
   const handleUserLocationUpdate = async ({ coords }: Location) => {
-    if (!segments) return;
+    if (!segments || !LineRef.current) return;
+
     const tripSegments = JSON.parse(JSON.stringify(segments)) as Segment[];
     const newLocation = [coords.longitude, coords.latitude] as Coordinates;
 
@@ -64,24 +68,7 @@ export default function TransitJournal() {
       ...activeSegments[0].waypoints.slice(nearestIndex + 1),
     ];
 
-    // update the map to show active route
-    segments.forEach((seg, index) => {
-      const segment = activeSegments.find((aseg) => aseg.id === seg.id);
-      if (!segment) return;
-      routeSourcesRef.current[`${segment.id}`]?.setNativeProps({
-        id: `${segment.id}`,
-        shape: JSON.stringify({
-          type: "Feature",
-          geometry: {
-            type: "LineString",
-            coordinates: segment.waypoints,
-          },
-          properties: {
-            color: TRANSPORTATION_COLORS[index],
-          },
-        }),
-      });
-    });
+    LineRef.current.update(activeSegments);
 
     // update the camera to follow the user and face the next point
     const nextPoint = activeSegments[0].waypoints[1] ?? newLocation;
@@ -133,6 +120,7 @@ export default function TransitJournal() {
     setUpdateCoords(segments.flatMap(({ waypoints }) => waypoints));
   }, [segments]);
 
+  console.log("rendering journal!");
   if (!hasActiveTransitJournal || !segments) {
     return (
       <SafeAreaView className="flex-1 justify-center items-center">
@@ -164,23 +152,8 @@ export default function TransitJournal() {
               />
             ))}
 
-          {/* Render active segments with different color */}
-          {segments &&
-            segments.map((segment) => (
-              <ShapeSource
-                key={`${segment.id}`}
-                id={`${segment.id}`}
-                ref={(ref) => (routeSourcesRef.current[`${segment.id}`] = ref)}
-              >
-                <LineLayer
-                  id={`${segment.id}`}
-                  style={{
-                    lineColor: ["get", "color"],
-                    lineWidth: 5,
-                  }}
-                />
-              </ShapeSource>
-            ))}
+          {/* Render Directions */}
+          <LineSource segments={segments} ref={LineRef} />
 
           {liveUpdates.map((update) => (
             <LiveUpdateMarker

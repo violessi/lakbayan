@@ -42,6 +42,7 @@ export const useLiveUpdates = (type: "box" | "line", interval: number) => {
       }
     };
 
+    if (intervalRef.current) clearInterval(intervalRef.current);
     fetchLiveUpdates();
 
     return () => {
