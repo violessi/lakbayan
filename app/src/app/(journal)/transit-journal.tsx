@@ -110,7 +110,14 @@ export default function TransitJournal() {
 
     // update the current segment and step information
     setCurrentSegment(segments[segmentIndex]);
-    setCurrentStep(nextStep);
+
+    // prevent unnecessary re-renders
+    if (
+      currentStep?.location[0] !== nextStep.location[0] ||
+      currentStep?.location[1] !== nextStep.location[1]
+    ) {
+      setCurrentStep(nextStep);
+    }
   };
 
   // Get initial app state
