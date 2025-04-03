@@ -42,6 +42,14 @@ export function convertToMultiPointWKT(points: Coordinates[]): string | null {
   return `SRID=4326;MULTIPOINT(${pointStrings})`;
 }
 
+export function convertToLineStringWKT(points: Coordinates[]): string | null {
+  if (points.length === 0) {
+    return null;
+  }
+  const pointStrings = points.map(([lng, lat]) => `${lng} ${lat}`).join(", ");
+  return `SRID=4326;LINESTRING(${pointStrings})`;
+}
+
 export function getNearestSegment(
   userLocation: Coordinates,
   segments: Segment[],
@@ -82,4 +90,15 @@ export function getNearestStep(
     }
   });
   return steps[stepIndex];
+}
+
+export function expandBoundingBox(box: Coordinates[], size: number): Coordinates[] {
+  const [min, max] = box;
+  const width = (max[0] - min[0]) * size;
+  const height = (max[1] - min[1]) * size;
+
+  return [
+    [min[0] - width, min[1] - height],
+    [max[0] + width, max[1] + height],
+  ];
 }

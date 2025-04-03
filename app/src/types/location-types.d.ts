@@ -65,6 +65,17 @@ declare global {
     [key: string]: any;
   };
 
+  export type MapBoxRegionPayload = {
+    zoomLevel: number;
+    heading: number;
+    animated: boolean;
+    isUserInteraction: boolean;
+    visibleBounds: GeoJSON.Position[];
+    pitch: number;
+  };
+
+  export type MapViewRegionChange = Feature<Point, MapBoxRegionPayload>;
+
   export type NearestPoint = Feature<Point, NearestPointProperties>;
 }
 

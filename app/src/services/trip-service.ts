@@ -11,6 +11,7 @@ import {
   convertKeysToCamelCase,
   convertToPointWKT,
   convertToMultiPointWKT,
+  convertToLineStringWKT,
 } from "@utils/map-utils";
 
 // Inserts a new trip record into the database
@@ -164,14 +165,29 @@ export async function fetchTripData(endpoints: TripEndpoints, radius: number): P
   }
 }
 
-// Fetches nearby live updates based on provided coordinates and radius
-export async function fetchNearbyLiveUpdates(
-  coordinates: Coordinates,
-  radius: number,
-): Promise<LiveUpdate[]> {
+export async function fetchLiveUpdatesBBox(coordinates: Coordinates[]) {
   try {
-    const args = { lat: coordinates[1], lon: coordinates[0], radius };
-    const res = await fetchDataRPC("fetch_nearby_live_updates", args);
+    const args = {
+      min_lat: coordinates[0][1],
+      min_lon: coordinates[0][0],
+      max_lat: coordinates[1][1],
+      max_lon: coordinates[1][0],
+    };
+    const res = await fetchDataRPC("fetch_live_updates_bbox", args);
+
+    // Validate the response data
+    const result = LiveUpdatesSchema.safeParse(res);
+    if (!result.success) throw new Error("Invalid Live Update Data");
+    return result.data;
+  } catch (error) {
+    throw new Error("Error fetching live updates");
+  }
+}
+
+export async function fetchLiveUpdatesLine(line: Coordinates[], distance: number) {
+  try {
+    const args = { line: convertToLineStringWKT(line), distance };
+    const res = await fetchDataRPC("fetch_live_updates_line", args);
 
     // Validate the response data
     const result = LiveUpdatesSchema.safeParse(res);
@@ -209,3 +225,21 @@ export async function deleteSegments(segmentIds: string[]): Promise<void> {
     throw new Error("Error deleting segments");
   }
 }
+
+// Fetches nearby live updates based on provided coordinates and radius
+// export async function fetchNearbyLiveUpdates(
+//   coordinates: Coordinates,
+//   radius: number,
+// ): Promise<LiveUpdate[]> {
+//   try {
+//     const args = { lat: coordinates[1], lon: coordinates[0], radius };
+//     const res = await fetchDataRPC("fetch_nearby_live_updates", args);
+
+//     // Validate the response data
+//     const result = LiveUpdatesSchema.safeParse(res);
+//     if (!result.success) throw new Error("Invalid Live Update Data");
+//     return result.data;
+//   } catch (error) {
+//     throw new Error("Error fetching live updates");
+//   }
+// }

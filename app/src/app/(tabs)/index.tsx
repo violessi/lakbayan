@@ -1,45 +1,26 @@
 import { useRouter } from "expo-router";
-import * as ExpoLocation from "expo-location";
-import React, { useEffect, useState } from "react";
-import Mapbox, { MapView, Camera, LocationPuck, Images as MapImage } from "@rnmapbox/maps";
 import { Text, Image, View, SafeAreaView, Pressable } from "react-native";
 
-import trafficIcon from "@assets/report-traffic.png";
-import lineIcon from "@assets/report-lines.png";
-import disruptionIcon from "@assets/report-disruption.png";
-
-import LiveUpdateMarker from "@components/map/LiveUpdateMarker";
 import Header from "@components/ui/Header";
+import { MapShell } from "@components/map/MapShell";
 import RecentTrips from "@components/search/RecentTrips";
-import { fetchNearbyLiveUpdates } from "@services/trip-service";
+import LiveUpdateMarker from "@components/map/LiveUpdateMarker";
 
-import { MAPBOX_ACCESS_TOKEN } from "../../utils/mapbox-config";
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
+import { useMapView } from "@hooks/use-map-view";
+import { useLiveUpdates } from "@hooks/use-live-updates";
 
 export default function Index() {
   const router = useRouter();
-  const [liveUpdates, setLiveUpdates] = useState<LiveUpdate[]>([]);
+  const { userLocation } = useMapView();
+  const { liveUpdates, setUpdateCoords } = useLiveUpdates("box", 30);
 
   const handleTextInputFocus = () => {
     router.push("/(search)/1-search-trip");
   };
 
-  useEffect(() => {
-    // TODO: make this to an onChangeListener
-    const fetchLiveUpdates = async () => {
-      const location = await ExpoLocation.getCurrentPositionAsync({});
-      const coordinates: Coordinates = [location.coords.longitude, location.coords.latitude];
-      try {
-        // Fetch live updates within 10km radius
-        const data = await fetchNearbyLiveUpdates(coordinates, 10000);
-        setLiveUpdates(data);
-      } catch (error) {
-        console.error("Error fetching live updates", error);
-      }
-    };
-
-    fetchLiveUpdates();
-  }, []);
+  const handleRegionChange = ({ properties }: MapViewRegionChange) => {
+    setUpdateCoords(properties.visibleBounds as Coordinates[]);
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -54,13 +35,10 @@ export default function Index() {
             style={{ width: 15, height: 15, marginRight: 10 }}
             resizeMode="contain"
           />
-
           <Text style={{ fontSize: 12, color: "#888" }}>Where are we off to today?</Text>
         </Pressable>
       </View>
-      <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12">
-        <Camera followZoomLevel={12} followUserLocation />
-        <LocationPuck />
+      <MapShell center={userLocation} handleRegionChange={handleRegionChange}>
         {liveUpdates.map((update) => (
           <LiveUpdateMarker
             key={update.id}
@@ -69,10 +47,7 @@ export default function Index() {
             coordinates={update.coordinate}
           />
         ))}
-        <MapImage
-          images={{ Traffic: trafficIcon, Disruption: disruptionIcon, "Long Line": lineIcon }}
-        />
-      </MapView>
+      </MapShell>
       <RecentTrips />
     </SafeAreaView>
   );

@@ -1,8 +1,12 @@
 import React from "react";
 import { Platform } from "react-native";
 import Mapbox, { Images, MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
+import type { Feature, Point } from "geojson";
+import pinIcon from "@assets/pin-purple.png";
+import trafficIcon from "@assets/report-traffic.png";
+import lineIcon from "@assets/report-lines.png";
+import disruptionIcon from "@assets/report-disruption.png";
 
-import pin from "@assets/pin-purple.png";
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -15,6 +19,9 @@ interface MapShellProps {
   fitBounds?: Coordinates[];
   handleMapPress?: (feature: MapPressFeature) => void;
   handleUserLocation?: (location: Location) => void;
+  handleRegionChange?: (region: Feature<Point, MapBoxRegionPayload>) => void;
+  cameraProps?: React.ComponentProps<typeof Camera>;
+  userLocationProps?: React.ComponentProps<typeof UserLocation>;
 }
 
 export const MapShell = ({
@@ -25,6 +32,9 @@ export const MapShell = ({
   fitBounds,
   handleMapPress,
   handleUserLocation,
+  handleRegionChange,
+  cameraProps,
+  userLocationProps,
 }: MapShellProps) => {
   const finalCenter = center ?? [121.05, 14.63]; // Fallback to QC
 
@@ -35,6 +45,13 @@ export const MapShell = ({
     }
   };
 
+  const markers = {
+    pin: pinIcon,
+    Traffic: trafficIcon,
+    Disruption: disruptionIcon,
+    "Long Line": lineIcon,
+  };
+
   return (
     <MapView
       style={{ flex: 1 }}
@@ -42,21 +59,24 @@ export const MapShell = ({
       onPress={handleMapPress}
       projection="mercator"
       onDidFinishLoadingMap={handleMapLoaded}
+      onRegionDidChange={handleRegionChange}
     >
       <Camera
         ref={cameraRef}
         centerCoordinate={finalCenter}
-        zoomLevel={zoomLevel}
+        zoomLevel={zoomLevel ?? 12}
         animationMode={Platform.OS === "android" ? "none" : "easeTo"}
+        {...cameraProps}
       />
       <UserLocation
         visible={true}
         androidRenderMode="normal"
         showsUserHeadingIndicator={true}
         onUpdate={handleUserLocation}
+        {...userLocationProps}
       />
       {children}
-      <Images images={{ pin }} />
+      <Images images={markers} />
     </MapView>
   );
 };
