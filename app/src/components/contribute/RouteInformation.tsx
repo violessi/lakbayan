@@ -1,117 +1,76 @@
-import React, { useMemo, useCallback } from "react";
+import React from "react";
 import { Text, View } from "react-native";
 
 import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import TransportationModeSelection from "@components/contribute/TransportationModeSelection";
-import {
-  BottomSheetView,
-  BottomSheetModal,
-  BottomSheetBackgroundProps,
-  BottomSheetBackdrop,
-} from "@gorhom/bottom-sheet";
+import TransportModeInput from "@components/contribute/TransportModeInput";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+
+import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 
 interface RouteInformationProps {
-  onRouteNameChange: (routeName: string) => void;
-  onLandmarkChange: (landmark: string) => void;
-  onInstructionChange: (instruction: string) => void;
-  onCostChange: (cost: string) => void;
-  routeName: string;
-  landmark: string;
-  instruction: string;
-  cost: string;
-  segmentMode: string;
-  bottomSheetModalRef: React.RefObject<BottomSheetModal>;
-  updateRoute: (updates: Partial<CreateSegment>) => void;
-  isAddingWaypoints: boolean;
-  handleToggleMode: () => Promise<void>;
-  clearWaypoints: () => void;
-  getRouteDirections: () => Promise<void>;
+  sheetRef: React.RefObject<BottomSheet>;
+  handleSubmit: () => void;
+  setIsEditingWaypoints: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function RouteInformation({
-  onRouteNameChange,
-  onLandmarkChange,
-  onInstructionChange,
-  onCostChange,
-  routeName,
-  landmark,
-  instruction,
-  cost,
-  segmentMode,
-  bottomSheetModalRef,
-  updateRoute,
-  isAddingWaypoints,
-  handleToggleMode,
-  clearWaypoints,
-  getRouteDirections,
+  sheetRef,
+  handleSubmit,
+  setIsEditingWaypoints,
 }: RouteInformationProps) {
-  const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackgroundProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        pressBehavior={"close"}
-      />
-    ),
-    [],
-  );
+  const { route, updateRoute } = useTripCreator();
+  const snapPoints = ["25%", "50%"];
+
+  const handleEditRoute = () => {
+    setIsEditingWaypoints(true);
+    sheetRef.current?.close();
+  };
 
   return (
-    <View>
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
-        snapPoints={snapPoints}
-        index={2}
-        backdropComponent={renderBackdrop}
-        keyboardBehavior={"extend"}
-      >
-        <BottomSheetView className="flex flex-col px-5 gap-4">
-          <Text className="text-xl font-bold">Route Information</Text>
-          <TransportationModeSelection
-            onTransportationModeChange={(segmentMode) => updateRoute({ segmentMode })}
+    <BottomSheet ref={sheetRef} snapPoints={snapPoints} index={1}>
+      <BottomSheetScrollView className="flex flex-col mx-4">
+        <Text className="text-2xl font-bold mb-4">Route Information</Text>
+        <View className="flex flex-col gap-2">
+          <TransportModeInput
+            value={route.segmentMode}
+            onChange={(segmentMode) => updateRoute({ segmentMode })}
           />
           <View className="flex-row gap-3">
             <View className="flex-1">
               <OutlinedTextInput
                 label="Route Name"
-                value={routeName}
-                onChangeText={onRouteNameChange}
+                value={route.segmentName}
+                onChangeText={(segmentName) => updateRoute({ segmentName })}
               />
             </View>
             <View className="flex-1">
-              {segmentMode == "Walk" ? (
-                <OutlinedTextInput
-                  label="Cost"
-                  value={cost}
-                  disabled={true}
-                  onChangeText={onCostChange}
-                />
-              ) : (
-                <OutlinedTextInput label="Cost" value={cost} onChangeText={onCostChange} />
-              )}
+              <OutlinedTextInput
+                label="Cost"
+                value={String(route.cost) ?? ""}
+                onChangeText={(cost) => {
+                  const parsedCost = Number(cost);
+                  updateRoute({ cost: isNaN(parsedCost) ? 0 : parsedCost });
+                }}
+              />
             </View>
           </View>
-          <OutlinedTextInput label="Landmark" value={landmark} onChangeText={onLandmarkChange} />
+          <OutlinedTextInput
+            label="Landmark"
+            value={route.landmark ?? ""}
+            onChangeText={(landmark) => updateRoute({ landmark })}
+          />
           <OutlinedTextInput
             label="Instruction"
-            value={instruction}
-            onChangeText={onInstructionChange}
+            value={route.instruction ?? ""}
+            onChangeText={(instruction) => updateRoute({ instruction })}
           />
-          <View className="flex flex-row gap-2 p-5 w-full justify-center">
-            <PrimaryButton
-              label={isAddingWaypoints ? "Recalculate" : "Edit Route"}
-              onPress={handleToggleMode}
-            />
-            <PrimaryButton
-              label={isAddingWaypoints ? "Clear" : "Calculate"}
-              onPress={isAddingWaypoints ? clearWaypoints : getRouteDirections}
-            />
-          </View>
-        </BottomSheetView>
-      </BottomSheetModal>
-    </View>
+        </View>
+        <View className="flex flex-row gap-2 p-5 w-full justify-center">
+          <PrimaryButton label={"Submit Route"} onPress={() => handleSubmit()} />
+          <PrimaryButton label={"Edit Route"} onPress={() => handleEditRoute()} />
+        </View>
+      </BottomSheetScrollView>
+    </BottomSheet>
   );
 }

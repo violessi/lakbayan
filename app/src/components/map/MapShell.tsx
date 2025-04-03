@@ -30,8 +30,8 @@ export const MapShell = ({
 
   const handleMapLoaded = () => {
     if (cameraRef?.current && fitBounds) {
-      const frame = [50, 150, 50, 100];
-      cameraRef.current.fitBounds(fitBounds[0], fitBounds[1], frame);
+      const padding = [150, 50, 300, 50];
+      cameraRef.current.fitBounds(fitBounds[0], fitBounds[1], padding);
     }
   };
 

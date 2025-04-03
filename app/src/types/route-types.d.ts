@@ -2,6 +2,8 @@ import { z } from "zod";
 import type { FeatureCollection, LineString } from "geojson";
 import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
 
+import type { RouteInputSchema } from "./route-input-schema";
+
 import type {
   TransportationModeSchema,
   TransitJournalStatusSchema,
@@ -44,8 +46,7 @@ declare global {
     contributor_id: string;
   }
 
-  // ==================== V2 ====================
-  // types are inferred from the zod schema to reduce redundancy
+  // ==================== DATABSE ====================
 
   export type TransportationMode = z.infer<typeof TransportationModeSchema>;
   export type TransitJournalStatus = z.infer<typeof TransitJournalStatusSchema>;
@@ -81,4 +82,8 @@ declare global {
   >;
 
   export type Profile = z.infer<typeof ProfileSchema>;
+
+  // ==================== INPUT ====================
+
+  export type RouteInput = z.infer<typeof RouteInputSchema>;
 }
