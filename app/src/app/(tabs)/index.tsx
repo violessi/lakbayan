@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useRouter } from "expo-router";
 import { Text, Image, View, SafeAreaView, Pressable } from "react-native";
 
@@ -13,11 +12,14 @@ import { useLiveUpdates } from "@hooks/use-live-updates";
 export default function Index() {
   const router = useRouter();
   const { userLocation } = useMapView();
-  const [region, setRegion] = useState<any>(null);
-  const liveUpdates = useLiveUpdates(region, 30000);
+  const { liveUpdates, setUpdateCoords } = useLiveUpdates("box", 30);
 
   const handleTextInputFocus = () => {
     router.push("/(search)/1-search-trip");
+  };
+
+  const handleRegionChange = ({ properties }: MapViewRegionChange) => {
+    setUpdateCoords(properties.visibleBounds as Coordinates[]);
   };
 
   return (
@@ -36,7 +38,7 @@ export default function Index() {
           <Text style={{ fontSize: 12, color: "#888" }}>Where are we off to today?</Text>
         </Pressable>
       </View>
-      <MapShell center={userLocation} handleRegionChange={setRegion}>
+      <MapShell center={userLocation} handleRegionChange={handleRegionChange}>
         {liveUpdates.map((update) => (
           <LiveUpdateMarker
             key={update.id}

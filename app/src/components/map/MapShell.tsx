@@ -1,7 +1,7 @@
 import React from "react";
 import { Platform } from "react-native";
 import Mapbox, { Images, MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
-
+import type { Feature, Point } from "geojson";
 import pinIcon from "@assets/pin-purple.png";
 import trafficIcon from "@assets/report-traffic.png";
 import lineIcon from "@assets/report-lines.png";
@@ -19,7 +19,7 @@ interface MapShellProps {
   fitBounds?: Coordinates[];
   handleMapPress?: (feature: MapPressFeature) => void;
   handleUserLocation?: (location: Location) => void;
-  handleRegionChange?: (region: any) => void;
+  handleRegionChange?: (region: Feature<Point, MapBoxRegionPayload>) => void;
   cameraProps?: React.ComponentProps<typeof Camera>;
   userLocationProps?: React.ComponentProps<typeof UserLocation>;
 }

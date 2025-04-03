@@ -165,7 +165,7 @@ export async function fetchTripData(endpoints: TripEndpoints, radius: number): P
   }
 }
 
-export async function fetchLiveUpdatesBBox(coordinates: [Coordinates, Coordinates]) {
+export async function fetchLiveUpdatesBBox(coordinates: Coordinates[]) {
   try {
     const args = {
       min_lat: coordinates[0][1],

@@ -21,8 +21,8 @@ import {
 } from "@utils/map-utils";
 import { useMapView } from "@hooks/use-map-view";
 import { useTransitJournal } from "@contexts/TransitJournal";
-import { fetchLiveUpdatesLine } from "@services/trip-service";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
+import { useLiveUpdates } from "@hooks/use-live-updates";
 
 // TODO: cleanup this file
 // TODO: cleanup this file
@@ -38,7 +38,8 @@ export default function TransitJournal() {
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
   const [showCompleteButton, setShowCompleteButton] = useState(false);
-  const [liveUpdates, setLiveUpdates] = useState<LiveUpdate[]>([]);
+
+  const { liveUpdates, setUpdateCoords } = useLiveUpdates("line", 30);
 
   function handleNavigateToReview() {
     setShowTripFinishedModal(false);
@@ -119,20 +120,10 @@ export default function TransitJournal() {
     handleUserLocationUpdate({ coords });
   }, []);
 
-  // Fetch live on segments every 30 seconds
-  // TODO: a lot of cleanup to do here
+  // Fetch live updates on segments
   useEffect(() => {
     if (!segments) return;
-    const line = segments.flatMap((segment) => segment.waypoints);
-    const fetchLiveUpdates = async () => {
-      const live = await fetchLiveUpdatesLine(line, 10);
-      setLiveUpdates(live);
-    };
-    fetchLiveUpdates();
-    const interval = setInterval(() => {
-      fetchLiveUpdates();
-    }, 30000);
-    return () => clearInterval(interval);
+    setUpdateCoords(segments.flatMap(({ waypoints }) => waypoints));
   }, [segments]);
 
   if (!hasActiveTransitJournal || !segments) {

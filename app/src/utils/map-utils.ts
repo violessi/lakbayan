@@ -91,3 +91,14 @@ export function getNearestStep(
   });
   return steps[stepIndex];
 }
+
+export function expandBoundingBox(box: Coordinates[], size: number): Coordinates[] {
+  const [min, max] = box;
+  const width = (max[0] - min[0]) * size;
+  const height = (max[1] - min[1]) * size;
+
+  return [
+    [min[0] - width, min[1] - height],
+    [max[0] + width, max[1] + height],
+  ];
+}
