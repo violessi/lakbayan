@@ -20,6 +20,8 @@ interface MapShellProps {
   handleMapPress?: (feature: MapPressFeature) => void;
   handleUserLocation?: (location: Location) => void;
   handleRegionChange?: (region: any) => void;
+  cameraProps?: React.ComponentProps<typeof Camera>;
+  userLocationProps?: React.ComponentProps<typeof UserLocation>;
 }
 
 export const MapShell = ({
@@ -31,6 +33,8 @@ export const MapShell = ({
   handleMapPress,
   handleUserLocation,
   handleRegionChange,
+  cameraProps,
+  userLocationProps,
 }: MapShellProps) => {
   const finalCenter = center ?? [121.05, 14.63]; // Fallback to QC
 
@@ -62,12 +66,14 @@ export const MapShell = ({
         centerCoordinate={finalCenter}
         zoomLevel={zoomLevel ?? 12}
         animationMode={Platform.OS === "android" ? "none" : "easeTo"}
+        {...cameraProps}
       />
       <UserLocation
         visible={true}
         androidRenderMode="normal"
         showsUserHeadingIndicator={true}
         onUpdate={handleUserLocation}
+        {...userLocationProps}
       />
       {children}
       <Images images={markers} />
