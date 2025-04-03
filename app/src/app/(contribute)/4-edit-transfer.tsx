@@ -1,181 +1,101 @@
 import { router } from "expo-router";
-import { useLocalSearchParams } from "expo-router";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
-import { Alert, SafeAreaView, View, BackHandler } from "react-native";
-import React, { useRef, useState, useCallback } from "react";
+import ButtomSheet from "@gorhom/bottom-sheet";
+import React, { useRef, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import { Alert, SafeAreaView, View, BackHandler } from "react-native";
 
 import Header from "@components/ui/Header";
-import CircleMarker from "@components/map/CircleMarker";
 import TripTitle from "@components/contribute/TripTitle";
+import { MapShell } from "@components/map/MapShell";
+import CircleMarker from "@components/map/CircleMarker";
+import SymbolMarker from "@components/map/SymbolMarker";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import DirectionsLine from "@components/ui/DirectionsLine";
+import DirectionLine from "@components/map/DirectionLine";
+import DirectionLines from "@components/map/DirectionLines";
 import RouteInformation from "@components/contribute/RouteInformation";
+import UnsavedChangesAlert from "@components/contribute/UnsavedChangesAlert";
 
+import { RouteInputSchema } from "@schemas";
+import { useMapView } from "@hooks/use-map-view";
 import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
-import { getDirections, paraphraseStep } from "@services/mapbox-service";
-
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
+import { TRANSPORTATION_COLORS as COLORS } from "@constants/transportation-color";
 
 export default function RouteInput() {
-  const cameraRef = useRef<Camera>(null);
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const [zoomLevel, setZoomLevel] = useState(13);
+  const buttomSheetRef = useRef<ButtomSheet>(null);
 
-  const { route, inEditMode, setInEditMode, updateRoute, addSegment, clearRouteData } =
-    useTripCreator();
-  const [customWaypoints, setCustomWaypoint] = useState<Coordinates[]>([]);
-  const [isAddingWaypoints, setIsAddingWaypoints] = useState(false);
-  const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+  const {
+    trip,
+    route,
+    segments,
+    editingIndex,
+    customWaypoints,
+    setCustomWaypoint,
+    setEditingIndex,
+    updateRoute,
+    createRoute,
+    addSegment,
+    clearRouteData,
+  } = useTripCreator();
+  const { cameraRef, zoomLevel, center, handleMapPress } = useMapView();
+  const [isEditingWaypoint, setIsEditingWaypoints] = useState(false);
 
-  const { index } = useLocalSearchParams<{ index: string }>();
-  const segmentIndex = index !== undefined && index !== null ? parseInt(String(index), 10) : -1;
+  const handleMapClick = async (feature: any) => {
+    if (!isEditingWaypoint) return;
+    setCustomWaypoint((prev) => [...prev, feature.geometry.coordinates]);
+    handleMapPress(feature);
+  };
 
-  const getRouteDirections = async () => {
-    handleDismissPress();
-    setIsLoadingRoute(true);
+  const handleCompleteEditing = () => {
+    setIsEditingWaypoints(false);
+    buttomSheetRef.current?.expand();
+  };
+
+  const handleProcessRoute = async () => {
     try {
-      const data = await getDirections(
-        route.startCoords,
-        customWaypoints,
-        route.endCoords,
-        route.segmentMode,
-        true,
-      );
-
-      const directions = data.routes[0];
-      const waypoints = directions.geometry.coordinates ?? [];
-      const duration = directions.duration;
-      const distance = directions.distance;
-      const navigationSteps = directions.legs.flatMap(({ steps }) =>
-        steps.map(({ maneuver }) => ({
-          instruction: paraphraseStep(maneuver.instruction),
-          location: maneuver.location,
-        })),
-      );
-      updateRoute({ waypoints, duration, distance, navigationSteps });
+      await createRoute(customWaypoints);
     } catch (error) {
-      console.error("Error fetching directions:", error);
-    } finally {
-      setIsLoadingRoute(false);
+      console.error(error);
+      Alert.alert("Error", "Unable to process route");
     }
   };
 
-  const handleMapClick = async (event: any) => {
-    if (!isAddingWaypoints) return;
-    setCustomWaypoint((prev) => [...prev, event.geometry.coordinates]);
+  const handleResetWaypoints = () => {
+    setCustomWaypoint([]);
+    updateRoute({ ...route, duration: 0, distance: 0, waypoints: [], navigationSteps: [] });
   };
 
-  const handleToggleMode = async () => {
-    handleDismissPress();
-    if (isAddingWaypoints) await getRouteDirections();
-    if (!isAddingWaypoints) setIsAddingWaypoints((prev) => !prev);
-  };
-
-  const handleDoneAddingWaypoint = () => {
-    setIsAddingWaypoints((prev) => !prev);
-  };
-
-  const handleDismissPress = useCallback(() => {
-    bottomSheetModalRef.current?.dismiss();
-  }, []);
-
+  // NOTE: handle custom error msg at schema
   const handleSubmit = () => {
-    if (
-      !route.segmentMode ||
-      !route.segmentName ||
-      !route.cost ||
-      isNaN(route.cost) ||
-      route.waypoints.length === 0
-    ) {
-      Alert.alert("Please fill in all fields to proceed.");
+    const result = RouteInputSchema.safeParse(route);
+    if (!result.success) {
+      Alert.alert("Error", result.error.errors[0].message);
       return;
     }
-    handleDismissPress();
-    addSegment(segmentIndex);
+
+    addSegment();
     router.replace("/(contribute)/2-review-trip");
   };
 
-  const clearWaypoints = () => {
-    setCustomWaypoint([]);
-    updateRoute({
-      ...route,
-      waypoints: [],
-      duration: 0,
-      distance: 0,
-      navigationSteps: [],
-    });
-  };
-  const handleZoomChange = (event: any) => setZoomLevel(event.properties.zoom);
-  const handleMapLoaded = () => {
-    if (cameraRef.current) {
-      cameraRef.current.fitBounds(route.startCoords, route.endCoords, [150, 150, 250, 150]);
-    }
-  };
+  // ==================== App Navigation ==================== //
 
-  // bottom sheet
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current!.present();
-  }, []);
+  const handleBackNavigation = () => {
+    clearRouteData();
+    setEditingIndex(-1);
+    if (editingIndex === -1) router.replace("/(contribute)/3-add-transfer");
+    else router.replace("/(contribute)/2-review-trip");
+  };
 
   const prevCallback = () => {
-    Alert.alert(
-      "Unsaved Changes",
-      "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
-      [
-        {
-          text: "Leave Anyway",
-          style: "destructive",
-          onPress: () => {
-            clearRouteData();
-            if (inEditMode) {
-              setInEditMode(false);
-              router.replace("/(contribute)/2-review-trip");
-            } else {
-              router.replace("/(contribute)/3-add-transfer");
-            }
-          },
-        },
-        { text: "Stay", style: "cancel" },
-      ],
-    );
+    UnsavedChangesAlert(handleBackNavigation);
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      const backAction = () => {
-        Alert.alert(
-          "Unsaved Changes",
-          "You have unsaved changes. If you leave now, your progress will be lost. Do you want to continue?",
-          [
-            {
-              text: "Leave Anyway",
-              style: "destructive",
-              onPress: () => {
-                clearRouteData();
-                if (inEditMode) {
-                  setInEditMode(false);
-                  router.replace("/(contribute)/2-review-trip");
-                } else {
-                  router.replace("/(contribute)/3-add-transfer");
-                }
-              },
-            },
-            { text: "Stay", style: "cancel" },
-          ],
-        );
-
-        return true; // Prevents default back button behavior
-      };
-
-      // Add event listener
-      const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
-
-      return () => backHandler.remove(); // Cleanup when screen loses focus
-    }, [inEditMode]), // Re-run if `inEditMode` changes
-  );
+  useFocusEffect(() => {
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
+      UnsavedChangesAlert(handleBackNavigation);
+      return true;
+    });
+    return () => backHandler.remove();
+  });
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -188,28 +108,27 @@ export default function RouteInput() {
         />
       </View>
 
-      <MapView
-        style={{ flex: 1 }}
-        styleURL="mapbox://styles/mapbox/streets-v12"
-        projection="mercator"
-        onRegionDidChange={handleZoomChange}
-        onDidFinishLoadingMap={handleMapLoaded}
-        onPress={handleMapClick}
+      <MapShell
+        center={center}
+        zoomLevel={zoomLevel}
+        cameraRef={cameraRef}
+        handleMapPress={handleMapClick}
+        fitBounds={[route.startCoords, route.endCoords]}
       >
-        <Camera ref={cameraRef} zoomLevel={zoomLevel} animationMode="easeTo" />
+        <DirectionLines coordinates={segments.map((segment) => segment.waypoints)} />
+        <DirectionLine coordinates={route.waypoints} color={COLORS[segments.length]} />
 
-        <CircleMarker
-          id="start-location"
-          coordinates={route.startCoords}
-          label={route.startLocation}
-          color="red"
-        />
-        <CircleMarker
-          id="end-location"
-          coordinates={route.endCoords}
-          label={route.endLocation}
-          color="red"
-        />
+        <SymbolMarker id="trip-start" label={trip.startLocation} coordinates={trip.startCoords} />
+        <SymbolMarker id="trip-end" label={trip.endLocation} coordinates={trip.endCoords} />
+
+        {trip.endLocation !== route.endLocation && (
+          <CircleMarker
+            id="route-end-loc"
+            coordinates={route.endCoords}
+            label={route.endLocation}
+            color={COLORS[segments.length]}
+          />
+        )}
 
         {customWaypoints.map((waypoint, index) => (
           <CircleMarker
@@ -217,44 +136,24 @@ export default function RouteInput() {
             id={`waypoint-${index}`}
             coordinates={waypoint}
             label={`Waypoint ${index + 1}`}
-            color="blue"
-            radius={6}
           />
         ))}
+      </MapShell>
 
-        {!isLoadingRoute && route.waypoints.length > 0 && (
-          <DirectionsLine coordinates={route.waypoints} />
+      <View className="absolute bottom-0 z-50 w-full px-10 pb-12">
+        {isEditingWaypoint && (
+          <View className="flex flex-row w-full justify-between">
+            <PrimaryButton label="Done" onPress={handleCompleteEditing} />
+            <PrimaryButton label="Calculate" onPress={handleProcessRoute} />
+            <PrimaryButton label="Clear" onPress={handleResetWaypoints} />
+          </View>
         )}
-      </MapView>
-
-      <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
-        <PrimaryButton
-          label={isAddingWaypoints ? "Recalculate" : "Edit Details"}
-          onPress={isAddingWaypoints ? handleToggleMode : handlePresentModalPress}
-        />
-        <PrimaryButton
-          label={isAddingWaypoints ? "Clear" : "Submit"}
-          onPress={isAddingWaypoints ? clearWaypoints : handleSubmit}
-        />
-        {isAddingWaypoints && <PrimaryButton label="Done" onPress={handleDoneAddingWaypoint} />}
       </View>
 
       <RouteInformation
-        onRouteNameChange={(segmentName) => updateRoute({ segmentName })}
-        onLandmarkChange={(landmark) => updateRoute({ landmark })}
-        onInstructionChange={(instruction) => updateRoute({ instruction })}
-        onCostChange={(cost) => updateRoute({ cost: Number(cost) })}
-        routeName={route.segmentName}
-        landmark={route.landmark ?? ""}
-        instruction={route.instruction ?? ""}
-        cost={route.cost.toString()}
-        segmentMode={route.segmentMode}
-        bottomSheetModalRef={bottomSheetModalRef}
-        updateRoute={updateRoute}
-        isAddingWaypoints={isAddingWaypoints}
-        handleToggleMode={handleToggleMode}
-        clearWaypoints={clearWaypoints}
-        getRouteDirections={getRouteDirections}
+        sheetRef={buttomSheetRef}
+        handleSubmit={handleSubmit}
+        setIsEditingWaypoints={setIsEditingWaypoints}
       />
     </SafeAreaView>
   );

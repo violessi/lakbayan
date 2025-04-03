@@ -2,16 +2,17 @@ import React, { useState } from "react";
 import { Text, View, TouchableOpacity, Image } from "react-native";
 import { TRANSPORTATION_MODES } from "@constants/transportation-modes";
 
-interface TransportationModeSelectionProps {
-  onTransportationModeChange: (mode: TransportationMode) => void;
+interface Props {
+  value: string;
+  onChange: (mode: TransportationMode) => void;
 }
 
-export default function TransportationModeSelection({ onTransportationModeChange }: TransportationModeSelectionProps) {
-  const [selectedMode, setSelectedMode] = useState<string>("");
+export default function TransportModeInput({ value, onChange }: Props) {
+  const [selectedMode, setSelectedMode] = useState<string>(value);
 
   const handleModeChange = (mode: TransportationMode) => {
     setSelectedMode(mode);
-    onTransportationModeChange(mode);
+    onChange(mode);
   };
 
   return (
@@ -34,7 +35,9 @@ export default function TransportationModeSelection({ onTransportationModeChange
                 tintColor: selectedMode === mode.label ? "#7F55D9" : "#7F7F7F",
               }}
             />
-            <Text className={`mt-1 text-xs ${selectedMode === mode.label ? "text-primary" : "text-secondary"}`}>
+            <Text
+              className={`mt-1 text-xs ${selectedMode === mode.label ? "text-primary" : "text-secondary"}`}
+            >
               {mode.label}
             </Text>
           </TouchableOpacity>

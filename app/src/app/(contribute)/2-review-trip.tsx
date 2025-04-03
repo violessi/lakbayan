@@ -17,11 +17,18 @@ import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 
 export default function TripReview() {
   const { cameraRef } = useMapView();
-  const { updateRoute, setInEditMode, deleteSegment } = useTripCreator();
-  const { clearTripData, clearRouteData, submitTrip } = useTripCreator();
-  const { trip, segments, isSegmentEmpty, isSegmentComplete } = useTripCreator();
-
-  const segmentCoordinates = segments.map(({ waypoints }) => waypoints);
+  const {
+    trip,
+    segments,
+    isSegmentEmpty,
+    isSegmentComplete,
+    updateRoute,
+    setEditingIndex,
+    deleteSegment,
+    clearTripData,
+    clearRouteData,
+    submitTrip,
+  } = useTripCreator();
 
   const handleCreateSegment = () => {
     clearRouteData();
@@ -29,12 +36,9 @@ export default function TripReview() {
   };
 
   const handleEditSegment = (index: number) => {
-    setInEditMode(true);
+    setEditingIndex(index);
     updateRoute(segments[index]);
-    router.replace({
-      pathname: "/(contribute)/4-edit-transfer",
-      params: { index },
-    });
+    router.replace("/(contribute)/4-edit-transfer");
   };
 
   const handleDeleteSegment = () => {
@@ -50,6 +54,7 @@ export default function TripReview() {
       Alert.alert("Trip Submitted");
       router.replace("/(tabs)");
     } catch (error) {
+      console.error(error);
       Alert.alert("Error submitting trip");
     }
   };
@@ -87,7 +92,7 @@ export default function TripReview() {
       </View>
 
       <MapShell cameraRef={cameraRef} fitBounds={[trip.startCoords, trip.endCoords]}>
-        <DirectionLines coordinates={segmentCoordinates} />
+        <DirectionLines coordinates={segments.map(({ waypoints }) => waypoints)} />
         <SymbolMarker id="start-loc" label={trip.startLocation} coordinates={trip.startCoords} />
         <SymbolMarker id="end-loc" label={trip.endLocation} coordinates={trip.endCoords} />
       </MapShell>

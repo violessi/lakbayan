@@ -7,7 +7,11 @@ interface TripTitleProps {
   transportationMode?: TransportationMode;
 }
 
-export default function TripTitle({ startLocation, endLocation, transportationMode }: TripTitleProps) {
+export default function TripTitle({
+  startLocation,
+  endLocation,
+  transportationMode,
+}: TripTitleProps) {
   const startLocationDisplay = startLocation.split(",")[0];
   const endLocationDisplay = endLocation.split(",")[0];
 

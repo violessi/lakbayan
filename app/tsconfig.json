@@ -13,7 +13,8 @@
       "@utils/*": ["utils/*"],
       "@api/*": ["api/*"],
       "@app/*": ["app/*"],
-      "@test-utils/*": ["__test-utils__/*"],
+      "@schemas": ["types/schema"],
+      "@test-utils/*": ["__test-utils__/*"]
     }
   },
   "include": [

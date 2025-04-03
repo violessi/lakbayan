@@ -5,17 +5,22 @@ import { addToPendingModeratorReview } from "@services/moderation-service";
 import { insertTrip, insertSegments, insertTripSegmentLinks } from "@services/trip-service";
 import { TRIP_INITIAL_STATE, SEGMENT_INITIAL_STATE } from "@contexts/TripCreator/initialValues";
 
+import { getDirections, paraphraseStep } from "@services/mapbox-service";
+
 interface TripCreatorContextType {
   trip: CreateTrip;
   route: CreateSegment;
   segments: CreateSegment[];
-  inEditMode: boolean;
+  editingIndex: number;
   isSegmentEmpty: boolean;
   isSegmentComplete: boolean;
-  setInEditMode: (editMode: boolean) => void;
+  customWaypoints: Coordinates[];
+  setCustomWaypoint: React.Dispatch<React.SetStateAction<Coordinates[]>>;
+  setEditingIndex: React.Dispatch<React.SetStateAction<number>>;
   addSegment: (index?: number) => void;
   updateRoute: (updates: Partial<CreateSegment>) => void;
   updateTrip: (updates: Partial<CreateTrip>) => void;
+  createRoute: (customWaypoints: Coordinates[]) => Promise<void>;
   submitTrip: () => Promise<void>;
   clearTripData: () => void;
   clearRouteData: () => void;
@@ -34,10 +39,11 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
   const { user } = useSession();
   if (!user) throw new Error("User must be logged in to create a trip");
 
+  const [editingIndex, setEditingIndex] = useState(-1);
   const [trip, setTrip] = useState<CreateTrip>(TRIP_INITIAL_STATE);
   const [route, setRoute] = useState<CreateSegment>(SEGMENT_INITIAL_STATE);
   const [segments, setSegments] = useState<CreateSegment[]>([]);
-  const [inEditMode, setInEditMode] = useState(false);
+  const [customWaypoints, setCustomWaypoint] = useState<Coordinates[]>([]);
 
   const isSegmentEmpty = !segments.length;
   const isSegmentComplete = segments.some((segment) => segment.endLocation === trip.endLocation);
@@ -52,19 +58,41 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
     setTrip((prevTrip) => ({ ...prevTrip, ...updates }));
   };
 
-  const addSegment = (index?: number) => {
+  const addSegment = () => {
     const segment = { ...route, contributorId: user.id };
 
-    if (inEditMode && index !== undefined) {
-      setSegments((prev) => prev.map((s, i) => (i === index ? segment : s)));
-      setInEditMode(false);
-    } else {
+    if (editingIndex === -1) {
       setSegments((prevSegments) => [...prevSegments, segment]);
+    } else {
+      setSegments((prev) => prev.map((s, i) => (i === editingIndex ? segment : s)));
+      setEditingIndex(-1);
     }
   };
 
   const deleteSegment = () => {
     setSegments((prevSegments) => prevSegments.slice(0, -1));
+  };
+
+  const createRoute = async () => {
+    const data = await getDirections(
+      route.startCoords,
+      customWaypoints,
+      route.endCoords,
+      route.segmentMode,
+      true,
+    );
+
+    const directions = data.routes[0];
+    const waypoints = directions.geometry.coordinates ?? [];
+    const duration = directions.duration;
+    const distance = directions.distance;
+    const navigationSteps = directions.legs.flatMap(({ steps }) =>
+      steps.map(({ maneuver }) => ({
+        instruction: paraphraseStep(maneuver.instruction),
+        location: maneuver.location,
+      })),
+    );
+    updateRoute({ waypoints, duration, distance, navigationSteps });
   };
 
   // =================== Reset Functions ===================
@@ -117,13 +145,16 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
         trip,
         route,
         segments,
-        inEditMode,
+        editingIndex,
         isSegmentEmpty,
         isSegmentComplete,
-        setInEditMode,
+        customWaypoints,
+        setCustomWaypoint,
+        setEditingIndex,
         addSegment,
         updateRoute,
         updateTrip,
+        createRoute,
         submitTrip,
         clearTripData,
         clearRouteData,

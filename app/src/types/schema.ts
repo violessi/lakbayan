@@ -176,3 +176,15 @@ export const ProfileSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
 });
+
+// ================== INPUT SCHEMA ==================
+
+export const RouteInputSchema = z.object({
+  segmentName: z.string().min(1, "Route name is required").min(3, "Route name is too short"),
+  segmentMode: TransportationModeSchema,
+  cost: z.number(),
+  landmark: z.string().nullable(),
+  instruction: z.string().nullable(),
+  waypoints: z.array(CoordinatesSchema).min(2, "Please generate the route"),
+  navigationSteps: z.array(NavigationStepsSchema),
+});
