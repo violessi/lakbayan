@@ -1,15 +1,16 @@
 import { useRouter } from "expo-router";
-import * as ExpoLocation from "expo-location";
+import type { Location } from "@rnmapbox/maps";
 import { ShapeSource, LineLayer } from "@rnmapbox/maps";
 import React, { useEffect, useRef, useState } from "react";
-import Mapbox, { MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
-import { Alert, SafeAreaView, View, Text, Button, Pressable } from "react-native";
+import { SafeAreaView, View, Text, Button, Pressable } from "react-native";
 
 import Header from "@components/ui/Header";
+import { MapShell } from "@components/map/MapShell";
 import ReportTab from "@components/journal/ReportTab";
 import CircleMarker from "@components/map/CircleMarker";
 import TransferModal from "@components/journal/TransferModal";
 import CompleteModal from "@components/journal/CompleteModal";
+import JournalInstructions from "@components/journal/JournalInstructions";
 
 import {
   computeHeading,
@@ -17,15 +18,13 @@ import {
   getNearestSegment,
   getNearestStep,
 } from "@utils/map-utils";
+import { useMapView } from "@hooks/use-map-view";
 import { useTransitJournal } from "@contexts/TransitJournal";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TransitJournal() {
+  const { userLocation, cameraRef } = useMapView();
   const router = useRouter();
-  const cameraRef = useRef<Camera>(null);
   const routeSourcesRef = useRef<{ [key: string]: ShapeSource | null }>({});
 
   const { hasActiveTransitJournal, segments } = useTransitJournal();
@@ -40,6 +39,7 @@ export default function TransitJournal() {
     router.push("/(journal)/journal-review");
   }
 
+  // TODO: move this!!!!
   const handleUserLocationUpdate = ({ coords }: Location) => {
     if (!segments) return;
     const tripSegments = JSON.parse(JSON.stringify(segments)) as Segment[];
@@ -106,24 +106,11 @@ export default function TransitJournal() {
     setCurrentStep(nextStep);
   };
 
-  // Request location permission and get initial app state
+  // Get initial app state
   useEffect(() => {
-    const getInitialLocation = async () => {
-      const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
-
-      if (status !== "granted") {
-        Alert.alert(
-          "Location Access Needed",
-          "To use this feature, please enable location access in your settings.",
-          [{ text: "Cancel", style: "cancel" }],
-        );
-      } else {
-        const location = await ExpoLocation.getCurrentPositionAsync({});
-        handleUserLocationUpdate(location as Location);
-      }
-    };
-
-    getInitialLocation();
+    if (!userLocation) return;
+    const coords = { latitude: userLocation[1], longitude: userLocation[0] };
+    handleUserLocationUpdate({ coords });
   }, []);
 
   if (!hasActiveTransitJournal || !segments) {
@@ -139,16 +126,13 @@ export default function TransitJournal() {
     <SafeAreaView className="flex-1">
       <Header title="Transit Journal" />
       <View className="flex-1">
-        <MapView style={{ flex: 1 }} styleURL="mapbox://styles/mapbox/streets-v12">
-          <Camera ref={cameraRef} />
-
-          <UserLocation
-            visible={true}
-            showsUserHeadingIndicator={true}
-            onUpdate={handleUserLocationUpdate}
-            animated={false}
-          />
-
+        <MapShell
+          cameraRef={cameraRef}
+          handleUserLocation={handleUserLocationUpdate}
+          userLocationProps={{
+            animated: false,
+          }}
+        >
           {/* Render All Transfer Points */}
           {segments &&
             segments.map((segment, index) => (
@@ -177,22 +161,10 @@ export default function TransitJournal() {
                 />
               </ShapeSource>
             ))}
-        </MapView>
+        </MapShell>
 
         {/* Render Information section on top of screen */}
-        <View className="absolute top-0 w-full bg-white p-4">
-          {currentStep ? (
-            <Text className="font-bold text-lg mb-2">{currentStep.instruction}</Text>
-          ) : (
-            <Text className="font-bold text-lg mb-2">Follow the instructions on the map.</Text>
-          )}
-          {currentSegment?.landmark && (
-            <Text className="text-sm mb-2">Landmark: {currentSegment?.landmark}</Text>
-          )}
-          {currentSegment?.instruction && (
-            <Text className="text-sm mb-2">Instruction: {currentSegment?.instruction}</Text>
-          )}
-        </View>
+        <JournalInstructions currentStep={currentStep} currentSegment={currentSegment} />
 
         {/* Render Complete Button if near destination */}
         {showCompleteButton && (
@@ -205,6 +177,7 @@ export default function TransitJournal() {
         )}
       </View>
 
+      {/* Render Report Tab */}
       <ReportTab />
 
       <TransferModal
