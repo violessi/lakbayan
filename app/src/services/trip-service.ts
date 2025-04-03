@@ -182,6 +182,25 @@ export async function fetchNearbyLiveUpdates(
   }
 }
 
+export async function fetchLiveUpdatesBBox(coordinates: [Coordinates, Coordinates]) {
+  try {
+    const args = {
+      min_lat: coordinates[0][1],
+      min_lon: coordinates[0][0],
+      max_lat: coordinates[1][1],
+      max_lon: coordinates[1][0],
+    };
+    const res = await fetchDataRPC("fetch_live_updates_bbox", args);
+
+    // Validate the response data
+    const result = LiveUpdatesSchema.safeParse(res);
+    if (!result.success) throw new Error("Invalid Live Update Data");
+    return result.data;
+  } catch (error) {
+    throw new Error("Error fetching live updates");
+  }
+}
+
 // Updates the profile record
 export async function updateProfile(profile: Partial<Profile>): Promise<void> {
   try {
