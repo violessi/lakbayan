@@ -10,6 +10,7 @@ import ReportTab from "@components/journal/ReportTab";
 import CircleMarker from "@components/map/CircleMarker";
 import TransferModal from "@components/journal/TransferModal";
 import CompleteModal from "@components/journal/CompleteModal";
+import LiveUpdateMarker from "@components/map/LiveUpdateMarker";
 import JournalInstructions from "@components/journal/JournalInstructions";
 
 import {
@@ -20,8 +21,12 @@ import {
 } from "@utils/map-utils";
 import { useMapView } from "@hooks/use-map-view";
 import { useTransitJournal } from "@contexts/TransitJournal";
+import { fetchLiveUpdatesLine } from "@services/trip-service";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 
+// TODO: cleanup this file
+// TODO: cleanup this file
+// TODO: cleanup this file
 export default function TransitJournal() {
   const { userLocation, cameraRef } = useMapView();
   const router = useRouter();
@@ -33,6 +38,7 @@ export default function TransitJournal() {
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
   const [showCompleteButton, setShowCompleteButton] = useState(false);
+  const [liveUpdates, setLiveUpdates] = useState<LiveUpdate[]>([]);
 
   function handleNavigateToReview() {
     setShowTripFinishedModal(false);
@@ -40,7 +46,7 @@ export default function TransitJournal() {
   }
 
   // TODO: move this!!!!
-  const handleUserLocationUpdate = ({ coords }: Location) => {
+  const handleUserLocationUpdate = async ({ coords }: Location) => {
     if (!segments) return;
     const tripSegments = JSON.parse(JSON.stringify(segments)) as Segment[];
     const newLocation = [coords.longitude, coords.latitude] as Coordinates;
@@ -113,6 +119,22 @@ export default function TransitJournal() {
     handleUserLocationUpdate({ coords });
   }, []);
 
+  // Fetch live on segments every 30 seconds
+  // TODO: a lot of cleanup to do here
+  useEffect(() => {
+    if (!segments) return;
+    const line = segments.flatMap((segment) => segment.waypoints);
+    const fetchLiveUpdates = async () => {
+      const live = await fetchLiveUpdatesLine(line, 10);
+      setLiveUpdates(live);
+    };
+    fetchLiveUpdates();
+    const interval = setInterval(() => {
+      fetchLiveUpdates();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [segments]);
+
   if (!hasActiveTransitJournal || !segments) {
     return (
       <SafeAreaView className="flex-1 justify-center items-center">
@@ -161,6 +183,15 @@ export default function TransitJournal() {
                 />
               </ShapeSource>
             ))}
+
+          {liveUpdates.map((update) => (
+            <LiveUpdateMarker
+              key={update.id}
+              id={update.id}
+              type={update.type}
+              coordinates={update.coordinate}
+            />
+          ))}
         </MapShell>
 
         {/* Render Information section on top of screen */}

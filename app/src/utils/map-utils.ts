@@ -42,6 +42,14 @@ export function convertToMultiPointWKT(points: Coordinates[]): string | null {
   return `SRID=4326;MULTIPOINT(${pointStrings})`;
 }
 
+export function convertToLineStringWKT(points: Coordinates[]): string | null {
+  if (points.length === 0) {
+    return null;
+  }
+  const pointStrings = points.map(([lng, lat]) => `${lng} ${lat}`).join(", ");
+  return `SRID=4326;LINESTRING(${pointStrings})`;
+}
+
 export function getNearestSegment(
   userLocation: Coordinates,
   segments: Segment[],
