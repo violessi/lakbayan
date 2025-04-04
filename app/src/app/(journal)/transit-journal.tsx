@@ -50,14 +50,15 @@ export default function TransitJournal() {
 
   // TODO: move this!!!!
   const handleUserLocationUpdate = async ({ coords }: Location) => {
-    if (!segments || !LineRef.current || !CircleRef.current) return;
+    if (!segments || !LineRef.current || !CircleRef.current || !cameraRef.current) return;
 
     const tripSegments = JSON.parse(JSON.stringify(segments)) as Segment[];
     const newLocation = [coords.longitude, coords.latitude] as Coordinates;
 
     // get the current segment and step
+    // TODO: check segment reference to remove unnecessary rerendering
     const { segmentIndex, nearestPoint } = getNearestSegment(newLocation, tripSegments);
-    const nextStep = getNearestStep(newLocation, tripSegments[segmentIndex].navigationSteps);
+    const nextStep = getNearestStep(newLocation, segments[segmentIndex].navigationSteps);
 
     // set the user location as the first point of the route
     const nearestIndex = nearestPoint.properties.index;
@@ -67,20 +68,20 @@ export default function TransitJournal() {
       ...activeSegments[0].waypoints.slice(nearestIndex + 1),
     ];
 
-    // update the map with the new segments
-    LineRef.current.update(activeSegments);
-    CircleRef.current.update(activeSegments);
-
     // update the camera to follow the user and face the next point
     const nextPoint = activeSegments[0].waypoints[1] ?? newLocation;
     const computedHeading = computeHeading(newLocation, nextPoint);
-    cameraRef.current?.setCamera({
+    cameraRef.current.setCamera({
       pitch: 60,
       zoomLevel: 16,
       animationDuration: 1000,
       heading: computedHeading,
       centerCoordinate: newLocation,
     });
+
+    // update the map with the new segments
+    LineRef.current.update(activeSegments);
+    CircleRef.current.update(activeSegments);
 
     // Show transfer modal everytime segment changes
     if (currentSegment?.id !== tripSegments[segmentIndex].id) {
@@ -100,22 +101,8 @@ export default function TransitJournal() {
 
     // update the current segment and step information
     setCurrentSegment(segments[segmentIndex]);
-
-    // prevent unnecessary re-renders
-    if (
-      currentStep?.location[0] !== nextStep.location[0] ||
-      currentStep?.location[1] !== nextStep.location[1]
-    ) {
-      setCurrentStep(nextStep);
-    }
+    setCurrentStep(nextStep);
   };
-
-  // Get initial app state
-  useEffect(() => {
-    if (!userLocation) return;
-    const coords = { latitude: userLocation[1], longitude: userLocation[0] };
-    handleUserLocationUpdate({ coords });
-  }, []);
 
   // Fetch live updates on segments
   useEffect(() => {
@@ -123,7 +110,6 @@ export default function TransitJournal() {
     setUpdateCoords(segments.flatMap(({ waypoints }) => waypoints));
   }, [segments]);
 
-  console.log("rendering journal!");
   if (!hasActiveTransitJournal || !segments) {
     return (
       <SafeAreaView className="flex-1 justify-center items-center">
@@ -143,8 +129,8 @@ export default function TransitJournal() {
           userLocationProps={{ animated: false }}
         >
           {/* Render direction line and transfer points */}
-          <CircleSource id={"transfer-points"} segments={segments} ref={CircleRef} />
-          <LineSource id={"direction-line"} segments={segments} ref={LineRef} />
+          <CircleSource id={"transfer-points"} data={segments} ref={CircleRef} />
+          <LineSource id={"direction-line"} data={segments} ref={LineRef} />
 
           {/* Render live updates */}
           {liveUpdates.map((update) => (

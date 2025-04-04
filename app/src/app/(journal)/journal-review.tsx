@@ -1,17 +1,16 @@
 import { useRouter } from "expo-router";
-import { SafeAreaView, Text, Button } from "react-native";
-import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 import React, { useEffect, useRef } from "react";
+import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
+import { SafeAreaView, Text, Button } from "react-native";
+import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
 import Header from "@components/ui/Header";
-import DirectionsLine from "@components/ui/DirectionsLine";
-import CircleMarker from "@components/map/CircleMarker";
+import LineSource from "@components/map/LineSource";
+import CircleSource from "@components/map/CircleSource";
 import JournalFeedback from "@components/journal/JournalFeedback";
 
 import { useSession } from "@contexts/SessionContext";
 import { useTransitJournal } from "@contexts/TransitJournal";
-import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
@@ -23,7 +22,6 @@ export default function JournalReview() {
   if (!user) throw new Error("User is not logged in");
 
   const { trip, segments, transitJournal, hasActiveTransitJournal } = useTransitJournal();
-  const segmentRoutes = segments?.map((segment) => segment.waypoints) ?? [];
 
   useEffect(() => {
     if (!trip) return;
@@ -61,30 +59,9 @@ export default function JournalReview() {
           animationMode="easeTo"
           zoomLevel={10}
         />
-
-        <CircleMarker
-          id="start"
-          coordinates={trip.startCoords}
-          label={trip.startLocation}
-          color={TRANSPORTATION_COLORS[0]}
-        />
-
-        {segments.map((segment, index) => (
-          <CircleMarker
-            id={`end-${index}`}
-            coordinates={segment.endCoords}
-            label={segment.endLocation}
-            color={TRANSPORTATION_COLORS[index]}
-          />
-        ))}
-
-        {segmentRoutes.map((coordinates, index) => (
-          <DirectionsLine
-            key={index}
-            coordinates={coordinates}
-            color={TRANSPORTATION_COLORS[index]}
-          />
-        ))}
+        <CircleSource id="start" data={[trip.startCoords]} radius={6} />
+        <CircleSource id="transfer-points" data={segments} radius={6} />
+        <LineSource id="line-source" data={segments} lineWidth={3} />
       </MapView>
 
       <JournalFeedback

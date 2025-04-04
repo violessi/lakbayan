@@ -1,43 +1,27 @@
 import * as turf from "@turf/turf";
 import { ShapeSource, LineLayer } from "@rnmapbox/maps";
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
-
 import { TRANSPORTATION_COLORS as COLORS } from "@constants/transportation-color";
 
-type Colors = Map<string, string>;
-type Props = { id: string; segments: Segment[]; lineWidth?: number };
 type Shape = GeoJSON.FeatureCollection<GeoJSON.LineString>;
+type Props = { id: string; data: Coordinates[][] | Segment[]; lineWidth?: number };
+export type LineSourceRef = { update: (data: Coordinates[][] | Segment[]) => void };
 
-export type LineSourceRef = {
-  update: (segments: Segment[]) => void;
-};
-
-// Generates a GeoJSON shape from given segments.
-const generateShape = (segments: Segment[], lineColors: Colors): Shape => ({
-  type: "FeatureCollection",
-  features: segments.map((segment) =>
-    turf.lineString(segment.waypoints, {
-      color: lineColors.get(segment.id),
-    }),
-  ),
-});
-
-// LineSource component to render a line on the map.
-const LineSource = forwardRef<LineSourceRef, Props>(({ id, segments, lineWidth }, ref) => {
+// This component takes in a list of line or a segment data and renders them on the map.
+// It uses refs to allow parent components to update the data dynamically without re-rendering.
+const LineSource = forwardRef<LineSourceRef, Props>(({ id, data, lineWidth }, ref) => {
   const lineRef = useRef<ShapeSource | null>(null);
-  const lineColors = new Map(segments.map(({ id }, i) => [id, COLORS[i]]));
-  const initialShape = generateShape(segments, lineColors);
+  const lineColors = data.map((_, i) => COLORS[i]);
+  const initialShape = generateShape(data, lineColors);
 
-  // Updates the shape dynamically without re-rendering.
-  const updateShape = (activeSegments: Segment[]) => {
-    const newShape = generateShape(activeSegments, lineColors);
+  // Update function to be called from parent components
+  const update = (newData: Coordinates[][] | Segment[]) => {
+    const newShape = generateShape(newData, lineColors);
     lineRef.current?.setNativeProps({ id, shape: JSON.stringify(newShape) });
   };
 
-  // Expose update method via ref
-  useImperativeHandle(ref, () => ({
-    update: updateShape,
-  }));
+  // Expose the update method to parent components via ref
+  useImperativeHandle(ref, () => ({ update }));
 
   return (
     <ShapeSource id={id} ref={lineRef} shape={initialShape}>
@@ -48,5 +32,19 @@ const LineSource = forwardRef<LineSourceRef, Props>(({ id, segments, lineWidth }
     </ShapeSource>
   );
 });
+
+// Generates a GeoJSON shape from given data.
+function generateShape(data: Coordinates[][] | Segment[], colors: string[]): Shape {
+  const relativeIndex = colors.length - data.length;
+  const features = data
+    .map((item, index) => {
+      const coordinates = "waypoints" in item ? item.waypoints : item;
+      if (coordinates.length < 2) return null;
+      return turf.lineString(coordinates, { color: colors[relativeIndex + index] });
+    })
+    .filter(Boolean);
+
+  return { type: "FeatureCollection", features } as Shape;
+}
 
 export default LineSource;
