@@ -5,7 +5,7 @@ import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import { TRANSPORTATION_COLORS as COLORS } from "@constants/transportation-color";
 
 type Colors = Map<string, string>;
-type Props = { segments: Segment[] };
+type Props = { id: string; segments: Segment[]; lineWidth?: number };
 type Shape = GeoJSON.FeatureCollection<GeoJSON.LineString>;
 
 export type LineSourceRef = {
@@ -23,9 +23,8 @@ const generateShape = (segments: Segment[], lineColors: Colors): Shape => ({
 });
 
 // LineSource component to render a line on the map.
-const LineSource = forwardRef<LineSourceRef, Props>(({ segments }, ref) => {
+const LineSource = forwardRef<LineSourceRef, Props>(({ id, segments, lineWidth }, ref) => {
   const lineRef = useRef<ShapeSource | null>(null);
-  const id = `shape-${segments.map(({ id }) => id).join("-")}`;
   const lineColors = new Map(segments.map(({ id }, i) => [id, COLORS[i]]));
   const initialShape = generateShape(segments, lineColors);
 
@@ -42,7 +41,10 @@ const LineSource = forwardRef<LineSourceRef, Props>(({ segments }, ref) => {
 
   return (
     <ShapeSource id={id} ref={lineRef} shape={initialShape}>
-      <LineLayer id={`line-${id}`} style={{ lineColor: ["get", "color"], lineWidth: 5 }} />
+      <LineLayer
+        id={`line-${id}`}
+        style={{ lineColor: ["get", "color"], lineWidth: lineWidth ?? 5 }}
+      />
     </ShapeSource>
   );
 });
