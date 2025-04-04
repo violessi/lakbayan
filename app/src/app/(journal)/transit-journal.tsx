@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView, View, Text, Button, Pressable } from "react-native";
 
 import Header from "@components/ui/Header";
+import NotFound from "@components/journal/NotFound";
 import { MapShell } from "@components/map/MapShell";
 import ReportLiveUpdates from "@components/journal/ReportLiveUpdates";
 import TransferModal from "@components/journal/TransferModal";
@@ -108,14 +109,7 @@ export default function TransitJournal() {
     setUpdateCoords(segments.flatMap(({ waypoints }) => waypoints));
   }, [segments]);
 
-  if (!hasActiveTransitJournal || !segments) {
-    return (
-      <SafeAreaView className="flex-1 justify-center items-center">
-        <Text>No active trip found.</Text>
-        <Button title="Go back" onPress={() => router.push("/(tabs)")} />
-      </SafeAreaView>
-    );
-  }
+  if (!segments) return <NotFound />;
 
   return (
     <SafeAreaView className="flex-1">

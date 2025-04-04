@@ -97,7 +97,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
 
   const addLiveUpdate = async (status: { type: LiveUpdateType; coordinate: Coordinates }) => {
     const payload: CreateLiveUpdate = {
-      contributorId: user?.id ?? "",
+      contributorId: user.id,
       transitJournalId: transitJournalId!,
       type: status.type,
       coordinate: status.coordinate,

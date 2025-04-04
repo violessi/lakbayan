@@ -31,12 +31,12 @@ export const useLiveUpdates = (type: "box" | "line", interval: number) => {
 
       if (type === "line") {
         // Fetch live updates based on the line coordinates
-        const data = await fetchLiveUpdatesLine(coordinates, interval);
+        const data = await fetchLiveUpdatesLine(coordinates, 100);
         setLiveUpdates(data);
 
         // Create an interval that continuously fetches live updates
         intervalRef.current = setInterval(async () => {
-          const data = await fetchLiveUpdatesLine(coordinates, interval);
+          const data = await fetchLiveUpdatesLine(coordinates, 100);
           setLiveUpdates(data);
         }, interval * 1000);
       }

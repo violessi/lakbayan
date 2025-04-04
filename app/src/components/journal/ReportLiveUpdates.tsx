@@ -5,7 +5,8 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { useTransitJournal } from "@contexts/TransitJournal";
 
-const reportOptions = [
+type Report = { label: LiveUpdateType; image: any };
+const reportOptions: Report[] = [
   { label: "Traffic", image: require("@assets/report-traffic.png") },
   { label: "Long Line", image: require("@assets/report-lines.png") },
   { label: "Disruption", image: require("@assets/report-disruption.png") },
@@ -16,7 +17,7 @@ export default function ReportTab() {
 
   const { addLiveUpdate } = useTransitJournal();
 
-  const handleReportPress = async (type: string) => {
+  const handleReportPress = async (type: LiveUpdateType) => {
     const location = await ExpoLocation.getCurrentPositionAsync({});
     const coordinate: Coordinates = [location.coords.longitude, location.coords.latitude];
 

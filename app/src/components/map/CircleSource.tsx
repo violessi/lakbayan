@@ -3,9 +3,10 @@ import { ShapeSource, CircleLayer } from "@rnmapbox/maps";
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import { TRANSPORTATION_COLORS as COLORS } from "@constants/transportation-color";
 
+type Data = Coordinates[] | Segment[];
 type Shape = GeoJSON.FeatureCollection<GeoJSON.Point>;
-type Props = { id: string; data: Coordinates[] | Segment[]; radius?: number };
-export type CircleSourceRef = { update: (data: Coordinates[] | Segment[]) => void };
+type Props = { id: string; data: Data; radius?: number };
+export type CircleSourceRef = { update: (data: Data) => void };
 
 // This component takes in a list of circle or a segment data and renders them on the map.
 // It uses refs to allow parent components to update the data dynamically without re-rendering.
@@ -15,7 +16,7 @@ const CircleSource = forwardRef<CircleSourceRef, Props>(({ id, data, radius = 8 
   const initialShape = generateShape(data, circleColors);
 
   // Update function to be called from parent components
-  const update = (newData: Coordinates[] | Segment[]) => {
+  const update = (newData: Data) => {
     const newShape = generateShape(newData, circleColors);
     circleRef.current?.setNativeProps({ id, shape: JSON.stringify(newShape) });
   };
@@ -37,7 +38,7 @@ const CircleSource = forwardRef<CircleSourceRef, Props>(({ id, data, radius = 8 
 });
 
 // Generates a GeoJSON shape from given data
-function generateShape(data: Coordinates[] | Segment[], colors: string[]): Shape {
+function generateShape(data: Data, colors: string[]): Shape {
   const relativeIndex = colors.length - data.length;
 
   const features = data.map((item, index) => {

@@ -1,7 +1,8 @@
 import { useRouter } from "expo-router";
-import { SafeAreaView, Text, Button } from "react-native";
+import { SafeAreaView } from "react-native";
 
 import Header from "@components/ui/Header";
+import NotFound from "@components/journal/NotFound";
 import { MapShell } from "@components/map/MapShell";
 import LineSource from "@components/map/LineSource";
 import CircleSource from "@components/map/CircleSource";
@@ -24,14 +25,7 @@ export default function JournalReview() {
     });
   }
 
-  if (!trip || !segments || !user) {
-    return (
-      <SafeAreaView className="flex-1 justify-center items-center">
-        <Text>No active trip found.</Text>
-        <Button title="Go back" onPress={() => router.push("/(tabs)")} />
-      </SafeAreaView>
-    );
-  }
+  if (!trip || !segments || !user) return <NotFound />;
 
   return (
     <SafeAreaView className="flex-1">
