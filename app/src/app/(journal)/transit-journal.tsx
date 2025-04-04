@@ -1,15 +1,16 @@
 import { useRouter } from "expo-router";
 import type { Location } from "@rnmapbox/maps";
 import React, { useEffect, useRef, useState } from "react";
-import { SafeAreaView, View, Text, Button, Pressable } from "react-native";
+import { SafeAreaView, View, Text, Pressable } from "react-native";
 
 import Header from "@components/ui/Header";
 import NotFound from "@components/journal/NotFound";
 import { MapShell } from "@components/map/MapShell";
-import ReportLiveUpdates from "@components/journal/ReportLiveUpdates";
+import SymbolSource from "@components/map/SymbolSource";
+import PrimaryButton from "@components/ui/PrimaryButton";
 import TransferModal from "@components/journal/TransferModal";
 import CompleteModal from "@components/journal/CompleteModal";
-import LiveUpdateMarker from "@components/map/LiveUpdateMarker";
+import ReportLiveUpdates from "@components/journal/ReportLiveUpdates";
 import JournalInstructions from "@components/journal/JournalInstructions";
 import LineSource, { type LineSourceRef } from "@components/map/LineSource";
 import CircleSource, { type CircleSourceRef } from "@components/map/CircleSource";
@@ -33,7 +34,7 @@ export default function TransitJournal() {
 
   const router = useRouter();
   const { cameraRef } = useMapView();
-  const { segments, hasActiveTransitJournal } = useTransitJournal();
+  const { segments } = useTransitJournal();
   const { liveUpdates, setUpdateCoords } = useLiveUpdates("line", 30);
 
   const [currentSegment, setCurrentSegment] = useState<Segment | null>(null);
@@ -120,32 +121,20 @@ export default function TransitJournal() {
           handleUserLocation={handleUserLocationUpdate}
           userLocationProps={{ animated: false }}
         >
-          {/* Render direction line and transfer points */}
+          {/* Render the map with the direction, transfer points, and live status*/}
           <CircleSource id={"transfer-points"} data={segments} ref={CircleRef} />
           <LineSource id={"direction-line"} data={segments} ref={LineRef} />
-
-          {/* Render live updates */}
-          {liveUpdates.map((update) => (
-            <LiveUpdateMarker
-              key={update.id}
-              id={update.id}
-              type={update.type}
-              coordinates={update.coordinate}
-            />
-          ))}
+          <SymbolSource id={"live-update"} data={liveUpdates} />
         </MapShell>
 
-        {/* Render Information section on top of screen */}
         <JournalInstructions currentStep={currentStep} currentSegment={currentSegment} />
 
-        {/* Render Complete Button if near destination */}
         {showCompleteButton && (
-          <Pressable
-            className="absolute bottom-44 right-6 bg-primary px-4 py-2 rounded-full shadow-lg active:bg-primary/50"
+          <PrimaryButton
+            className="absolute bottom-44 right-6"
+            label="Done"
             onPress={() => setShowTripFinishedModal(true)}
-          >
-            <Text className="text-white font-bold text-lg">Done</Text>
-          </Pressable>
+          />
         )}
       </View>
 
