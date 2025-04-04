@@ -5,8 +5,7 @@ import { SafeAreaView, View, Text, Button, Pressable } from "react-native";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
-import ReportTab from "@components/journal/ReportTab";
-import CircleMarker from "@components/map/CircleMarker";
+import ReportLiveUpdates from "@components/journal/ReportLiveUpdates";
 import TransferModal from "@components/journal/TransferModal";
 import CompleteModal from "@components/journal/CompleteModal";
 import LiveUpdateMarker from "@components/map/LiveUpdateMarker";
@@ -22,18 +21,17 @@ import {
 } from "@utils/map-utils";
 import { useMapView } from "@hooks/use-map-view";
 import { useTransitJournal } from "@contexts/TransitJournal";
-import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 import { useLiveUpdates } from "@hooks/use-live-updates";
 
 // TODO: cleanup this file
 // TODO: cleanup this file
 // TODO: cleanup this file
 export default function TransitJournal() {
-  const { userLocation, cameraRef } = useMapView();
-  const router = useRouter();
   const LineRef = useRef<LineSourceRef>(null);
   const CircleRef = useRef<CircleSourceRef>(null);
 
+  const router = useRouter();
+  const { cameraRef } = useMapView();
   const { segments, hasActiveTransitJournal } = useTransitJournal();
   const { liveUpdates, setUpdateCoords } = useLiveUpdates("line", 30);
 
@@ -157,8 +155,7 @@ export default function TransitJournal() {
         )}
       </View>
 
-      {/* Render Report Tab */}
-      <ReportTab />
+      <ReportLiveUpdates />
 
       <TransferModal
         isVisible={showNextSegmentModal}
