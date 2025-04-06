@@ -14,10 +14,10 @@ const JournalInstructions = ({ currentStep, currentSegment }: Props) => {
         <Text className="font-bold text-lg mb-2">Follow the instructions on the map.</Text>
       )}
       {currentSegment?.landmark && (
-        <Text className="text-sm mb-2">Landmark: {currentSegment?.landmark}</Text>
+        <Text className="text-sm mb-2">Landmark: {currentSegment.landmark}</Text>
       )}
       {currentSegment?.instruction && (
-        <Text className="text-sm mb-2">Instruction: {currentSegment?.instruction}</Text>
+        <Text className="text-sm mb-2">Instruction: {currentSegment.instruction}</Text>
       )}
     </View>
   );

@@ -23,7 +23,7 @@ Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 export default function TripOverview() {
   const router = useRouter();
   const { user } = useSession();
-  const { hasActiveTransitJournal } = useTransitJournal();
+  const { transitJournalId } = useTransitJournal();
   const cameraRef = useRef<Camera>(null);
 
   const { tripData } = useLocalSearchParams();
@@ -71,10 +71,10 @@ export default function TripOverview() {
   }
 
   useEffect(() => {
-    if (hasActiveTransitJournal) {
+    if (!!transitJournalId) {
       router.replace("/(journal)/transit-journal");
     }
-  }, [hasActiveTransitJournal]);
+  }, [transitJournalId]);
   return (
     <SafeAreaView className="flex-1">
       <Header title="Trip Overview" />

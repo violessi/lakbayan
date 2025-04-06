@@ -1,6 +1,5 @@
-import React, { createContext, useState, ReactNode, useEffect } from "react";
+import React, { useRef, createContext, useState, ReactNode, useEffect } from "react";
 import { useSession } from "@contexts/SessionContext";
-import { supabase } from "@utils/supabase";
 import {
   fetchUserTransitJournal,
   fetchTransitJournal,
@@ -8,13 +7,40 @@ import {
   fetchSegments,
   insertLiveUpdate,
 } from "@services/trip-service";
+import { subscribeToTableChanges } from "@api/supabase";
+
+import { type LineSourceRef } from "@components/map/LineSource";
+import { type CircleSourceRef } from "@components/map/CircleSource";
+
+import {
+  computeHeading,
+  isNearLocation,
+  getNearestSegment,
+  getNearestStep,
+} from "@utils/map-utils";
+import type { Camera, Location } from "@rnmapbox/maps";
+
+interface AddLiveUpdate {
+  type: LiveUpdateType;
+  coordinate: Coordinates;
+}
 
 interface TransitJournalContextType {
-  hasActiveTransitJournal: boolean;
+  cameraRef: React.RefObject<Camera>;
+  lineRef: React.RefObject<LineSourceRef>;
+  circleRef: React.RefObject<CircleSourceRef>;
+  transitJournalId: string | null;
   transitJournal: any | null;
   trip: Trip | null;
   segments: Segment[] | null;
-  addLiveUpdate: (status: { type: LiveUpdateType; coordinate: Coordinates }) => Promise<void>;
+  currentStep: NavigationSteps | null;
+  activeSegments: Segment[];
+  showNextSegmentModal: boolean;
+  showTripFinishedModal: boolean;
+  setShowNextSegmentModal: (showNextSegmentModal: boolean) => void;
+  setShowTripFinishedModal: (showTripFinishedModal: boolean) => void;
+  addLiveUpdate: ({ type, coordinate }: AddLiveUpdate) => Promise<void>;
+  handleUserLocationUpdate: ({ coords }: Location) => Promise<void>;
 }
 
 const TransitJournalContext = createContext<TransitJournalContextType | null>(null);
@@ -23,45 +49,50 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   const { user } = useSession();
   if (!user) return <>{children}</>;
 
-  const [transitJournalId, setTransitJournalId] = useState<string | null>(null);
+  const cameraRef = useRef<Camera>(null);
+  const lineRef = useRef<LineSourceRef>(null);
+  const circleRef = useRef<CircleSourceRef>(null);
+
   const [transitJournal, setTransitJournal] = useState<any | null>(null);
+  const [transitJournalId, setTransitJournalId] = useState<string | null>(null);
+
   const [trip, setTrip] = useState<Trip | null>(null);
   const [segments, setSegments] = useState<Segment[] | null>(null);
-  const [hasActiveTransitJournal, setHasActiveTransitJournal] = useState(false);
+  const [currentStep, setCurrentStep] = useState<NavigationSteps | null>(null);
+  const [activeSegments, setActiveSegments] = useState<Segment[]>([]);
 
+  const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
+  const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
+
+  // Check if the user has a transit journal
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const transitJournalId = await fetchUserTransitJournal(user?.id ?? "");
+        const transitJournalId = await fetchUserTransitJournal(user.id);
         setTransitJournalId(transitJournalId);
       } catch (error) {
-        throw new Error("Error fetching transit journal ID");
+        console.error("[ERROR] Failed to fetch user transit journal");
       }
     };
     fetchInitialData();
 
-    const subscription = supabase
-      .channel("profiles")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user?.id || ""}` },
-        (payload: any) => {
-          setTransitJournalId(payload.new.transit_journal_id);
-        },
-      )
-      .subscribe();
+    const subscription = subscribeToTableChanges({
+      table: "profiles",
+      filters: { id: user.id },
+      callback: (payload: any) => setTransitJournalId(payload.new.transit_journal_id),
+    });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [user?.id ?? ""]);
+  }, [user.id]);
 
+  // Fetch the transit journal data
   useEffect(() => {
     if (!transitJournalId) {
       setTrip(null);
       setSegments(null);
       setTransitJournal(null);
-      setHasActiveTransitJournal(false);
       return;
     }
 
@@ -83,39 +114,84 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
         setTrip(trip);
         setSegments(segments);
         setTransitJournal(journalData);
-        setHasActiveTransitJournal(true);
       } catch (error) {
         console.error("Error fetching transit journal data:", error);
-        setTrip(null);
-        setSegments(null);
-        setTransitJournal(null);
-        setHasActiveTransitJournal(false);
       }
     };
     fetchTransitJournalData();
   }, [transitJournalId]);
 
-  const addLiveUpdate = async (status: { type: LiveUpdateType; coordinate: Coordinates }) => {
-    const payload: CreateLiveUpdate = {
-      contributorId: user.id,
-      transitJournalId: transitJournalId!,
-      type: status.type,
-      coordinate: status.coordinate,
-    };
+  // ============================ Methods ============================
 
+  const addLiveUpdate = async ({ type, coordinate }: AddLiveUpdate) => {
     try {
+      if (!transitJournalId || !user) return;
+      const payload = { contributorId: user.id, transitJournalId, coordinate, type };
       await insertLiveUpdate(payload);
     } catch (error) {
       throw new Error("Error adding live status");
     }
   };
 
+  const handleUserLocationUpdate = async ({ coords }: Location) => {
+    if (!segments || !lineRef.current || !circleRef.current || !cameraRef.current) return;
+    const newLocation = [coords.longitude, coords.latitude] as Coordinates;
+
+    // get the current segment and step, and the active routes
+    const { segmentIndex, nearestPoint } = getNearestSegment(newLocation, segments);
+    const _currentSegment = segments[segmentIndex];
+    const activeRoutes = getActiveRoutes(segments, segmentIndex, nearestPoint);
+    const { stepIndex } = getNearestStep(newLocation, _currentSegment.navigationSteps);
+
+    // update the camera to follow the user and face the next point
+    // TODO: add toggle follow mode
+    const newHeading = computeHeading(newLocation, activeRoutes[0].waypoints[1] ?? newLocation);
+    cameraRef.current.setCamera({
+      pitch: 60,
+      zoomLevel: 16,
+      animationDuration: 1000,
+      heading: newHeading,
+      centerCoordinate: newLocation,
+    });
+
+    // update the map with the new segments
+    lineRef.current.update(activeRoutes);
+    circleRef.current.update(activeRoutes);
+
+    // Show transfer modal everytime segment changes
+    if (activeSegments[0]?.id !== _currentSegment.id) {
+      setShowTripFinishedModal(false);
+      setShowNextSegmentModal(true);
+    }
+
+    // check if currentLocation is near destination
+    const destination = segments[segments.length - 1].endCoords;
+    if (isNearLocation(newLocation, destination, 20)) {
+      setShowNextSegmentModal(false);
+      setShowTripFinishedModal(true);
+    }
+
+    // update the active segments and step information
+    setActiveSegments(segments.slice(segmentIndex));
+    setCurrentStep(_currentSegment.navigationSteps[stepIndex]);
+  };
+
   const value = {
+    cameraRef,
+    lineRef,
+    circleRef,
+    transitJournal,
+    transitJournalId,
     trip,
     segments,
-    transitJournal,
-    hasActiveTransitJournal,
+    currentStep,
+    activeSegments,
     addLiveUpdate,
+    showNextSegmentModal,
+    setShowNextSegmentModal,
+    showTripFinishedModal,
+    setShowTripFinishedModal,
+    handleUserLocationUpdate,
   };
   return <TransitJournalContext.Provider value={value}>{children}</TransitJournalContext.Provider>;
 }
@@ -127,3 +203,13 @@ export const useTransitJournal = (): TransitJournalContextType => {
   }
   return context;
 };
+
+function getActiveRoutes(segments: Segment[], currentIndex: number, nearestPoint: NearestPoint) {
+  const segmentsCopy = JSON.parse(JSON.stringify(segments)) as Segment[];
+  const activeSegments = segmentsCopy.slice(currentIndex);
+  activeSegments[0].waypoints = [
+    nearestPoint.geometry.coordinates as Coordinates,
+    ...activeSegments[0].waypoints.slice(nearestPoint.properties.index + 1),
+  ];
+  return activeSegments;
+}

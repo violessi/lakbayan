@@ -1,5 +1,5 @@
 import { supabase } from "@utils/supabase";
-import { newError } from "@utils/utils";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
 // Inserts data into a specified Supabase table.
 export async function insertData(table: string, payload: any[]): Promise<any[]> {
@@ -91,4 +91,27 @@ export async function fetchDataRPC(fn: string, params: any): Promise<any[]> {
     console.error("[API ERROR]", errMsg, error.message);
     throw new Error(error.message || errMsg);
   }
+}
+
+export function subscribeToTableChanges({
+  table,
+  filters,
+  event = "UPDATE",
+  schema = "public",
+  callback,
+}: {
+  table: string;
+  filters: Record<string, any>;
+  event?: any; // "INSERT" | "UPDATE" | "DELETE"
+  schema?: string;
+  callback: (payload: any) => void;
+}): RealtimeChannel {
+  const filter = Object.entries(filters)
+    .map(([key, value]) => `${key}=eq.${value}`)
+    .join(",");
+
+  return supabase
+    .channel(`${table}-${event}-${filter}`)
+    .on("postgres_changes", { event, schema, table, filter }, callback)
+    .subscribe();
 }

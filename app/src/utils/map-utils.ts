@@ -61,7 +61,6 @@ export function getNearestSegment(
   segments.forEach((segment, index) => {
     const geoLine = turf.lineString(segment.waypoints);
     const closestLine = turf.nearestPointOnLine(geoLine, geoPoint);
-
     if (!nearestPoint || closestLine.properties.dist < nearestPoint.properties.dist) {
       nearestPoint = closestLine;
       segmentIndex = index;
@@ -75,7 +74,7 @@ export function getNearestSegment(
 export function getNearestStep(
   userLocation: Coordinates,
   steps: NavigationSteps[],
-): NavigationSteps {
+): { stepIndex: number } {
   let stepIndex = 0;
   let minDistance = Infinity;
 
@@ -89,7 +88,7 @@ export function getNearestStep(
       stepIndex = index;
     }
   });
-  return steps[stepIndex];
+  return { stepIndex };
 }
 
 export function expandBoundingBox(box: Coordinates[], size: number): Coordinates[] {
