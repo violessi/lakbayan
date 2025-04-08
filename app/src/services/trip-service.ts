@@ -219,6 +219,23 @@ export async function updateTransitJournal(transitJournal: Partial<TransitJourna
   }
 }
 
+export async function incrementSegmentGPSCount(segmentIds: string[]): Promise<void> {
+  try {
+    const segments = await fetchSegments(segmentIds);
+    const payload = segments.map((segment) => ({
+      id: segment.id,
+      gps_verified: segment.gpsVerified + 1,
+    }));
+    await Promise.all(
+      payload.map(async (segment) => {
+        await updateData(segment, "segments", { id: segment.id });
+      }),
+    );
+  } catch (error) {
+    throw new Error("Error updating segments");
+  }
+}
+
 export async function deleteSegments(segmentIds: string[]): Promise<void> {
   if (segmentIds.length === 0) return;
   try {
@@ -227,21 +244,3 @@ export async function deleteSegments(segmentIds: string[]): Promise<void> {
     throw new Error("Error deleting segments");
   }
 }
-
-// Fetches nearby live updates based on provided coordinates and radius
-// export async function fetchNearbyLiveUpdates(
-//   coordinates: Coordinates,
-//   radius: number,
-// ): Promise<LiveUpdate[]> {
-//   try {
-//     const args = { lat: coordinates[1], lon: coordinates[0], radius };
-//     const res = await fetchDataRPC("fetch_nearby_live_updates", args);
-
-//     // Validate the response data
-//     const result = LiveUpdatesSchema.safeParse(res);
-//     if (!result.success) throw new Error("Invalid Live Update Data");
-//     return result.data;
-//   } catch (error) {
-//     throw new Error("Error fetching live updates");
-//   }
-// }

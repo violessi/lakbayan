@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native";
+import React, { useState } from "react";
+import { SafeAreaView, Alert } from "react-native";
 
 import Header from "@components/ui/Header";
 import NotFound from "@components/journal/NotFound";
@@ -12,11 +13,19 @@ import { useMapView } from "@hooks/use-map-view";
 import { useSession } from "@contexts/SessionContext";
 import { useTransitJournal } from "@contexts/TransitJournal";
 
+import { addComment } from "@services/socials-service";
+import {
+  updateTransitJournal,
+  updateProfile,
+  incrementSegmentGPSCount,
+} from "@services/trip-service";
+
 export default function JournalReview() {
   const router = useRouter();
   const { user } = useSession();
   const { cameraRef } = useMapView();
   const { trip, segments, transitJournal } = useTransitJournal();
+  const [newComment, setNewComment] = useState("");
 
   function handleCommentPress(tripId: string) {
     router.push({
@@ -24,6 +33,30 @@ export default function JournalReview() {
       params: { tripId, is_gps_verified: "true" },
     });
   }
+
+  const handleSubmit = async () => {
+    if (!newComment.trim()) return;
+    if (!trip || !segments || !user) return;
+
+    const journalPayload: Partial<TransitJournal> = {
+      id: transitJournal.id,
+      status: "success",
+      startTime: new Date().toISOString(),
+    };
+
+    try {
+      // TODO: make this atomic
+      await addComment(trip.id, user.id, newComment, true);
+      await incrementSegmentGPSCount(trip.segments.map(({ id }) => id));
+      await updateTransitJournal(journalPayload);
+      await updateProfile({ id: user.id, transitJournalId: null });
+
+      Alert.alert("Success", "Your transit journal has been submitted!", [{ text: "OK" }]);
+      router.replace("/(tabs)");
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+    }
+  };
 
   if (!trip || !segments || !user) return <NotFound />;
 
@@ -39,11 +72,11 @@ export default function JournalReview() {
 
       <JournalFeedback
         trip={trip}
-        segments={segments}
         currentUserId={user.id}
         onCommentPress={handleCommentPress}
-        isGpsVerified={true}
-        transitJournal={transitJournal}
+        handleSubmit={handleSubmit}
+        newComment={newComment}
+        setNewComment={setNewComment}
       />
     </SafeAreaView>
   );

@@ -31,7 +31,7 @@ interface TransitJournalContextType {
   circleRef: React.RefObject<CircleSourceRef>;
   transitJournalId: string | null;
   transitJournal: any | null;
-  trip: Trip | null;
+  trip: FullTrip | null;
   segments: Segment[] | null;
   currentStep: NavigationSteps | null;
   activeSegments: Segment[];
@@ -56,7 +56,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   const [transitJournal, setTransitJournal] = useState<any | null>(null);
   const [transitJournalId, setTransitJournalId] = useState<string | null>(null);
 
-  const [trip, setTrip] = useState<Trip | null>(null);
+  const [trip, setTrip] = useState<FullTrip | null>(null);
   const [segments, setSegments] = useState<Segment[] | null>(null);
   const [currentStep, setCurrentStep] = useState<NavigationSteps | null>(null);
   const [activeSegments, setActiveSegments] = useState<Segment[]>([]);
@@ -100,7 +100,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
       try {
         const journalData = await fetchTransitJournal(transitJournalId);
         const fullTripData = await fetchTrip(journalData.tripId);
-        const { segments, ...trip } = fullTripData;
+        const { segments, ...res } = fullTripData;
 
         if (journalData.preSegmentId) {
           const preSegment = await fetchSegments([journalData.preSegmentId]);
@@ -111,7 +111,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
           segments.push(postSegment[0]);
         }
 
-        setTrip(trip);
+        setTrip(fullTripData);
         setSegments(segments);
         setTransitJournal(journalData);
       } catch (error) {
