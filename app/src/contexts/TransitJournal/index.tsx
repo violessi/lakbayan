@@ -43,6 +43,8 @@ interface TransitJournalContextType {
   setShowTripFinishedModal: (showTripFinishedModal: boolean) => void;
   addLiveUpdate: ({ type, coordinate }: AddLiveUpdate) => Promise<void>;
   handleUserLocationUpdate: ({ coords }: Location) => Promise<void>;
+  followUser: boolean;
+  setFollowUser: (followUser: boolean) => void;
 }
 
 const TransitJournalContext = createContext<TransitJournalContextType | null>(null);
@@ -66,6 +68,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   const [showTripAbortModal, setShowTripAbortModal] = useState(false);
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
+  const [followUser, setFollowUser] = useState(true);
 
   // Check if the user has a transit journal
   useEffect(() => {
@@ -148,14 +151,16 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
 
     // update the camera to follow the user and face the next point
     // TODO: add toggle follow mode
-    const newHeading = computeHeading(newLocation, activeRoutes[0].waypoints[1] ?? newLocation);
-    cameraRef.current.setCamera({
-      pitch: 60,
-      zoomLevel: 16,
-      animationDuration: 1000,
-      heading: newHeading,
-      centerCoordinate: newLocation,
-    });
+    if (followUser) {
+      const newHeading = computeHeading(newLocation, activeRoutes[0].waypoints[1] ?? newLocation);
+      cameraRef.current.setCamera({
+        pitch: 60,
+        zoomLevel: 16,
+        animationDuration: 1000,
+        heading: newHeading,
+        centerCoordinate: newLocation,
+      });
+    }
 
     // update the map with the new segments
     lineRef.current.update(activeRoutes);
@@ -197,6 +202,8 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     showTripFinishedModal,
     setShowTripFinishedModal,
     handleUserLocationUpdate,
+    followUser,
+    setFollowUser,
   };
   return <TransitJournalContext.Provider value={value}>{children}</TransitJournalContext.Provider>;
 }

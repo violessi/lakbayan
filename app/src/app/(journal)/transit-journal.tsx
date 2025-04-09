@@ -43,12 +43,20 @@ export default function TransitJournal() {
     setShowNextSegmentModal,
     setShowTripFinishedModal,
     handleUserLocationUpdate,
+    followUser,
+    setFollowUser,
   } = useTransitJournal();
 
   // complete transit and redirect to review page
   const handleNavigateToReview = () => {
     setShowTripFinishedModal(false);
     router.push("/(journal)/journal-review");
+  };
+
+  const handleCameraChange = (state: MapBoxMapState) => {
+    if (state.gestures.isGestureActive) {
+      setFollowUser(false);
+    }
   };
 
   // abort transit and redirect to home page
@@ -92,12 +100,21 @@ export default function TransitJournal() {
       <MapShell
         cameraRef={cameraRef}
         handleUserLocation={handleUserLocationUpdate}
+        handleCameraChange={handleCameraChange}
         userLocationProps={{ animated: false }}
       >
         <CircleSource id={"transfer-points"} data={segments} ref={circleRef} />
         <LineSource id={"direction-line"} data={segments} ref={lineRef} />
         <SymbolSource id={"live-update"} data={liveUpdates} />
       </MapShell>
+
+      {!followUser && (
+        <PrimaryButton
+          className="absolute bottom-64 right-6"
+          label="Follow User"
+          onPress={() => setFollowUser(true)}
+        />
+      )}
 
       <PrimaryButton
         className="absolute bottom-48 right-6"

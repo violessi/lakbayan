@@ -20,6 +20,7 @@ interface MapShellProps {
   handleMapPress?: (feature: MapPressFeature) => void;
   handleUserLocation?: (location: Location) => void;
   handleRegionChange?: (region: Feature<Point, MapBoxRegionPayload>) => void;
+  handleCameraChange?: (state: MapBoxMapState) => void;
   cameraProps?: React.ComponentProps<typeof Camera>;
   userLocationProps?: React.ComponentProps<typeof UserLocation>;
 }
@@ -33,6 +34,7 @@ export const MapShell = ({
   handleMapPress,
   handleUserLocation,
   handleRegionChange,
+  handleCameraChange,
   cameraProps,
   userLocationProps,
 }: MapShellProps) => {
@@ -60,6 +62,9 @@ export const MapShell = ({
       projection="mercator"
       onDidFinishLoadingMap={handleMapLoaded}
       onRegionDidChange={handleRegionChange}
+      onCameraChanged={handleCameraChange}
+      scaleBarEnabled={false}
+      logoEnabled={false}
     >
       <Camera
         ref={cameraRef}
