@@ -1,6 +1,6 @@
-import { useRouter } from "expo-router";
-import { useLocalSearchParams } from "expo-router";
+import { useEffect } from "react";
 import { Alert, SafeAreaView } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -65,6 +65,12 @@ export default function TripOverview() {
       Alert.alert("Error starting trip, please try again");
     }
   }
+
+  useEffect(() => {
+    if (!!transitJournalId) {
+      router.replace("/(journal)/transit-journal");
+    }
+  }, [transitJournalId]);
 
   return (
     <SafeAreaView className="flex-1">
