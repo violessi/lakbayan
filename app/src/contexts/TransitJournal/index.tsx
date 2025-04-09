@@ -35,8 +35,10 @@ interface TransitJournalContextType {
   segments: Segment[] | null;
   currentStep: NavigationSteps | null;
   activeSegments: Segment[];
+  showTripAbortModal: boolean;
   showNextSegmentModal: boolean;
   showTripFinishedModal: boolean;
+  setShowTripAbortModal: (showTripAbortModal: boolean) => void;
   setShowNextSegmentModal: (showNextSegmentModal: boolean) => void;
   setShowTripFinishedModal: (showTripFinishedModal: boolean) => void;
   addLiveUpdate: ({ type, coordinate }: AddLiveUpdate) => Promise<void>;
@@ -61,6 +63,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   const [currentStep, setCurrentStep] = useState<NavigationSteps | null>(null);
   const [activeSegments, setActiveSegments] = useState<Segment[]>([]);
 
+  const [showTripAbortModal, setShowTripAbortModal] = useState(false);
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
 
@@ -187,6 +190,8 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     currentStep,
     activeSegments,
     addLiveUpdate,
+    showTripAbortModal,
+    setShowTripAbortModal,
     showNextSegmentModal,
     setShowNextSegmentModal,
     showTripFinishedModal,

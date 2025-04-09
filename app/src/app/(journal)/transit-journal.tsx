@@ -1,9 +1,10 @@
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { SafeAreaView, View } from "react-native";
+import { Alert, SafeAreaView, View } from "react-native";
 
 import Header from "@components/ui/Header";
 import NotFound from "@components/journal/NotFound";
+import AbortModal from "@components/journal/AbortModal";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import TransferModal from "@components/journal/TransferModal";
 import CompleteModal from "@components/journal/CompleteModal";
@@ -15,30 +16,65 @@ import LineSource from "@components/map/LineSource";
 import SymbolSource from "@components/map/SymbolSource";
 import CircleSource from "@components/map/CircleSource";
 
-import { useTransitJournal } from "@contexts/TransitJournal";
+import { isNearLocation } from "@utils/map-utils";
+import { useSession } from "@contexts/SessionContext";
 import { useLiveUpdates } from "@hooks/use-live-updates";
+import { useUserLocation } from "@contexts/LocationContext";
+import { useTransitJournal } from "@contexts/TransitJournal";
+import { updateTransitJournal, updateProfile } from "@services/trip-service";
 
 export default function TransitJournal() {
   const router = useRouter();
+  const { user } = useSession();
+  const { userLocation } = useUserLocation();
+  const { liveUpdates, setUpdateCoords } = useLiveUpdates("line", 30);
   const {
     cameraRef,
     lineRef,
     circleRef,
     segments,
     currentStep,
+    transitJournal,
     activeSegments,
+    showTripAbortModal,
     showNextSegmentModal,
     showTripFinishedModal,
+    setShowTripAbortModal,
     setShowNextSegmentModal,
     setShowTripFinishedModal,
     handleUserLocationUpdate,
   } = useTransitJournal();
 
-  const { liveUpdates, setUpdateCoords } = useLiveUpdates("line", 30);
-
+  // complete transit and redirect to review page
   const handleNavigateToReview = () => {
     setShowTripFinishedModal(false);
     router.push("/(journal)/journal-review");
+  };
+
+  // abort transit and redirect to home page
+  const handleAbortTrip = async () => {
+    try {
+      const journalPayload: Partial<TransitJournal> = {
+        id: transitJournal.id,
+        status: "cancelled",
+      };
+      await updateTransitJournal(journalPayload);
+      await updateProfile({ id: user!.id, transitJournalId: null });
+      setShowTripAbortModal(false);
+      router.replace("/(tabs)");
+      Alert.alert("Transit Ended", "Your transit journal has been Cancelled!", [{ text: "OK" }]);
+    } catch (error) {
+      Alert.alert("Error", "Failed to abort your transit journal. Please try again.");
+    }
+  };
+
+  // Allow early completion if the user is within 500m of the destination
+  const handleCompleteTrip = () => {
+    if (!segments || !userLocation) return;
+    const destination = segments[segments.length - 1].endCoords;
+    const isCompleted = isNearLocation(userLocation, destination, 500);
+    if (isCompleted) setShowTripFinishedModal(true);
+    else setShowTripAbortModal(true);
   };
 
   // Fetch live updates on segments
@@ -63,11 +99,10 @@ export default function TransitJournal() {
         <SymbolSource id={"live-update"} data={liveUpdates} />
       </MapShell>
 
-      {/* TODO: update this to handle abort transit */}
       <PrimaryButton
         className="absolute bottom-48 right-6"
         label="Done"
-        onPress={() => setShowTripFinishedModal(true)}
+        onPress={handleCompleteTrip}
       />
 
       <ReportLiveUpdates />
@@ -82,6 +117,11 @@ export default function TransitJournal() {
           isVisible={showTripFinishedModal}
           nextCallback={handleNavigateToReview}
           cancelCallback={() => setShowTripFinishedModal(false)}
+        />
+        <AbortModal
+          isVisible={showTripAbortModal}
+          nextCallback={handleAbortTrip}
+          cancelCallback={() => setShowTripAbortModal(false)}
         />
       </View>
     </SafeAreaView>
