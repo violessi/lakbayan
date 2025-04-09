@@ -3,10 +3,9 @@ import { SafeAreaView, View, Alert } from "react-native";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
-import CircleMarker from "@components/map/CircleMarker";
+import LineSource from "@components/map/LineSource";
 import SymbolMarker from "@components/map/SymbolMarker";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import DirectionLines from "@components/map/DirectionLines";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 
 import { useMapView } from "@hooks/use-map-view";
@@ -16,7 +15,6 @@ import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
 export default function RouteSelectInfo() {
   const { cameraRef, handleMapPress } = useMapView();
   const { trip, segments, route, updateRoute, clearRouteData } = useTripCreator();
-  const segmentCoordinates = segments.map(({ waypoints }) => waypoints);
 
   // when user updates the end location
   const handleEndChange = async (endCoords: Coordinates, endLocation?: string) => {
@@ -48,38 +46,22 @@ export default function RouteSelectInfo() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Route Information" prevCallback={prevCallback} />
-
-      <View>
-        <StartEndSearchBar
-          isStartActive={false}
-          defaultStart={route.startLocation}
-          defaultEnd={route.endLocation}
-          onEndChange={(l, c) => handleEndChange(c, l)}
-        />
-      </View>
-
+      <Header prevCallback={prevCallback} title="Route Information" />
+      <StartEndSearchBar
+        isStartActive={false}
+        defaultStart={route.startLocation}
+        defaultEnd={route.endLocation}
+        onEndChange={(l, c) => handleEndChange(c, l)}
+      />
       <MapShell
         cameraRef={cameraRef}
         fitBounds={[route.startCoords, trip.endCoords]}
         handleMapPress={(feature) => handleMapPress(feature, handleEndChange)}
       >
-        <DirectionLines coordinates={segmentCoordinates} />
-        <SymbolMarker
-          id="trip-start-location"
-          coordinates={trip.startCoords}
-          label={trip.startLocation}
-        />
-        <SymbolMarker
-          id="trip-end-location"
-          coordinates={trip.endCoords}
-          label={trip.endLocation}
-        />
-        <CircleMarker
-          id="route-end-location"
-          coordinates={route.endCoords}
-          label={route.endLocation}
-        />
+        <LineSource id="segments" data={segments} lineWidth={3} />
+        <SymbolMarker id="start-loc" coordinates={trip.startCoords} label="Start" />
+        <SymbolMarker id="end-loc" coordinates={trip.endCoords} label="Destination" />
+        <SymbolMarker id="next-loc" coordinates={route.endCoords} label="Next Transfer" />
       </MapShell>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">

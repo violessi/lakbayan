@@ -4,11 +4,11 @@ import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView, View, Alert, BackHandler } from "react-native";
 
 import Header from "@components/ui/Header";
+import LineSource from "@components/map/LineSource";
 import { MapShell } from "@components/map/MapShell";
 import SymbolMarker from "@components/map/SymbolMarker";
 import TripTitle from "@components/contribute/TripTitle";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import DirectionLines from "@components/map/DirectionLines";
 import TripSummary from "@components/contribute/TripSummary";
 import UnsavedChangesAlert from "@components/contribute/UnsavedChangesAlert";
 
@@ -51,11 +51,10 @@ export default function TripReview() {
   const handleSubmitTrip = async () => {
     try {
       await submitTrip();
-      Alert.alert("Trip Submitted");
+      Alert.alert("Trip Submitted", "Your trip has been submitted successfully!");
       router.replace("/(tabs)");
     } catch (error) {
-      console.error(error);
-      Alert.alert("Error submitting trip");
+      Alert.alert("Error", "Failed to submit your trip. Please try again.");
     }
   };
 
@@ -85,14 +84,14 @@ export default function TripReview() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Trip Review" prevCallback={prevCallback} />
+      <Header prevCallback={prevCallback} title="Trip Review" />
 
       <View className="flex justify-center items-center">
         <TripTitle startLocation={trip.startLocation} endLocation={trip.endLocation} />
       </View>
 
       <MapShell cameraRef={cameraRef} fitBounds={[trip.startCoords, trip.endCoords]}>
-        <DirectionLines coordinates={segments.map(({ waypoints }) => waypoints)} />
+        <LineSource id="segments" data={segments} lineWidth={3} />
         <SymbolMarker id="start-loc" label={trip.startLocation} coordinates={trip.startCoords} />
         <SymbolMarker id="end-loc" label={trip.endLocation} coordinates={trip.endCoords} />
       </MapShell>

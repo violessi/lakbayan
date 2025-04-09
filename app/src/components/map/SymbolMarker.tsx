@@ -22,6 +22,7 @@ function SymbolMarker({
 }: SymbolMarkerProps) {
   if (!coordinates) return null;
 
+  // FIXME: add offset to the icon
   return (
     <ShapeSource id={id} shape={point(coordinates)}>
       <SymbolLayer

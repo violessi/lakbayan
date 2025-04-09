@@ -5,14 +5,14 @@ import { TRANSPORTATION_COLORS as COLORS } from "@constants/transportation-color
 
 type Data = Coordinates[] | Segment[];
 type Shape = GeoJSON.FeatureCollection<GeoJSON.Point>;
-type Props = { id: string; data: Data; radius?: number };
+type Props = { id: string; data: Data; colors?: string[]; radius?: number };
 export type CircleSourceRef = { update: (data: Data) => void };
 
 // This component takes in a list of circle or a segment data and renders them on the map.
 // It uses refs to allow parent components to update the data dynamically without re-rendering.
-const CircleSource = forwardRef<CircleSourceRef, Props>(({ id, data, radius = 8 }, ref) => {
+const CircleSource = forwardRef<CircleSourceRef, Props>(({ id, data, colors, radius = 8 }, ref) => {
   const circleRef = useRef<ShapeSource | null>(null);
-  const circleColors = data.map((_, i) => COLORS[i]);
+  const circleColors = colors ?? data.map((_, i) => COLORS[i]);
   const initialShape = generateShape(data, circleColors);
 
   // Update function to be called from parent components

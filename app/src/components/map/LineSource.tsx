@@ -3,16 +3,16 @@ import { ShapeSource, LineLayer } from "@rnmapbox/maps";
 import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import { TRANSPORTATION_COLORS as COLORS } from "@constants/transportation-color";
 
-type Data = Coordinates[][] | Segment[];
+type Data = Coordinates[][] | Segment[] | CreateSegment[];
 type Shape = GeoJSON.FeatureCollection<GeoJSON.LineString>;
-type Props = { id: string; data: Data; lineWidth?: number };
+type Props = { id: string; data: Data; lineWidth?: number; colors?: string[] };
 export type LineSourceRef = { update: (data: Data) => void };
 
 // This component takes in a list of line or a segment data and renders them on the map.
 // It uses refs to allow parent components to update the data dynamically without re-rendering.
-const LineSource = forwardRef<LineSourceRef, Props>(({ id, data, lineWidth }, ref) => {
+const LineSource = forwardRef<LineSourceRef, Props>(({ id, data, lineWidth, colors }, ref) => {
   const lineRef = useRef<ShapeSource | null>(null);
-  const lineColors = data.map((_, i) => COLORS[i]);
+  const lineColors = colors ?? data.map((_, i) => COLORS[i]);
   const initialShape = generateShape(data, lineColors);
 
   // Update function to be called from parent components
