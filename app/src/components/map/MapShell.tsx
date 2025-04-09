@@ -65,7 +65,8 @@ export const MapShell = ({
         ref={cameraRef}
         centerCoordinate={finalCenter}
         zoomLevel={zoomLevel ?? 12}
-        animationMode={Platform.OS === "android" ? "none" : "easeTo"}
+        animationMode={"easeTo"}
+        animationDuration={500}
         {...cameraProps}
       />
       <UserLocation

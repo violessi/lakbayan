@@ -48,7 +48,8 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
       setSuggestedTrips(fullTrips);
       setFilteredTrips(fullTrips);
     } catch (error) {
-      console.error("Failed to fetch trips:", error);
+      console.error("[ERROR] Fetching suggester trips: ", error);
+      throw new Error("Failed to fetch trips");
     }
   };
 
