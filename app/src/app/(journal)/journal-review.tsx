@@ -41,7 +41,7 @@ export default function JournalReview() {
     const journalPayload: Partial<TransitJournal> = {
       id: transitJournal.id,
       status: "success",
-      startTime: new Date().toISOString(),
+      endTime: new Date().toISOString(),
     };
 
     try {
