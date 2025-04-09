@@ -11,7 +11,7 @@ export default function CompleteModal({
 }) {
   return (
     <Modal transparent visible={isVisible} animationType="fade">
-      <View className="flex-1 justify-center items-center bg-black/50">
+      <View className="flex-1 justify-center items-center bg-black/60">
         <View className="bg-white px-6 py-6 rounded-xl shadow-lg w-5/6 max-w-md">
           <Text className="text-2xl font-bold text-gray-900 mb-4 text-center">Trip Completed!</Text>
 

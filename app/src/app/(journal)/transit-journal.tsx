@@ -34,7 +34,7 @@ export default function TransitJournal() {
     handleUserLocationUpdate,
   } = useTransitJournal();
 
-  const { liveUpdates, setUpdateCoords } = useLiveUpdates("line", 300);
+  const { liveUpdates, setUpdateCoords } = useLiveUpdates("line", 30);
 
   const handleNavigateToReview = () => {
     setShowTripFinishedModal(false);
@@ -52,40 +52,38 @@ export default function TransitJournal() {
   return (
     <SafeAreaView className="flex-1">
       <Header title="Transit Journal" />
-      <View className="flex-1">
-        <MapShell
-          cameraRef={cameraRef}
-          handleUserLocation={handleUserLocationUpdate}
-          userLocationProps={{ animated: false }}
-        >
-          {/* Render the map with the direction, transfer points, and live status*/}
-          <CircleSource id={"transfer-points"} data={segments} ref={circleRef} />
-          <LineSource id={"direction-line"} data={segments} ref={lineRef} />
-          <SymbolSource id={"live-update"} data={liveUpdates} />
-        </MapShell>
+      <JournalInstructions currentStep={currentStep} currentSegment={activeSegments[0]} />
+      <MapShell
+        cameraRef={cameraRef}
+        handleUserLocation={handleUserLocationUpdate}
+        userLocationProps={{ animated: false }}
+      >
+        <CircleSource id={"transfer-points"} data={segments} ref={circleRef} />
+        <LineSource id={"direction-line"} data={segments} ref={lineRef} />
+        <SymbolSource id={"live-update"} data={liveUpdates} />
+      </MapShell>
 
-        <JournalInstructions currentStep={currentStep} currentSegment={activeSegments[0]} />
-
-        {/* TODO: update this to abort transit */}
-        <PrimaryButton
-          className="absolute bottom-44 right-6"
-          label="Done"
-          onPress={() => setShowTripFinishedModal(true)}
-        />
-      </View>
+      {/* TODO: update this to handle abort transit */}
+      <PrimaryButton
+        className="absolute bottom-48 right-6"
+        label="Done"
+        onPress={() => setShowTripFinishedModal(true)}
+      />
 
       <ReportLiveUpdates />
 
-      <TransferModal
-        isVisible={showNextSegmentModal}
-        currentSegment={activeSegments[0]}
-        callback={() => setShowNextSegmentModal(false)}
-      />
-      <CompleteModal
-        isVisible={showTripFinishedModal}
-        nextCallback={handleNavigateToReview}
-        cancelCallback={() => setShowTripFinishedModal(false)}
-      />
+      <View>
+        <TransferModal
+          isVisible={showNextSegmentModal}
+          currentSegment={activeSegments[0]}
+          callback={() => setShowNextSegmentModal(false)}
+        />
+        <CompleteModal
+          isVisible={showTripFinishedModal}
+          nextCallback={handleNavigateToReview}
+          cancelCallback={() => setShowTripFinishedModal(false)}
+        />
+      </View>
     </SafeAreaView>
   );
 }

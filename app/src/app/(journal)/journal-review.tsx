@@ -54,7 +54,7 @@ export default function JournalReview() {
       Alert.alert("Success", "Your transit journal has been submitted!", [{ text: "OK" }]);
       router.replace("/(tabs)");
     } catch (error) {
-      console.error("Error submitting feedback:", error);
+      Alert.alert("Error", "Failed to submit your transit journal. Please try again.");
     }
   };
 
