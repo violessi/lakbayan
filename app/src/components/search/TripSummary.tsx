@@ -1,21 +1,22 @@
 import React from "react";
-import { Text, View, FlatList, Image, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { useTripSummaryData } from "@hooks/use-trip-summary-data";
-
-import RouteItem from "@components/ui/RouteItem";
-import VotingBar from "@components/VotingBar";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { Text, View, FlatList, Image, TouchableOpacity } from "react-native";
 
+import VotingBar from "@components/VotingBar";
+import RouteItem from "@components/ui/RouteItem";
+import PrimaryButton from "@components/ui/PrimaryButton";
+
+import { useTripSummaryData } from "@hooks/use-trip-summary-data";
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
-
 const comment = require("@assets/social-comment.png");
 
 interface TripSummaryProps {
   trip: Trip;
   segments: Segment[];
-  currentUserId: string;
-  onCommentPress: (tripId: string) => void;
+  currentUserId: string | null | undefined;
+  handleCommentPress: (tripId: string) => void;
+  handleStartPress?: () => void;
 }
 
 const snapPoints = ["15%", "25%", "40%", "72%"];
@@ -24,7 +25,8 @@ export default function TripSummary({
   trip,
   segments,
   currentUserId,
-  onCommentPress,
+  handleCommentPress,
+  handleStartPress,
 }: TripSummaryProps) {
   const router = useRouter();
 
@@ -40,6 +42,11 @@ export default function TripSummary({
   return (
     <BottomSheet snapPoints={snapPoints} index={2}>
       <BottomSheetView className="flex flex-col px-5 gap-6">
+        {handleStartPress && (
+          <View className="w-full">
+            <PrimaryButton label="Start Transit Journal" onPress={handleStartPress} />
+          </View>
+        )}
         <View className="flex flex-row justify-between">
           <View className="flex flex-row gap-2">
             <Text>Contributed by</Text>
@@ -50,8 +57,8 @@ export default function TripSummary({
             </TouchableOpacity>
           </View>
           <View className="flex flex-row gap-3 items-center">
-            <VotingBar tripId={trip.id} userId={currentUserId} />
-            <TouchableOpacity onPress={() => onCommentPress(trip.id)}>
+            {currentUserId && <VotingBar tripId={trip.id} userId={currentUserId} />}
+            <TouchableOpacity onPress={() => handleCommentPress(trip.id)}>
               <Image source={comment} style={{ width: 12, height: 12 }} resizeMode="contain" />
             </TouchableOpacity>
           </View>

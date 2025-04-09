@@ -1,44 +1,33 @@
 import { useRouter } from "expo-router";
-import React, { useRef, Fragment, useEffect } from "react";
-import { Alert, View, SafeAreaView } from "react-native";
-import Mapbox, { MapView, Camera } from "@rnmapbox/maps";
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+import { useLocalSearchParams } from "expo-router";
+import { Alert, SafeAreaView } from "react-native";
 
 import Header from "@components/ui/Header";
-import CircleMarker from "@components/map/CircleMarker";
-import PrimaryButton from "@components/ui/PrimaryButton";
+import { MapShell } from "@components/map/MapShell";
+import LineSource from "@components/map/LineSource";
+import CircleSource from "@components/map/CircleSource";
+import SymbolMarker from "@components/map/SymbolMarker";
 import TripSummary from "@components/search/TripSummary";
-import DirectionsLine from "@components/ui/DirectionsLine";
 
+import { useMapView } from "@hooks/use-map-view";
 import { useTripSearch } from "@contexts/TripSearch";
 import { useSession } from "@contexts/SessionContext";
 import { useTransitJournal } from "@contexts/TransitJournal";
-import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
 import { insertSegments, insertTransitJournal, updateProfile } from "@services/trip-service";
-
-import { useLocalSearchParams } from "expo-router"; // for pages that redirect to this screen
-
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function TripOverview() {
   const router = useRouter();
-  const { user } = useSession();
-  const { transitJournalId } = useTransitJournal();
-  const cameraRef = useRef<Camera>(null);
-
   const { tripData } = useLocalSearchParams();
-  const { trip: contextTrip } = useTripSearch();
 
-  // Use contextTrip if available, otherwise parse tripData from params
+  const { user } = useSession();
+  const { cameraRef } = useMapView();
+  const { trip: contextTrip } = useTripSearch();
+  const { transitJournalId } = useTransitJournal();
+
+  // NOTE: some pages redirect to this page using searchParams
   const trip =
     contextTrip ?? ((typeof tripData === "string" ? JSON.parse(tripData) : null) as TripSearch);
   if (!trip) throw new Error("Trip not found");
-
-  const handleMapLoaded = () => {
-    if (cameraRef.current) {
-      cameraRef.current.fitBounds(trip.startCoords, trip.endCoords, [150, 150, 250, 150]);
-    }
-  };
 
   function handleCommentPress(tripId: string) {
     router.push({
@@ -48,100 +37,52 @@ export default function TripOverview() {
   }
 
   async function handleStartPress() {
+    if (!user) throw new Error("User not found");
+    if (!!transitJournalId) {
+      Alert.alert(
+        "Existing trip in progress",
+        "Please finish your current trip before starting a new one.",
+      );
+      return;
+    }
     try {
       // if trip has pre/post segments, insert them first to segments table
-      const { preSegment, postSegment } = trip!;
+      const { preSegment, postSegment } = trip;
       const preSegmentId = preSegment ? (await insertSegments([preSegment]))[0] : null;
       const postSegmentId = postSegment ? (await insertSegments([postSegment]))[0] : null;
 
       // insert transit journal for the trip
       const transitJournalId = await insertTransitJournal({
-        userId: user!.id,
-        tripId: trip!.id,
+        userId: user.id,
+        tripId: trip.id,
         preSegmentId,
         postSegmentId,
       });
 
       // bind transit journal to user
-      await updateProfile({ id: user!.id, transitJournalId });
+      await updateProfile({ id: user.id, transitJournalId });
     } catch (error) {
-      Alert.alert("Error starting trip");
-      console.error(error);
+      Alert.alert("Error starting trip, please try again");
     }
   }
 
-  useEffect(() => {
-    if (!!transitJournalId) {
-      router.replace("/(journal)/transit-journal");
-    }
-  }, [transitJournalId]);
   return (
     <SafeAreaView className="flex-1">
       <Header title="Trip Overview" />
 
-      <MapView
-        style={{ flex: 1 }}
-        styleURL="mapbox://styles/mapbox/streets-v12"
-        projection="mercator"
-        onDidFinishLoadingMap={handleMapLoaded}
-      >
-        <Camera ref={cameraRef} animationMode="easeTo" zoomLevel={10} />
+      <MapShell cameraRef={cameraRef} fitBounds={[trip.startCoords, trip.endCoords]}>
+        <SymbolMarker id="start" label="Start" coordinates={trip.startCoords} />
+        <CircleSource id="transfers" data={trip.segments} />
+        <LineSource id="segments" data={trip.segments} lineWidth={3} />
+      </MapShell>
 
-        {/* Overall Start and End Markers */}
-        <CircleMarker
-          id="start"
-          coordinates={trip.startCoords}
-          label={trip.startLocation}
-          color="green"
-          radius={8}
-        />
-        <CircleMarker
-          id="end"
-          coordinates={trip.endCoords}
-          label={trip.endLocation}
-          color="red"
-          radius={8}
-        />
-
-        {trip.segments.map((segment, index) => (
-          <Fragment key={`segment-markers-${index}`}>
-            <CircleMarker
-              id="start-seg"
-              coordinates={segment.startCoords}
-              label={segment.startLocation}
-              color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
-              radius={6}
-            />
-            <CircleMarker
-              id="end-seg"
-              coordinates={segment.endCoords}
-              label={segment.endLocation}
-              color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
-              radius={6}
-            />
-          </Fragment>
-        ))}
-        {trip.segments.map((segment, index) => (
-          <DirectionsLine
-            key={index}
-            coordinates={segment.waypoints}
-            color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
-          />
-        ))}
-      </MapView>
-
-      <View className="px-10  z-10">
-        <PrimaryButton label="Start" onPress={handleStartPress} />
-      </View>
-
-      {user && (
-        <TripSummary
-          trip={trip}
-          segments={trip.segments}
-          currentUserId={user.id}
-          onCommentPress={handleCommentPress}
-        />
-      )}
+      <TripSummary
+        trip={trip}
+        segments={trip.segments}
+        currentUserId={user?.id}
+        handleCommentPress={handleCommentPress}
+        handleStartPress={handleStartPress}
+      />
     </SafeAreaView>
   );
 }

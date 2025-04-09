@@ -126,7 +126,7 @@ export default function ModerateTripReview() {
           trip={trip}
           segments={trip.segments}
           currentUserId={user.id}
-          onCommentPress={handleCommentPress}
+          handleCommentPress={handleCommentPress}
         />
       )}
 
