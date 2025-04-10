@@ -46,7 +46,7 @@ export default function JournalFeedback({
             <Text className="text-lg font-bold">Share your experience!</Text>
           </View>
           <View className="flex flex-row gap-3 items-center">
-            <VotingBar tripId={trip.id} userId={currentUserId} />
+            <VotingBar trip={trip} userId={currentUserId} />
             <TouchableOpacity onPress={() => onCommentPress(trip.id)}>
               <Image source={comment} style={{ width: 12, height: 12 }} resizeMode="contain" />
             </TouchableOpacity>

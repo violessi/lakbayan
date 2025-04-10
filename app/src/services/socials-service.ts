@@ -4,7 +4,7 @@ import { getUsername } from "@services/account-service";
 
 // Votes
 
-export async function getPoints(trip: FullTrip): Promise<number> {
+export async function getPoints(trip: Trip): Promise<number> {
   return trip.upvotes - trip.downvotes;
 }
 

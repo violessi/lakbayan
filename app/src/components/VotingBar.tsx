@@ -6,7 +6,7 @@ const upvote = require("@assets/social-upvote.png");
 const downvote = require("@assets/social-downvote.png");
 
 interface VotingProps {
-  trip: FullTrip;
+  trip: Trip;
   userId: string;
 }
 
