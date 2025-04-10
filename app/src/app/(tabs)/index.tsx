@@ -14,7 +14,6 @@ export default function Index() {
   const { userLocation } = useMapView();
   const { symbolRef, updateLiveStatus } = useLiveUpdates("box", 10);
 
-  console.log("[RENDER] Rendering Page...");
   const handleTextInputFocus = () => {
     router.push("/(search)/1-search-trip");
   };

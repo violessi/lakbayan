@@ -50,8 +50,6 @@ export const MapShell = ({
     "Long Line": lineIcon,
   };
 
-  console.log("[RENDER] Rendering MapShell...");
-
   return (
     <MapView
       style={{ flex: 1 }}

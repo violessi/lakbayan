@@ -20,7 +20,6 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   useEffect(() => {
     (async () => {
-      console.log("getting permission");
       const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
       if (status === "granted") {
         setPermissionGranted(true);

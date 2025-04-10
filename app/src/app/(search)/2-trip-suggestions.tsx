@@ -20,7 +20,7 @@ export default function SuggestedTrips() {
     router.push("/(search)/3-trip-overview");
   };
 
-  const handleOpenFilters = () => filterSheetRef.current?.expand();
+  const handleOpenFilters = () => filterSheetRef.current?.snapToIndex(1);
   const prevCallback = () => router.replace("/(search)/1-search-trip");
 
   return (

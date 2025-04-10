@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function FilterSearch({ sheetRef, filters, applyFilters }: Props) {
-  const snapPoints = ["60%", "90%"];
+  const snapPoints = ["60%"];
 
   const [timeToLeave, setTimeToLeave] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
