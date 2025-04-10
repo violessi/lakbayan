@@ -5,9 +5,11 @@ import { GtfsShape, GtfsTrip, GtfsRoute } from "types/schema";
 
 type GtfsData = Array<GtfsShape & GtfsTrip & GtfsRoute>;
 
-const DOTC_SHAPES_URL = "https://raw.githubusercontent.com/sakayph/gtfs/refs/heads/master/shapes.txt";
+const DOTC_SHAPES_URL =
+  "https://raw.githubusercontent.com/sakayph/gtfs/refs/heads/master/shapes.txt";
 const DOTC_TRIPS_URL = "https://raw.githubusercontent.com/sakayph/gtfs/refs/heads/master/trips.txt";
-const DOTC_ROUTES_URL = "https://raw.githubusercontent.com/sakayph/gtfs/refs/heads/master/routes.txt";
+const DOTC_ROUTES_URL =
+  "https://raw.githubusercontent.com/sakayph/gtfs/refs/heads/master/routes.txt";
 
 async function fetchDotcData(url: string) {
   const response = await fetch(url);

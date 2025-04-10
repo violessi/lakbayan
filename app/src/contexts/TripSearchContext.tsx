@@ -1,5 +1,5 @@
+import React, { createContext, useState, ReactNode } from "react";
 import { getDirections, paraphraseStep } from "@services/mapbox-service";
-import React, { createContext, useState, ReactNode, useMemo } from "react";
 
 import { isNearLocation } from "@utils/map-utils";
 import { TripEndpointsSchema } from "types/schema";
@@ -66,20 +66,16 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
     setFilteredTrips(filtered);
   };
 
-  const value = useMemo(
-    () => ({
-      tripEndpoints,
-      updateTripEndpoints,
-      filteredTrips,
-      fetchSuggestedTrips,
-      filters,
-      applyFilters,
-      trip,
-      setTrip,
-    }),
-    [tripEndpoints, suggestedTrips, filters, trip],
-  );
-
+  const value = {
+    tripEndpoints,
+    updateTripEndpoints,
+    filteredTrips,
+    fetchSuggestedTrips,
+    filters,
+    applyFilters,
+    trip,
+    setTrip,
+  };
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;
 }
 

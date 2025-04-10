@@ -1,16 +1,17 @@
-import React, { useRef, createContext, useState, ReactNode, useEffect } from "react";
-import { useSession } from "@contexts/SessionContext";
-import {
-  fetchUserTransitJournal,
-  fetchTransitJournal,
-  fetchTrip,
-  fetchSegments,
-  insertLiveUpdate,
-} from "@services/trip-service";
-import { subscribeToTableChanges } from "@api/supabase";
+import type { Camera, Location } from "@rnmapbox/maps";
+import { useContext, useRef, createContext, useState, ReactNode, useEffect, Fragment } from "react";
 
 import { type LineSourceRef } from "@components/map/LineSource";
 import { type CircleSourceRef } from "@components/map/CircleSource";
+
+import {
+  fetchTrip,
+  fetchSegments,
+  insertLiveUpdate,
+  fetchTransitJournal,
+  fetchUserTransitJournal,
+} from "@services/trip-service";
+import { subscribeToTableChanges } from "@api/supabase";
 
 import {
   computeHeading,
@@ -18,7 +19,7 @@ import {
   getNearestSegment,
   getNearestStep,
 } from "@utils/map-utils";
-import type { Camera, Location } from "@rnmapbox/maps";
+import { useSession } from "@contexts/SessionContext";
 
 interface AddLiveUpdate {
   type: LiveUpdateType;
@@ -51,8 +52,6 @@ const TransitJournalContext = createContext<TransitJournalContextType | null>(nu
 
 export function TransitJournalProvider({ children }: { children: ReactNode }) {
   const { user } = useSession();
-  if (!user) return <>{children}</>;
-
   const cameraRef = useRef<Camera>(null);
   const lineRef = useRef<LineSourceRef>(null);
   const circleRef = useRef<CircleSourceRef>(null);
@@ -72,6 +71,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
 
   // Check if the user has a transit journal
   useEffect(() => {
+    if (!user) return;
     const fetchInitialData = async () => {
       try {
         const transitJournalId = await fetchUserTransitJournal(user.id);
@@ -91,7 +91,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [user.id]);
+  }, [user?.id]);
 
   // Fetch the transit journal data
   useEffect(() => {
@@ -205,11 +205,13 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     followUser,
     setFollowUser,
   };
+
+  if (!user) return <Fragment>{children}</Fragment>;
   return <TransitJournalContext.Provider value={value}>{children}</TransitJournalContext.Provider>;
 }
 
 export const useTransitJournal = (): TransitJournalContextType => {
-  const context = React.useContext(TransitJournalContext);
+  const context = useContext(TransitJournalContext);
   if (!context) {
     throw new Error("useTransitJournal must be used within a TransitJournalProvider");
   }

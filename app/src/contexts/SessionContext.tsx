@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, Fragment } from "react";
 
 import { supabase } from "@utils/supabase";
 import { User } from "@supabase/supabase-js";
@@ -9,7 +9,7 @@ interface SessionContextType {
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
-export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,8 +30,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, []);
 
-  return <SessionContext.Provider value={{ user }}>{loading ? <></> : children}</SessionContext.Provider>;
-};
+  return (
+    <SessionContext.Provider value={{ user }}>
+      {loading ? <Fragment /> : children}
+    </SessionContext.Provider>
+  );
+}
 
 // Custom hook to use session context
 export const useSession = () => {
