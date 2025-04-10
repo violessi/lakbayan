@@ -1,11 +1,11 @@
 import { useRouter } from "expo-router";
 import { Alert, SafeAreaView, View } from "react-native";
-import { useEffect } from "react";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
 import SymbolMarker from "@components/map/SymbolMarker";
 import PrimaryButton from "@components/ui/PrimaryButton";
+import PrimaryButtonOutline from "@components/ui/PrimaryButtonOutline";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 
 import { useMapView } from "@hooks/use-map-view";
@@ -106,7 +106,9 @@ export default function SearchTrip() {
       </MapShell>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
-        <PrimaryButton label="Use Current Location" onPress={handleUseCurrentLoc} />
+        <PrimaryButtonOutline onPress={handleUseCurrentLoc}>
+          Use Current Location
+        </PrimaryButtonOutline>
         <PrimaryButton label="Confirm" onPress={handleConfirmLocation} />
       </View>
     </SafeAreaView>
