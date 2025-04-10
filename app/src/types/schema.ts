@@ -77,6 +77,7 @@ export const TripSchema = z.object({
   downvotes: z.number(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  comments: z.number(),
 });
 
 export const TripsSchema = z.array(TripSchema);

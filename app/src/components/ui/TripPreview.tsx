@@ -15,8 +15,7 @@ const bookmarkedIcon = require("@assets/social-bookmarked.png");
 
 export default function TripPreview({ trip }: { trip: FullTrip }) {
   const { user } = useSession();
-  const { bookmarked, modVerifications, gpsVerifications, commentCount, toggleBookmark } =
-    useTripPreviewData(user?.id || null, trip);
+  const { bookmarked, toggleBookmark } = useTripPreviewData(user?.id || null, trip);
 
   const totalDuration = trip.segments.reduce((sum, seg) => sum + seg.duration, 0);
   const totalCost = trip.segments.reduce((sum, seg) => sum + seg.cost, 0);
@@ -57,7 +56,7 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
                   style={{ width: 16, height: 16 }}
                   resizeMode="contain"
                 />
-                <Text className="text-sm">{modVerifications}</Text>
+                <Text className="text-sm">{trip.modVerified}</Text>
               </View>
               <View className="flex flex-row gap-1 items-center">
                 <Image
@@ -65,14 +64,14 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
                   style={{ width: 16, height: 16 }}
                   resizeMode="contain"
                 />
-                <Text className="text-sm">{gpsVerifications}</Text>
+                <Text className="text-sm">{trip.gpsVerified}</Text>
               </View>
             </View>
             <View className="flex flex-row gap-3">
-              {user && <VotingBar tripId={trip.id} userId={user.id} />}
+              {user && <VotingBar trip={trip} userId={user.id} />}
               <View className="flex flex-row gap-1 items-center">
                 <Image source={comment} style={{ width: 11, height: 11 }} resizeMode="contain" />
-                <Text className="text-sm">{commentCount}</Text>
+                <Text className="text-sm">{trip.comments}</Text>
               </View>
             </View>
           </View>

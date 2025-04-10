@@ -5,9 +5,11 @@ import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
 import SymbolMarker from "@components/map/SymbolMarker";
 import PrimaryButton from "@components/ui/PrimaryButton";
+import PrimaryButtonOutline from "@components/ui/PrimaryButtonOutline";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 
 import { useMapView } from "@hooks/use-map-view";
+import { useDefaultStartLocation } from "@hooks/use-default-start-location";
 import { useTripSearch } from "@contexts/TripSearchContext";
 import { reverseGeocode } from "@services/mapbox-service";
 
@@ -23,6 +25,15 @@ export default function SearchTrip() {
     updateTripEndpoints({ startLocation, startCoords });
     cameraRef.current?.moveTo(startCoords, 1000);
   };
+
+  // Set the default start location to the user's current location if not already set
+  useDefaultStartLocation({
+    userLocation: userLocation ?? undefined,
+    startLocation,
+    onSetStart: handleStartChange,
+    cameraRef,
+    zoomLevel,
+  });
 
   // When the user updates a location as "Destination".
   const handleEndChange = (endLocation: string, endCoords: Coordinates) => {
@@ -95,7 +106,9 @@ export default function SearchTrip() {
       </MapShell>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
-        <PrimaryButton label="Use Current Location" onPress={handleUseCurrentLoc} />
+        <PrimaryButtonOutline onPress={handleUseCurrentLoc}>
+          Use Current Location
+        </PrimaryButtonOutline>
         <PrimaryButton label="Confirm" onPress={handleConfirmLocation} />
       </View>
     </SafeAreaView>

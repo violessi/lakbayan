@@ -16,7 +16,7 @@ export type ModerationReview = z.infer<typeof ModerationReviewSchema>;
 
 export async function getPendingTripVerifications(moderatorId: string): Promise<FullTrip[]> {
   const { data: reviewData, error: reviewError } = await supabase
-    .from("moderation-reviews")
+    .from("moderation_reviews")
     .select("trip_toda_id")
     .eq("moderator_id", moderatorId)
     .eq("status", "pending")
@@ -46,7 +46,7 @@ export async function getPendingTripVerifications(moderatorId: string): Promise<
 
 export async function getPendingTodaVerifications(moderatorId: string): Promise<StopData[]> {
   const { data: reviewData, error: reviewError } = await supabase
-    .from("moderation-reviews")
+    .from("moderation_reviews")
     .select("trip_toda_id")
     .eq("moderator_id", moderatorId)
     .eq("status", "pending")
@@ -92,7 +92,7 @@ export async function addToPendingModeratorReview(tripId: string, type: string):
       type,
     }));
 
-    const { error } = await supabase.from("moderation-reviews").insert(moderationEntries);
+    const { error } = await supabase.from("moderation_reviews").insert(moderationEntries);
 
     if (error) {
       console.error("Error inserting into moderation table:", error);
@@ -111,7 +111,7 @@ export async function updateModerationStatus(
   status: string,
 ): Promise<void> {
   const { error } = await supabase
-    .from("moderation-reviews")
+    .from("moderation_reviews")
     .update({ status })
     .eq("moderator_id", moderatorId)
     .eq("trip_toda_id", tripId);

@@ -1,11 +1,11 @@
 import { Stack } from "expo-router";
-import { PaperProvider } from "react-native-paper";
+import { PaperProvider, MD3LightTheme } from "react-native-paper";
 import { useTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import "@utils/global.css";
-import { SessionProvider } from "../contexts/SessionContext";
+import { SessionProvider } from "@contexts/SessionContext";
 import { TransitJournalProvider } from "@contexts/TransitJournalContext";
 import { LocationProvider } from "@contexts/LocationContext";
 
@@ -13,13 +13,22 @@ export default function RootLayout() {
   const { colors } = useTheme();
   colors.background = "transparent";
 
+  const lightTheme = {
+    ...MD3LightTheme,
+    dark: false,
+    colors: {
+      ...MD3LightTheme.colors,
+      background: "transparent",
+    },
+  };
+
   return (
     <SessionProvider>
       <LocationProvider>
         <TransitJournalProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <BottomSheetModalProvider>
-              <PaperProvider>
+              <PaperProvider theme={lightTheme}>
                 <Stack>
                   <Stack.Screen name="index" options={{ headerShown: false }} />
                   <Stack.Screen name="(auth)" options={{ headerShown: false }} />

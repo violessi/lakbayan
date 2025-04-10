@@ -73,23 +73,6 @@ export default function ModerateTripsList() {
             )}
           />
         )}
-
-        {pendingTodas.length > 0 && (
-          <>
-            <Text className="text-black text-xl font-bold mt-4 mb-4">
-              Pending TODA Verifications
-            </Text>
-            <FlatList
-              data={pendingTodas}
-              keyExtractor={(stop) => stop.id}
-              renderItem={({ item: stop }) => (
-                <View className="p-2 border-b border-gray-200">
-                  <Text className="text-sm text-gray-700">TODA Stop ID: {stop.id}</Text>
-                </View>
-              )}
-            />
-          </>
-        )}
       </View>
     </SafeAreaView>
   );
