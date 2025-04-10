@@ -5,19 +5,18 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Alert, SafeAreaView, View, BackHandler } from "react-native";
 
 import Header from "@components/ui/Header";
-import TripTitle from "@components/contribute/TripTitle";
+import LineSource from "@components/map/LineSource";
 import { MapShell } from "@components/map/MapShell";
-import CircleMarker from "@components/map/CircleMarker";
+import CircleSource from "@components/map/CircleSource";
 import SymbolMarker from "@components/map/SymbolMarker";
+import TripTitle from "@components/contribute/TripTitle";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import DirectionLine from "@components/map/DirectionLine";
-import DirectionLines from "@components/map/DirectionLines";
 import RouteInformation from "@components/contribute/RouteInformation";
 import UnsavedChangesAlert from "@components/contribute/UnsavedChangesAlert";
 
 import { RouteInputSchema } from "@schemas";
 import { useMapView } from "@hooks/use-map-view";
-import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
+import { useTripCreator } from "@contexts/TripCreator";
 import { TRANSPORTATION_COLORS as COLORS } from "@constants/transportation-color";
 
 export default function RouteInput() {
@@ -71,7 +70,6 @@ export default function RouteInput() {
       Alert.alert("Error", result.error.errors[0].message);
       return;
     }
-
     addSegment();
     router.replace("/(contribute)/2-review-trip");
   };
@@ -115,29 +113,15 @@ export default function RouteInput() {
         handleMapPress={handleMapClick}
         fitBounds={[route.startCoords, route.endCoords]}
       >
-        <DirectionLines coordinates={segments.map((segment) => segment.waypoints)} />
-        <DirectionLine coordinates={route.waypoints} color={COLORS[segments.length]} />
+        <LineSource id="segments" data={segments} lineWidth={3} />
+        <LineSource id="route" data={[route]} lineWidth={3} colors={[COLORS[segments.length]]} />
 
-        <SymbolMarker id="trip-start" label={trip.startLocation} coordinates={trip.startCoords} />
-        <SymbolMarker id="trip-end" label={trip.endLocation} coordinates={trip.endCoords} />
-
+        <CircleSource id="waypoints" data={customWaypoints} />
+        <SymbolMarker id="start-loc" label="Start" coordinates={trip.startCoords} />
+        <SymbolMarker id="end-loc" label="destination" coordinates={trip.endCoords} />
         {trip.endLocation !== route.endLocation && (
-          <CircleMarker
-            id="route-end-loc"
-            coordinates={route.endCoords}
-            label={route.endLocation}
-            color={COLORS[segments.length]}
-          />
+          <SymbolMarker id="next-loc" coordinates={route.endCoords} label="Next Transfer" />
         )}
-
-        {customWaypoints.map((waypoint, index) => (
-          <CircleMarker
-            key={`waypoint-${index}`}
-            id={`waypoint-${index}`}
-            coordinates={waypoint}
-            label={`Waypoint ${index + 1}`}
-          />
-        ))}
       </MapShell>
 
       <View className="absolute bottom-0 z-50 w-full px-10 pb-12">

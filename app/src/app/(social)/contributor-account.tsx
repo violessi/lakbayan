@@ -45,7 +45,7 @@ export default function ContributorAccount() {
   const [submittedTrips, setSubmittedTrips] = useState<FullTrip[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const { userTrips, loading: tripsLoading, error } = useUserTrips(contributor.id);
+  const { userTrips, loading: tripsLoading } = useUserTrips(contributor.id);
 
   useEffect(() => {
     if (!contributor.id || tripsLoading) return;

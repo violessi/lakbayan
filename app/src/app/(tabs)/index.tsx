@@ -3,8 +3,8 @@ import { Text, Image, View, SafeAreaView, Pressable } from "react-native";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
+import SymbolSource from "@components/map/SymbolSource";
 import RecentTrips from "@components/search/RecentTrips";
-import LiveUpdateMarker from "@components/map/LiveUpdateMarker";
 
 import { useMapView } from "@hooks/use-map-view";
 import { useLiveUpdates } from "@hooks/use-live-updates";
@@ -12,14 +12,18 @@ import { useLiveUpdates } from "@hooks/use-live-updates";
 export default function Index() {
   const router = useRouter();
   const { userLocation } = useMapView();
-  const { liveUpdates, setUpdateCoords } = useLiveUpdates("box", 30);
+  const { symbolRef, updateLiveStatus } = useLiveUpdates("box", 10);
 
   const handleTextInputFocus = () => {
     router.push("/(search)/1-search-trip");
   };
 
-  const handleRegionChange = ({ properties }: MapViewRegionChange) => {
-    setUpdateCoords(properties.visibleBounds as Coordinates[]);
+  const handleCameraChange = (state: MapBoxMapState) => {
+    const newCoordinates = [
+      state.properties.bounds.ne,
+      state.properties.bounds.sw,
+    ] as Coordinates[];
+    updateLiveStatus(newCoordinates);
   };
 
   return (
@@ -38,15 +42,8 @@ export default function Index() {
           <Text style={{ fontSize: 12, color: "#888" }}>Where are we off to today?</Text>
         </Pressable>
       </View>
-      <MapShell center={userLocation} handleRegionChange={handleRegionChange}>
-        {liveUpdates.map((update) => (
-          <LiveUpdateMarker
-            key={update.id}
-            id={update.id}
-            type={update.type}
-            coordinates={update.coordinate}
-          />
-        ))}
+      <MapShell center={userLocation} handleCameraChange={handleCameraChange}>
+        <SymbolSource ref={symbolRef} id={"live-update"} />
       </MapShell>
       <RecentTrips />
     </SafeAreaView>

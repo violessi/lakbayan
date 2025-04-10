@@ -1,6 +1,6 @@
 import React from "react";
 import { point } from "@turf/helpers";
-import { ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
+import { ShapeSource, SymbolLayer } from "@rnmapbox/maps";
 
 interface LiveUpdateMarkerProps {
   id: string;

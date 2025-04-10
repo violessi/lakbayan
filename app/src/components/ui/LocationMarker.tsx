@@ -11,7 +11,13 @@ interface LocationMarkerProps {
   radius: number;
 }
 
-export default function LocationMarker({ id, coordinates, label, color, radius }: LocationMarkerProps) {
+export default function LocationMarker({
+  id,
+  coordinates,
+  label,
+  color,
+  radius,
+}: LocationMarkerProps) {
   return (
     <ShapeSource id={id} shape={point(coordinates)}>
       <CircleLayer

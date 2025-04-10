@@ -1,14 +1,9 @@
 import React, { useState } from "react";
 import { View, FlatList, Keyboard } from "react-native";
-import { TextInput, List, IconButton } from "react-native-paper";
-import { fetchSuggestions } from "@services/mapbox-service";
-
-import Mapbox from "@rnmapbox/maps";
-import { MAPBOX_ACCESS_TOKEN } from "../utils/mapbox-config";
+import { TextInput, IconButton } from "react-native-paper";
 
 import { SuggestionListItem } from "./ui/SuggestionsList";
-
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
+import { fetchSuggestions } from "@services/mapbox-service";
 
 interface StartEndSearchProps {
   onStartChange?: (location: string, coordinates: [number, number]) => void;

@@ -3,7 +3,7 @@ import * as ExpoLocation from "expo-location";
 import { Text, View, Image, TouchableOpacity, Alert } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
-import { useTransitJournal } from "@contexts/TransitJournal";
+import { useTransitJournal } from "@contexts/TransitJournalContext";
 
 type Report = { label: LiveUpdateType; image: any };
 const reportOptions: Report[] = [
@@ -13,7 +13,7 @@ const reportOptions: Report[] = [
 ];
 
 export default function ReportTab() {
-  const snapPoints = ["15%", "20%", "40%", "72%"];
+  const snapPoints = ["7"];
 
   const { addLiveUpdate } = useTransitJournal();
 
@@ -23,35 +23,33 @@ export default function ReportTab() {
 
     Alert.alert("Send Live Update", `Report ${type} at your current location?`, [
       { text: "Cancel", style: "cancel" },
-      {
-        text: "Send Live Update",
-        onPress: () => addLiveUpdate({ type, coordinate }),
-      },
+      { text: "Send Live Update", onPress: () => addLiveUpdate({ type, coordinate }) },
     ]);
   };
 
   return (
-    <BottomSheet snapPoints={snapPoints} index={2}>
-      <BottomSheetView className="flex flex-col px-5 gap-6">
+    <BottomSheet snapPoints={snapPoints} index={1}>
+      <BottomSheetView className="flex flex-col px-6 pb-8 gap-4">
         <View className="flex flex-row justify-between">
-          <Text className="font-bold text-lg">How's the trip?</Text>
+          <Text className="font-bold text-xl">Send Live Updates</Text>
         </View>
-        <View className="flex flex-row justify-between px-12">
+        <View className="flex flex-row justify-center gap-4">
           {reportOptions.map(({ label, image }) => {
             return (
               <TouchableOpacity
                 key={label}
                 onPress={() => handleReportPress(label)}
-                className={`border rounded py-5 w-24 items-center border-gray-200"
-                }`}
+                className={
+                  "border border-primary rounded-xl w-20 aspect-square flex justify-center items-center"
+                }
               >
                 <Image
                   source={image}
-                  className="w-7 h-7 mb-2"
+                  className="size-6 mb-2"
                   resizeMode="contain"
                   style={{ tintColor: "#9CA3AF" }} // Purple when selected, gray when not
                 />
-                <Text className={`text-secondary text-sm`}>{label}</Text>
+                <Text className={`text-gray-600 text-sm`}>{label}</Text>
               </TouchableOpacity>
             );
           })}

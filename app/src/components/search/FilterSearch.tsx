@@ -1,21 +1,18 @@
-import React, { useState, useMemo, useCallback, useRef } from "react";
+import React, { useState } from "react";
 import { View, Text, Pressable } from "react-native";
-
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { Checkbox, RadioButton } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Checkbox, Modal, Menu, RadioButton } from "react-native-paper";
-
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import PrimaryButton from "@components/ui/PrimaryButton";
 
 interface Props {
-  onClose: () => void;
+  sheetRef: React.RefObject<BottomSheet>;
   filters: FilterState;
   applyFilters: (filters: FilterState) => void;
 }
 
-export default function FilterSearch({ onClose, filters, applyFilters }: Props) {
-  const snapPoints = useMemo(() => ["55%"], []);
-  const bottomSheetRef = useRef(null);
+export default function FilterSearch({ sheetRef, filters, applyFilters }: Props) {
+  const snapPoints = ["60%"];
 
   const [timeToLeave, setTimeToLeave] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -30,21 +27,21 @@ export default function FilterSearch({ onClose, filters, applyFilters }: Props) 
     );
   };
 
+  // Apply filters and close the sheet
   const handleApplyFilters = () => {
     applyFilters({ sortBy, transportModes: selectedModes });
-    onClose();
+    sheetRef.current?.close();
   };
 
   return (
     <BottomSheet
-      ref={bottomSheetRef}
+      ref={sheetRef}
       snapPoints={snapPoints}
-      index={0}
+      index={-1}
       enablePanDownToClose
       onClose={handleApplyFilters}
     >
-      <BottomSheetView className="flex flex-col px-5 gap-3">
-        {/* Header */}
+      <BottomSheetView className="flex flex-col px-5 pb-8 gap-3">
         <View className="flex-row items-center gap-2">
           <Text className="text-xl font-bold">Filter trips</Text>
         </View>
@@ -74,7 +71,6 @@ export default function FilterSearch({ onClose, filters, applyFilters }: Props) 
 
         <View>
           <Text className="text-gray-600">Sort by</Text>
-
           <RadioButton.Group onValueChange={setSortBy} value={sortBy}>
             <View className="flex-row items-center">
               <RadioButton value="Verified by moderators" />

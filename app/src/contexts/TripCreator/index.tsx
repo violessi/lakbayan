@@ -1,11 +1,10 @@
 import React, { createContext, useState, ReactNode } from "react";
 
 import { useSession } from "@contexts/SessionContext";
+import { getDirections, paraphraseStep } from "@services/mapbox-service";
 import { addToPendingModeratorReview } from "@services/moderation-service";
 import { insertTrip, insertSegments, insertTripSegmentLinks } from "@services/trip-service";
 import { TRIP_INITIAL_STATE, SEGMENT_INITIAL_STATE } from "@contexts/TripCreator/initialValues";
-
-import { getDirections, paraphraseStep } from "@services/mapbox-service";
 
 interface TripCreatorContextType {
   trip: CreateTrip;

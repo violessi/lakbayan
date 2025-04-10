@@ -1,116 +1,101 @@
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
 import { Alert, SafeAreaView, View } from "react-native";
-import Mapbox, { MapView, Camera, Images } from "@rnmapbox/maps";
 
 import Header from "@components/ui/Header";
+import { MapShell } from "@components/map/MapShell";
 import SymbolMarker from "@components/map/SymbolMarker";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 
-import pin from "@assets/pin-purple.png";
-import { useTripSearch } from "@contexts/TripSearch";
+import { useMapView } from "@hooks/use-map-view";
+import { useTripSearch } from "@contexts/TripSearchContext";
 import { reverseGeocode } from "@services/mapbox-service";
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
-
-// TODO: set initial camera to current location
-const INITIAL_CENTER = [121.05, 14.63] as Coordinates;
-
+// NOTE: Same component as contribyte-create-trip
 export default function SearchTrip() {
   const router = useRouter();
-  const cameraRef = useRef<Camera>(null);
-  const [zoomLevel, setZoomLevel] = useState(15);
-
+  const { userLocation, cameraRef, zoomLevel, center, handleMapPress } = useMapView();
   const { tripEndpoints, updateTripEndpoints, fetchSuggestedTrips } = useTripSearch();
-  const [mapCoordinates, setMapCoordinates] = useState<Coordinates | null>(null);
+  const { startLocation, endLocation, startCoords, endCoords } = tripEndpoints || {};
 
+  // When the user updates a location as "Source".
   const handleStartChange = (startLocation: string, startCoords: Coordinates) => {
-    setMapCoordinates(null);
     updateTripEndpoints({ startLocation, startCoords });
-    if (cameraRef.current) cameraRef.current.moveTo(startCoords, 1000);
+    cameraRef.current?.moveTo(startCoords, 1000);
   };
 
+  // When the user updates a location as "Destination".
   const handleEndChange = (endLocation: string, endCoords: Coordinates) => {
-    setMapCoordinates(null);
     updateTripEndpoints({ endLocation, endCoords });
-    if (cameraRef.current) cameraRef.current.moveTo(endCoords, 1000);
+    cameraRef.current?.moveTo(endCoords, 1000);
   };
 
-  const handleMapPress = async (event: any) => {
-    const coords = event.geometry.coordinates as Coordinates;
-    const locationName = await reverseGeocode(coords);
-    setMapCoordinates(coords);
-    confirmationAlert(coords, locationName);
-    if (cameraRef.current) cameraRef.current.moveTo(coords, 1000);
+  // Allow users to use current location as start or end location.
+  const handleUseCurrentLoc = async () => {
+    if (!userLocation) throw new Error("User location not found.");
+    confirmationAlert(userLocation);
   };
 
-  const confirmationAlert = (coords: Coordinates, location: string) => {
+  // When the user presses Confirm, navigate to the next screen if both locations are set.
+  const handleConfirmLocation = async () => {
+    if (!tripEndpoints?.startLocation || !tripEndpoints?.endLocation) {
+      Alert.alert("Please select both a source and destination.");
+      return;
+    }
+    try {
+      await fetchSuggestedTrips();
+      router.push("/(search)/2-trip-suggestions");
+    } catch (error) {
+      Alert.alert("Error fetching trips. Please try again.");
+    }
+  };
+
+  // Alert asking if the location is Source or Destination.
+  const confirmationAlert = async (coords: Coordinates) => {
+    const location = (await reverseGeocode(coords)) as string;
     Alert.alert(
       "Confirm Location",
       `Do you want to set ${location} as your source or destination?`,
       [
+        { text: "Cancel" },
         { text: "Source", onPress: () => handleStartChange(location, coords) },
         { text: "Destination", onPress: () => handleEndChange(location, coords) },
-        { text: "Cancel", onPress: () => setMapCoordinates(null) },
       ],
     );
   };
 
-  const handleConfirmLocation = async () => {
-    if (tripEndpoints?.startLocation && tripEndpoints?.endLocation) {
-      await fetchSuggestedTrips();
-      router.push("/(search)/2-trip-suggestions");
-    } else {
-      Alert.alert("Please select both a source and destination.");
-    }
+  // Handle map press event with confirmation alert.
+  const handlePress = (feature: MapPressFeature) => {
+    handleMapPress(feature, confirmationAlert);
   };
 
-  const handleZoomChange = (event: any) => {
-    setZoomLevel(event.properties.zoom);
-  };
+  // Navigate back to the previous screen.
+  const prevCallback = () => router.replace("/(tabs)");
 
   return (
     <SafeAreaView className="flex-1">
-      <Header title="Where are we off to today?" />
+      <Header prevCallback={prevCallback} title="Where are we off to today?" />
       <View>
         <StartEndSearchBar
-          defaultStart={tripEndpoints?.startLocation || "Starting location"}
-          defaultEnd={tripEndpoints?.endLocation || "Destination"}
+          defaultStart={startLocation || "Starting location"}
+          defaultEnd={endLocation || "Destination"}
           onStartChange={handleStartChange}
           onEndChange={handleEndChange}
         />
       </View>
 
-      <MapView
-        style={{ flex: 1 }}
-        styleURL="mapbox://styles/mapbox/streets-v12"
-        onPress={handleMapPress}
-        onRegionDidChange={handleZoomChange}
-        projection="mercator"
+      <MapShell
+        center={center}
+        zoomLevel={zoomLevel}
+        cameraRef={cameraRef}
+        handleMapPress={handlePress}
       >
-        <Camera
-          ref={cameraRef}
-          centerCoordinate={INITIAL_CENTER}
-          zoomLevel={zoomLevel}
-          animationMode="easeTo"
-        />
-        <SymbolMarker id="map-onclick-location-c1" coordinates={mapCoordinates} />
-        <SymbolMarker
-          id="start-location-c1"
-          label={tripEndpoints?.startLocation?.split(",")[0]}
-          coordinates={tripEndpoints?.startCoords}
-        />
-        <SymbolMarker
-          id="end-location-c1"
-          label={tripEndpoints?.endLocation?.split(",")[0]}
-          coordinates={tripEndpoints?.endCoords}
-        />
-        <Images images={{ pin }} />
-      </MapView>
+        <SymbolMarker id="start-loc" label="Start" coordinates={startCoords} />
+        <SymbolMarker id="end-loc" label="Destination" coordinates={endCoords} />
+      </MapShell>
 
-      <View className="z-50 p-5 absolute bottom-0 w-1/2 self-center">
+      <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
+        <PrimaryButton label="Use Current Location" onPress={handleUseCurrentLoc} />
         <PrimaryButton label="Confirm" onPress={handleConfirmLocation} />
       </View>
     </SafeAreaView>

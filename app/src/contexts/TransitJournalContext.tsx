@@ -1,16 +1,17 @@
-import React, { useRef, createContext, useState, ReactNode, useEffect } from "react";
-import { useSession } from "@contexts/SessionContext";
-import {
-  fetchUserTransitJournal,
-  fetchTransitJournal,
-  fetchTrip,
-  fetchSegments,
-  insertLiveUpdate,
-} from "@services/trip-service";
-import { subscribeToTableChanges } from "@api/supabase";
+import type { Camera, Location } from "@rnmapbox/maps";
+import { useContext, useRef, createContext, useState, ReactNode, useEffect, Fragment } from "react";
 
 import { type LineSourceRef } from "@components/map/LineSource";
 import { type CircleSourceRef } from "@components/map/CircleSource";
+
+import {
+  fetchTrip,
+  fetchSegments,
+  insertLiveUpdate,
+  fetchTransitJournal,
+  fetchUserTransitJournal,
+} from "@services/trip-service";
+import { subscribeToTableChanges } from "@api/supabase";
 
 import {
   computeHeading,
@@ -18,7 +19,7 @@ import {
   getNearestSegment,
   getNearestStep,
 } from "@utils/map-utils";
-import type { Camera, Location } from "@rnmapbox/maps";
+import { useSession } from "@contexts/SessionContext";
 
 interface AddLiveUpdate {
   type: LiveUpdateType;
@@ -31,24 +32,26 @@ interface TransitJournalContextType {
   circleRef: React.RefObject<CircleSourceRef>;
   transitJournalId: string | null;
   transitJournal: any | null;
-  trip: Trip | null;
+  trip: FullTrip | null;
   segments: Segment[] | null;
   currentStep: NavigationSteps | null;
   activeSegments: Segment[];
+  showTripAbortModal: boolean;
   showNextSegmentModal: boolean;
   showTripFinishedModal: boolean;
+  setShowTripAbortModal: (showTripAbortModal: boolean) => void;
   setShowNextSegmentModal: (showNextSegmentModal: boolean) => void;
   setShowTripFinishedModal: (showTripFinishedModal: boolean) => void;
   addLiveUpdate: ({ type, coordinate }: AddLiveUpdate) => Promise<void>;
   handleUserLocationUpdate: ({ coords }: Location) => Promise<void>;
+  followUser: boolean;
+  setFollowUser: (followUser: boolean) => void;
 }
 
 const TransitJournalContext = createContext<TransitJournalContextType | null>(null);
 
 export function TransitJournalProvider({ children }: { children: ReactNode }) {
   const { user } = useSession();
-  if (!user) return <>{children}</>;
-
   const cameraRef = useRef<Camera>(null);
   const lineRef = useRef<LineSourceRef>(null);
   const circleRef = useRef<CircleSourceRef>(null);
@@ -56,16 +59,19 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   const [transitJournal, setTransitJournal] = useState<any | null>(null);
   const [transitJournalId, setTransitJournalId] = useState<string | null>(null);
 
-  const [trip, setTrip] = useState<Trip | null>(null);
+  const [trip, setTrip] = useState<FullTrip | null>(null);
   const [segments, setSegments] = useState<Segment[] | null>(null);
   const [currentStep, setCurrentStep] = useState<NavigationSteps | null>(null);
   const [activeSegments, setActiveSegments] = useState<Segment[]>([]);
 
+  const [showTripAbortModal, setShowTripAbortModal] = useState(false);
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
+  const [followUser, setFollowUser] = useState(true);
 
   // Check if the user has a transit journal
   useEffect(() => {
+    if (!user) return;
     const fetchInitialData = async () => {
       try {
         const transitJournalId = await fetchUserTransitJournal(user.id);
@@ -85,7 +91,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [user.id]);
+  }, [user?.id]);
 
   // Fetch the transit journal data
   useEffect(() => {
@@ -100,7 +106,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
       try {
         const journalData = await fetchTransitJournal(transitJournalId);
         const fullTripData = await fetchTrip(journalData.tripId);
-        const { segments, ...trip } = fullTripData;
+        const { segments, ...res } = fullTripData;
 
         if (journalData.preSegmentId) {
           const preSegment = await fetchSegments([journalData.preSegmentId]);
@@ -111,7 +117,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
           segments.push(postSegment[0]);
         }
 
-        setTrip(trip);
+        setTrip(fullTripData);
         setSegments(segments);
         setTransitJournal(journalData);
       } catch (error) {
@@ -145,14 +151,16 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
 
     // update the camera to follow the user and face the next point
     // TODO: add toggle follow mode
-    const newHeading = computeHeading(newLocation, activeRoutes[0].waypoints[1] ?? newLocation);
-    cameraRef.current.setCamera({
-      pitch: 60,
-      zoomLevel: 16,
-      animationDuration: 1000,
-      heading: newHeading,
-      centerCoordinate: newLocation,
-    });
+    if (followUser) {
+      const newHeading = computeHeading(newLocation, activeRoutes[0].waypoints[1] ?? newLocation);
+      cameraRef.current.setCamera({
+        pitch: 60,
+        zoomLevel: 16,
+        animationDuration: 1000,
+        heading: newHeading,
+        centerCoordinate: newLocation,
+      });
+    }
 
     // update the map with the new segments
     lineRef.current.update(activeRoutes);
@@ -187,17 +195,23 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     currentStep,
     activeSegments,
     addLiveUpdate,
+    showTripAbortModal,
+    setShowTripAbortModal,
     showNextSegmentModal,
     setShowNextSegmentModal,
     showTripFinishedModal,
     setShowTripFinishedModal,
     handleUserLocationUpdate,
+    followUser,
+    setFollowUser,
   };
+
+  if (!user) return <Fragment>{children}</Fragment>;
   return <TransitJournalContext.Provider value={value}>{children}</TransitJournalContext.Provider>;
 }
 
 export const useTransitJournal = (): TransitJournalContextType => {
-  const context = React.useContext(TransitJournalContext);
+  const context = useContext(TransitJournalContext);
   if (!context) {
     throw new Error("useTransitJournal must be used within a TransitJournalProvider");
   }

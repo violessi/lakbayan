@@ -3,7 +3,7 @@ import { Text, Pressable } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 
-import { useTransitJournal } from "@contexts/TransitJournal";
+import { useTransitJournal } from "@contexts/TransitJournalContext";
 
 export default function RecentTrips() {
   const snapPoints = ["20%"];

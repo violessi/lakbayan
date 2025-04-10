@@ -1,4 +1,5 @@
 import type { Feature, Point, Geometry, GeoJsonProperties } from "geojson";
+import type { MapState } from "@rnmapbox/maps";
 
 declare global {
   export interface Suggestion {
@@ -75,6 +76,7 @@ declare global {
   };
 
   export type MapViewRegionChange = Feature<Point, MapBoxRegionPayload>;
+  export type MapBoxMapState = MapState;
 
   export type NearestPoint = Feature<Point, NearestPointProperties>;
 }

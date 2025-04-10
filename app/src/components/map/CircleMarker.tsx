@@ -38,7 +38,8 @@ function CircleMarker({
           style={{
             textField: label,
             textSize: 10,
-            textOffset: [0, 4],
+            textOffset: [0, 2],
+            textAllowOverlap: true,
           }}
         />
       ) : (

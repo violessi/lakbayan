@@ -1,14 +1,12 @@
 import React from "react";
-import { Platform } from "react-native";
 import Mapbox, { Images, MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
-import type { Feature, Point } from "geojson";
+
 import pinIcon from "@assets/pin-purple.png";
-import trafficIcon from "@assets/report-traffic.png";
 import lineIcon from "@assets/report-lines.png";
+import trafficIcon from "@assets/report-traffic.png";
 import disruptionIcon from "@assets/report-disruption.png";
 
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 interface MapShellProps {
@@ -19,7 +17,7 @@ interface MapShellProps {
   fitBounds?: Coordinates[];
   handleMapPress?: (feature: MapPressFeature) => void;
   handleUserLocation?: (location: Location) => void;
-  handleRegionChange?: (region: Feature<Point, MapBoxRegionPayload>) => void;
+  handleCameraChange?: (state: MapBoxMapState) => void;
   cameraProps?: React.ComponentProps<typeof Camera>;
   userLocationProps?: React.ComponentProps<typeof UserLocation>;
 }
@@ -32,7 +30,7 @@ export const MapShell = ({
   fitBounds,
   handleMapPress,
   handleUserLocation,
-  handleRegionChange,
+  handleCameraChange,
   cameraProps,
   userLocationProps,
 }: MapShellProps) => {
@@ -55,17 +53,20 @@ export const MapShell = ({
   return (
     <MapView
       style={{ flex: 1 }}
-      styleURL="mapbox://styles/mapbox/streets-v12"
-      onPress={handleMapPress}
       projection="mercator"
+      styleURL="mapbox://styles/mapbox/streets-v12"
+      logoEnabled={false}
+      scaleBarEnabled={false}
+      onPress={handleMapPress}
+      onCameraChanged={handleCameraChange}
       onDidFinishLoadingMap={handleMapLoaded}
-      onRegionDidChange={handleRegionChange}
     >
       <Camera
         ref={cameraRef}
         centerCoordinate={finalCenter}
         zoomLevel={zoomLevel ?? 12}
-        animationMode={Platform.OS === "android" ? "none" : "easeTo"}
+        animationMode={"easeTo"}
+        animationDuration={500}
         {...cameraProps}
       />
       <UserLocation

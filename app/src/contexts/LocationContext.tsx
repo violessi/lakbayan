@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect, ReactNode } from "react";
 import * as ExpoLocation from "expo-location";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 // Define the context type
 interface LocationContextType {
@@ -20,7 +20,6 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   useEffect(() => {
     (async () => {
-      console.log("getting permission");
       const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
       if (status === "granted") {
         setPermissionGranted(true);
@@ -41,7 +40,7 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({ children }
 };
 
 export const useUserLocation = (): LocationContextType => {
-  const context = React.useContext(LocationContext);
+  const context = useContext(LocationContext);
   if (!context) {
     throw new Error("useLocation must be used within a LocationProvider");
   }

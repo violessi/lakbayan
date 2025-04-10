@@ -1,25 +1,28 @@
 import React from "react";
 import { point } from "@turf/helpers";
-import { ShapeSource, SymbolLayer, Images } from "@rnmapbox/maps";
+import { ShapeSource, SymbolLayer } from "@rnmapbox/maps";
 
 interface SymbolMarkerProps {
   id: string;
-  label?: string | null | undefined;
   coordinates: Coordinates | null | undefined;
+  label?: string | null | undefined;
   iconImage?: string;
   iconSize?: number;
 }
 
-// FIXME: duplicate source layers
+// Renders a single symbol marker on the map using ShapeSource and SymbolLayer.
+// Ideal for static or individually controlled markers.
+// For dynamic or data-driven markers, consider using the SymbolSource component instead.
 function SymbolMarker({
   id,
-  label,
   coordinates,
+  label,
   iconImage = "pin",
   iconSize = 0.1,
 }: SymbolMarkerProps) {
   if (!coordinates) return null;
 
+  // FIXME: add offset to the icon
   return (
     <ShapeSource id={id} shape={point(coordinates)}>
       <SymbolLayer
@@ -27,6 +30,7 @@ function SymbolMarker({
         style={{
           iconImage: iconImage,
           iconSize: iconSize,
+          iconAllowOverlap: true,
         }}
       />
       {label ? (
@@ -35,7 +39,8 @@ function SymbolMarker({
           style={{
             textField: label,
             textSize: 10,
-            textOffset: [0, 4],
+            textOffset: [0, 2],
+            textAllowOverlap: true,
           }}
         />
       ) : (

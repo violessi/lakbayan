@@ -10,7 +10,7 @@ import StartEndSearchBar from "@components/StartEndSearchBar";
 
 import { useMapView } from "@hooks/use-map-view";
 import { reverseGeocode } from "@services/mapbox-service";
-import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
+import { useTripCreator } from "@contexts/TripCreator";
 
 export default function CustomTrip() {
   const { trip, updateTrip } = useTripCreator();
@@ -57,12 +57,17 @@ export default function CustomTrip() {
     );
   };
 
+  // Handle map press event with confirmation alert.
+  const handlePress = (feature: MapPressFeature) => {
+    handleMapPress(feature, confirmationAlert);
+  };
+
   // Navigate back to the previous screen.
   const prevCallback = () => router.replace("/(tabs)/contribute");
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Custom Trips" prevCallback={prevCallback} />
+      <Header prevCallback={prevCallback} title="Custom Trips" />
 
       <View>
         <StartEndSearchBar
@@ -77,18 +82,10 @@ export default function CustomTrip() {
         center={center}
         zoomLevel={zoomLevel}
         cameraRef={cameraRef}
-        handleMapPress={(feature) => handleMapPress(feature, confirmationAlert)}
+        handleMapPress={handlePress}
       >
-        <SymbolMarker
-          id="start-location"
-          label={trip.startLocation.split(",")[0]}
-          coordinates={trip.startCoords}
-        />
-        <SymbolMarker
-          id="end-location"
-          label={trip.endLocation.split(",")[0]}
-          coordinates={trip.endCoords}
-        />
+        <SymbolMarker id="start-loc" label="Start" coordinates={trip.startCoords} />
+        <SymbolMarker id="end-loc" label="Destination" coordinates={trip.endCoords} />
       </MapShell>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">

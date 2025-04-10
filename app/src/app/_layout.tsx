@@ -1,12 +1,12 @@
 import { Stack } from "expo-router";
-import { PaperProvider, MD3LightTheme } from "react-native-paper";
+import { PaperProvider } from "react-native-paper";
 import { useTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import "@utils/global.css";
 import { SessionProvider } from "../contexts/SessionContext";
-import { TransitJournalProvider } from "@contexts/TransitJournal";
+import { TransitJournalProvider } from "@contexts/TransitJournalContext";
 import { LocationProvider } from "@contexts/LocationContext";
 
 export default function RootLayout() {

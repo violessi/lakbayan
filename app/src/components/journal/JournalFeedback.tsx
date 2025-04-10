@@ -1,41 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, Image, TouchableOpacity, TextInput, Alert } from "react-native";
-import { useRouter } from "expo-router";
-
-import { getPoints } from "@services/socials-service";
-import { addComment } from "@services/socials-service";
-import { insertJournalEntry } from "@services/journal-service";
-import { updateTransitJournal, updateProfile } from "@services/trip-service";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { Text, View, Image, TouchableOpacity, TextInput } from "react-native";
 
 import VotingBar from "@components/VotingBar";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
+import { getPoints } from "@services/socials-service";
 const comment = require("@assets/social-comment.png");
 
 interface JournalFeedbackProps {
   trip: Trip;
-  segments: Segment[];
   currentUserId: string;
   onCommentPress: (tripId: string) => void;
-  isGpsVerified: boolean;
-  transitJournal: TransitJournal;
+  handleSubmit: () => void;
+  newComment: string;
+  setNewComment: (comment: string) => void;
 }
 
 export default function JournalFeedback({
   trip,
-  segments,
   currentUserId,
   onCommentPress,
-  isGpsVerified,
-  transitJournal,
+  handleSubmit,
+  newComment,
+  setNewComment,
 }: JournalFeedbackProps) {
   const snapPoints = ["10%", "18%", "40%", "72%"];
-  const router = useRouter();
 
   const [points, setPoints] = useState<number>(0);
-
-  const [newComment, setNewComment] = useState("");
 
   useEffect(() => {
     async function fetchPoints() {
@@ -45,51 +37,6 @@ export default function JournalFeedback({
 
     fetchPoints();
   }, [trip.contributorId, trip.id]);
-
-  const handleSubmit = async () => {
-    if (!newComment.trim()) return;
-
-    try {
-      await addComment(trip.id, currentUserId || "", newComment, isGpsVerified);
-      console.log("Comment added successfully");
-
-      for (const segment of segments) {
-        if (segment.id.startsWith("walk")) continue; // Skip generated walk segments
-
-        await insertJournalEntry(
-          segment.id,
-          currentUserId,
-          "2025-03-10T08:00:00Z", // FIXME Placeholder time_start
-          "2025-03-10T08:30:00Z", // FIXME Placeholder time_end
-          1800, // FIXME Placeholder duration
-          false,
-          false,
-        );
-      }
-
-      console.log("Journal entries added successfully");
-
-      // Update transit journal status to success
-      await updateTransitJournal({
-        id: transitJournal.id,
-        status: "success",
-        endTime: new Date().toISOString(),
-      });
-
-      // Update user profile to remove transit journal
-      await updateProfile({
-        id: currentUserId,
-        transitJournalId: null,
-      });
-
-      router.replace("/(tabs)");
-      Alert.alert("Success", "Your transit journal has been submitted!", [{ text: "OK" }]);
-
-      setNewComment("");
-    } catch (error) {
-      console.error("Error submitting feedback:", error);
-    }
-  };
 
   return (
     <BottomSheet snapPoints={snapPoints} index={2}>
