@@ -3,7 +3,7 @@ import * as ExpoLocation from "expo-location";
 import { Text, View, Image, TouchableOpacity, Alert } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
-import { useTransitJournal } from "@contexts/TransitJournal";
+import { useTransitJournal } from "@contexts/TransitJournalContext";
 
 type Report = { label: LiveUpdateType; image: any };
 const reportOptions: Report[] = [

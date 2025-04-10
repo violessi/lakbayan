@@ -1,11 +1,9 @@
-import lodash from "lodash";
-import { useRef } from "react";
 import { useRouter } from "expo-router";
 import { Text, Image, View, SafeAreaView, Pressable } from "react-native";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
-import SymbolSource, { type SymbolSourceRef } from "@components/map/SymbolSource";
+import SymbolSource from "@components/map/SymbolSource";
 import RecentTrips from "@components/search/RecentTrips";
 
 import { useMapView } from "@hooks/use-map-view";

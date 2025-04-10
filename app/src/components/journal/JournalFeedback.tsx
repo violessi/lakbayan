@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Text, View, Image, TouchableOpacity, TextInput } from "react-native";
-
-import { getPoints } from "@services/socials-service";
 
 import VotingBar from "@components/VotingBar";
 import PrimaryButton from "@components/ui/PrimaryButton";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
+import { getPoints } from "@services/socials-service";
 const comment = require("@assets/social-comment.png");
 
 interface JournalFeedbackProps {

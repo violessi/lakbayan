@@ -8,7 +8,7 @@ import TripPreview from "@components/ui/TripPreview";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import FilterSearch from "@components/search/FilterSearch";
 
-import { useTripSearch } from "@contexts/TripSearch";
+import { useTripSearch } from "@contexts/TripSearchContext";
 
 export default function SuggestedTrips() {
   const router = useRouter();

@@ -8,7 +8,7 @@ import PrimaryButton from "@components/ui/PrimaryButton";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 
 import { useMapView } from "@hooks/use-map-view";
-import { useTripSearch } from "@contexts/TripSearch";
+import { useTripSearch } from "@contexts/TripSearchContext";
 import { reverseGeocode } from "@services/mapbox-service";
 
 // NOTE: Same component as contribyte-create-trip

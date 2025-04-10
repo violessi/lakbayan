@@ -49,4 +49,6 @@ function generateShape(data: Data, colors: string[]): Shape {
   return { type: "FeatureCollection", features };
 }
 
+CircleSource.displayName = "CircleSource";
+
 export default CircleSource;

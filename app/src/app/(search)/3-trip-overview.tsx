@@ -10,9 +10,9 @@ import SymbolMarker from "@components/map/SymbolMarker";
 import TripSummary from "@components/search/TripSummary";
 
 import { useMapView } from "@hooks/use-map-view";
-import { useTripSearch } from "@contexts/TripSearch";
+import { useTripSearch } from "@contexts/TripSearchContext";
 import { useSession } from "@contexts/SessionContext";
-import { useTransitJournal } from "@contexts/TransitJournal";
+import { useTransitJournal } from "@contexts/TransitJournalContext";
 import { insertSegments, insertTransitJournal, updateProfile } from "@services/trip-service";
 
 export default function TripOverview() {

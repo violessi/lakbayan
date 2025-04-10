@@ -20,7 +20,7 @@ import { isNearLocation } from "@utils/map-utils";
 import { useSession } from "@contexts/SessionContext";
 import { useLiveUpdates } from "@hooks/use-live-updates";
 import { useUserLocation } from "@contexts/LocationContext";
-import { useTransitJournal } from "@contexts/TransitJournal";
+import { useTransitJournal } from "@contexts/TransitJournalContext";
 import { updateTransitJournal, updateProfile } from "@services/trip-service";
 
 export default function TransitJournal() {

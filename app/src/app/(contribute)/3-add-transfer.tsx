@@ -10,7 +10,7 @@ import StartEndSearchBar from "@components/StartEndSearchBar";
 
 import { useMapView } from "@hooks/use-map-view";
 import { reverseGeocode } from "@services/mapbox-service";
-import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
+import { useTripCreator } from "@contexts/TripCreator";
 
 export default function RouteSelectInfo() {
   const { cameraRef, handleMapPress } = useMapView();

@@ -1,15 +1,9 @@
 import React, { useState } from "react";
-
 import { View, FlatList, Keyboard } from "react-native";
-import { TextInput, List, IconButton } from "react-native-paper";
-
-import { fetchSuggestions } from "@services/mapbox-service";
+import { TextInput, IconButton } from "react-native-paper";
 
 import { SuggestionListItem } from "./ui/SuggestionsList";
-
-import Mapbox from "@rnmapbox/maps";
-import { MAPBOX_ACCESS_TOKEN } from "../utils/mapbox-config";
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
+import { fetchSuggestions } from "@services/mapbox-service";
 
 interface LocationSearchBarProps {
   onSuggestionSelect: (longitude: number, latitude: number) => void;

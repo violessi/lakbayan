@@ -1,5 +1,5 @@
 import { Stack, Redirect } from "expo-router";
-import { TripCreatorProvider } from "@contexts/TripCreator/TripCreatorContext";
+import { TripCreatorProvider } from "@contexts/TripCreator";
 import { useSession } from "@contexts/SessionContext";
 
 export default function ContributeLayout() {

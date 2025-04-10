@@ -1,14 +1,12 @@
 import React from "react";
-import { Platform } from "react-native";
 import Mapbox, { Images, MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
-import type { Feature, Point } from "geojson";
+
 import pinIcon from "@assets/pin-purple.png";
-import trafficIcon from "@assets/report-traffic.png";
 import lineIcon from "@assets/report-lines.png";
+import trafficIcon from "@assets/report-traffic.png";
 import disruptionIcon from "@assets/report-disruption.png";
 
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 interface MapShellProps {

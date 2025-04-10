@@ -49,4 +49,6 @@ function generateShape(data: Data, icon: string): Shape {
   return { type: "FeatureCollection", features };
 }
 
+SymbolSource.displayName = "SymbolSource";
+
 export default SymbolSource;

@@ -11,7 +11,7 @@ import JournalFeedback from "@components/journal/JournalFeedback";
 
 import { useMapView } from "@hooks/use-map-view";
 import { useSession } from "@contexts/SessionContext";
-import { useTransitJournal } from "@contexts/TransitJournal";
+import { useTransitJournal } from "@contexts/TransitJournalContext";
 
 import { addComment } from "@services/socials-service";
 import {

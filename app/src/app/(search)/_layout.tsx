@@ -1,6 +1,6 @@
 import { Stack, Redirect } from "expo-router";
 import { useSession } from "@contexts/SessionContext";
-import { TripSearchProvider } from "@contexts/TripSearch";
+import { TripSearchProvider } from "@contexts/TripSearchContext";
 
 export default function ContributeLayout() {
   const { user } = useSession();

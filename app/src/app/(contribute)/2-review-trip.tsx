@@ -13,7 +13,7 @@ import TripSummary from "@components/contribute/TripSummary";
 import UnsavedChangesAlert from "@components/contribute/UnsavedChangesAlert";
 
 import { useMapView } from "@hooks/use-map-view";
-import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
+import { useTripCreator } from "@contexts/TripCreator";
 
 export default function TripReview() {
   const { cameraRef } = useMapView();

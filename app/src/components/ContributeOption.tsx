@@ -20,7 +20,12 @@ const Option = ({ title, description, link, icon }: OptionProps) => {
       <View className="flex-row justify-between items-center w-full">
         <View className="flex-col gap-1 w-10/12">
           <View className="flex-row items-center">
-            <Image source={icon} className="w-6 h-6 mr-2" resizeMode="contain" style={{ tintColor: "#7F55D9" }} />
+            <Image
+              source={icon}
+              className="w-6 h-6 mr-2"
+              resizeMode="contain"
+              style={{ tintColor: "#7F55D9" }}
+            />
             <Text className="text-xl font-bold">{title}</Text>
           </View>
           <View className="flex-row">

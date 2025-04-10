@@ -48,4 +48,6 @@ function generateShape(data: Data, colors: string[]): Shape {
   return { type: "FeatureCollection", features } as Shape;
 }
 
+LineSource.displayName = "LineSource";
+
 export default LineSource;

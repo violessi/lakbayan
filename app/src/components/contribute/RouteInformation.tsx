@@ -6,7 +6,7 @@ import PrimaryButton from "@components/ui/PrimaryButton";
 import TransportModeInput from "@components/contribute/TransportModeInput";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
-import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
+import { useTripCreator } from "@contexts/TripCreator";
 
 interface RouteInformationProps {
   sheetRef: React.RefObject<BottomSheet>;

@@ -16,7 +16,7 @@ import UnsavedChangesAlert from "@components/contribute/UnsavedChangesAlert";
 
 import { RouteInputSchema } from "@schemas";
 import { useMapView } from "@hooks/use-map-view";
-import { useTripCreator } from "@contexts/TripCreator/TripCreatorContext";
+import { useTripCreator } from "@contexts/TripCreator";
 import { TRANSPORTATION_COLORS as COLORS } from "@constants/transportation-color";
 
 export default function RouteInput() {
