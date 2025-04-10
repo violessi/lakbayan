@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
 import { Alert, SafeAreaView, View } from "react-native";
+import { useEffect } from "react";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -8,6 +9,7 @@ import PrimaryButton from "@components/ui/PrimaryButton";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 
 import { useMapView } from "@hooks/use-map-view";
+import { useDefaultStartLocation } from "@hooks/use-default-start-location";
 import { useTripSearch } from "@contexts/TripSearchContext";
 import { reverseGeocode } from "@services/mapbox-service";
 
@@ -23,6 +25,15 @@ export default function SearchTrip() {
     updateTripEndpoints({ startLocation, startCoords });
     cameraRef.current?.moveTo(startCoords, 1000);
   };
+
+  // Set the default start location to the user's current location if not already set
+  useDefaultStartLocation({
+    userLocation: userLocation ?? undefined,
+    startLocation,
+    onSetStart: handleStartChange,
+    cameraRef,
+    zoomLevel,
+  });
 
   // When the user updates a location as "Destination".
   const handleEndChange = (endLocation: string, endCoords: Coordinates) => {
