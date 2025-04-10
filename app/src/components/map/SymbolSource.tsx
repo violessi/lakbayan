@@ -4,7 +4,7 @@ import React, { useRef, useImperativeHandle, forwardRef } from "react";
 
 type Data = Coordinates[] | LiveUpdate[] | Segment[];
 type Shape = GeoJSON.FeatureCollection<GeoJSON.Point>;
-type Props = { id: string; data: Data; iconImage?: string; iconSize?: number };
+type Props = { id: string; data?: Data; iconImage?: string; iconSize?: number };
 
 export type SymbolSourceRef = { update: (data: Data) => void };
 
@@ -13,7 +13,7 @@ export type SymbolSourceRef = { update: (data: Data) => void };
 const SymbolSource = forwardRef<SymbolSourceRef, Props>(
   ({ id, data, iconImage = "pin", iconSize = 0.03 }, ref) => {
     const symbolRef = useRef<ShapeSource | null>(null);
-    const initialShape = generateShape(data, iconImage);
+    const initialShape = generateShape(data ?? [], iconImage);
 
     // Update function to modify symbols dynamically
     const update = (newData: Data) => {

@@ -1,55 +1,52 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+import { debounce } from "lodash";
 import { expandBoundingBox } from "@utils/map-utils";
 import { fetchLiveUpdatesBBox, fetchLiveUpdatesLine } from "@services/trip-service";
+import { type SymbolSourceRef } from "@components/map/SymbolSource";
 
-// This hook fetches live updates based on the camera region.
-// Each time the camera moves, it fetches new live updates.
-// It also sets an interval to fetch live updates for that region.
 export const useLiveUpdates = (type: "box" | "line", interval: number) => {
+  const symbolRef = useRef<SymbolSourceRef | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [coordinates, setUpdateCoords] = useState<Coordinates[] | null>(null);
-  const [liveUpdates, setLiveUpdates] = useState<LiveUpdate[]>([]);
+
+  // This function clears the existing interval if it exists
+  const clearExistingInterval = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  // This function fetches live updates based on the type and coordinates
+  const fetchAndUpdate = async (coordinates: Coordinates[]) => {
+    if (type === "box") {
+      const searchBounds = expandBoundingBox(coordinates, 0.5);
+      const data = await fetchLiveUpdatesBBox(searchBounds);
+      symbolRef.current?.update(data);
+    } else if (type === "line") {
+      const data = await fetchLiveUpdatesLine(coordinates, 100);
+      symbolRef.current?.update(data);
+    }
+  };
+
+  // This function is used to update the live status
+  // Debounce to prevent excessive calls when user is panning the map
+  const updateLiveStatus = debounce(async (newCoordinates: Coordinates[]) => {
+    clearExistingInterval();
+    if (!newCoordinates.length) return;
+    console.log(`[LIVE UPDATES][${type}] Fetching initial updates...`);
+    await fetchAndUpdate(newCoordinates);
+    intervalRef.current = setInterval(async () => {
+      console.log(`[LIVE UPDATES][${type}] Fetching live updates...`);
+      await fetchAndUpdate(newCoordinates);
+    }, interval * 1000);
+  }, 2000);
 
   useEffect(() => {
-    const fetchLiveUpdates = async () => {
-      if (!coordinates) return;
-
-      if (type === "box") {
-        // Generate search bounds based on the camera region
-        const searchBounds = expandBoundingBox(coordinates, 0.5);
-
-        // Fetch live updates based on the search bounds
-        const data = await fetchLiveUpdatesBBox(searchBounds);
-        setLiveUpdates(data);
-
-        // Create an interval that continuously fetches live updates
-        intervalRef.current = setInterval(async () => {
-          const data = await fetchLiveUpdatesBBox(searchBounds);
-          setLiveUpdates(data);
-        }, interval * 1000);
-      }
-
-      if (type === "line") {
-        // Fetch live updates based on the line coordinates
-        const data = await fetchLiveUpdatesLine(coordinates, 100);
-        setLiveUpdates(data);
-
-        // Create an interval that continuously fetches live updates
-        intervalRef.current = setInterval(async () => {
-          const data = await fetchLiveUpdatesLine(coordinates, 100);
-          setLiveUpdates(data);
-        }, interval * 1000);
-      }
-    };
-
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    fetchLiveUpdates();
-
     return () => {
-      // Cleanup when the component unmounts or coordinate changes
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      clearExistingInterval();
+      updateLiveStatus.cancel();
     };
-  }, [coordinates]);
+  }, []);
 
-  return { liveUpdates, setUpdateCoords };
+  return { symbolRef, updateLiveStatus };
 };

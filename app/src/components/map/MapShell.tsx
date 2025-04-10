@@ -19,7 +19,6 @@ interface MapShellProps {
   fitBounds?: Coordinates[];
   handleMapPress?: (feature: MapPressFeature) => void;
   handleUserLocation?: (location: Location) => void;
-  handleRegionChange?: (region: Feature<Point, MapBoxRegionPayload>) => void;
   handleCameraChange?: (state: MapBoxMapState) => void;
   cameraProps?: React.ComponentProps<typeof Camera>;
   userLocationProps?: React.ComponentProps<typeof UserLocation>;
@@ -33,7 +32,6 @@ export const MapShell = ({
   fitBounds,
   handleMapPress,
   handleUserLocation,
-  handleRegionChange,
   handleCameraChange,
   cameraProps,
   userLocationProps,
@@ -54,17 +52,18 @@ export const MapShell = ({
     "Long Line": lineIcon,
   };
 
+  console.log("[RENDER] Rendering MapShell...");
+
   return (
     <MapView
       style={{ flex: 1 }}
-      styleURL="mapbox://styles/mapbox/streets-v12"
-      onPress={handleMapPress}
       projection="mercator"
-      onDidFinishLoadingMap={handleMapLoaded}
-      onRegionDidChange={handleRegionChange}
-      onCameraChanged={handleCameraChange}
-      scaleBarEnabled={false}
+      styleURL="mapbox://styles/mapbox/streets-v12"
       logoEnabled={false}
+      scaleBarEnabled={false}
+      onPress={handleMapPress}
+      onCameraChanged={handleCameraChange}
+      onDidFinishLoadingMap={handleMapLoaded}
     >
       <Camera
         ref={cameraRef}

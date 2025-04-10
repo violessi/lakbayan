@@ -27,7 +27,7 @@ export default function TransitJournal() {
   const router = useRouter();
   const { user } = useSession();
   const { userLocation } = useUserLocation();
-  const { liveUpdates, setUpdateCoords } = useLiveUpdates("line", 30);
+  const { symbolRef, updateLiveStatus } = useLiveUpdates("line", 5);
   const {
     cameraRef,
     lineRef,
@@ -88,7 +88,7 @@ export default function TransitJournal() {
   // Fetch live updates on segments
   useEffect(() => {
     if (!segments) return;
-    setUpdateCoords(segments.flatMap(({ waypoints }) => waypoints));
+    updateLiveStatus(segments.flatMap(({ waypoints }) => waypoints));
   }, [segments]);
 
   if (!segments) return <NotFound />;
@@ -105,7 +105,7 @@ export default function TransitJournal() {
       >
         <CircleSource id={"transfer-points"} data={segments} ref={circleRef} />
         <LineSource id={"direction-line"} data={segments} ref={lineRef} />
-        <SymbolSource id={"live-update"} data={liveUpdates} />
+        <SymbolSource id={"live-update"} ref={symbolRef} />
       </MapShell>
 
       {!followUser && (
