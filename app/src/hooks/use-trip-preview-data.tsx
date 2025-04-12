@@ -1,18 +1,8 @@
 import { useState, useEffect } from "react";
-import {
-  getBookmarks,
-  addBookmark,
-  removeBookmark,
-  countModVerifications,
-  countGpsVerifications,
-  countComments,
-} from "@services/socials-service";
+import { getBookmarks, addBookmark, removeBookmark } from "@services/socials-service";
 
 export function useTripPreviewData(userId: string | null, trip: FullTrip) {
   const [bookmarked, setBookmarked] = useState(false);
-  const [modVerifications, setModVerifications] = useState(0);
-  const [gpsVerifications, setGpsVerifications] = useState(0);
-  const [commentCount, setCommentCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,21 +11,10 @@ export function useTripPreviewData(userId: string | null, trip: FullTrip) {
 
       setLoading(true);
 
-      const segmentIds = trip.segments
-        .filter((seg) => !seg.id.startsWith("walk-"))
-        .map((seg) => seg.id);
-
-      const [bookmarks, modCount, gpsCount, commentCountTemp] = await Promise.all([
-        getBookmarks(userId),
-        countModVerifications(trip.id, "trip"),
-        countGpsVerifications(segmentIds),
-        countComments(trip.id),
-      ]);
+      const [bookmarks] = await Promise.all([getBookmarks(userId)]);
 
       setBookmarked(bookmarks.includes(trip.id));
-      setModVerifications(modCount);
-      setGpsVerifications(gpsCount);
-      setCommentCount(commentCountTemp);
+
       setLoading(false);
     }
 
@@ -56,9 +35,6 @@ export function useTripPreviewData(userId: string | null, trip: FullTrip) {
   return {
     loading,
     bookmarked,
-    modVerifications,
-    gpsVerifications,
-    commentCount,
     toggleBookmark,
   };
 }

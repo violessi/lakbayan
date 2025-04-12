@@ -4,18 +4,8 @@ import { getUsername } from "@services/account-service";
 
 // Votes
 
-export async function getPoints(tripId: string): Promise<number> {
-  const { data, error } = await supabase
-    .from("votes")
-    .select("vote_type", { count: "exact" })
-    .eq("trip_id", tripId);
-
-  if (error) throw error;
-
-  const upvotes = data.filter((vote) => vote.vote_type === "upvote").length;
-  const downvotes = data.filter((vote) => vote.vote_type === "downvote").length;
-
-  return upvotes - downvotes;
+export async function getPoints(trip: Trip): Promise<number> {
+  return trip.upvotes - trip.downvotes;
 }
 
 export async function updateVotes(
@@ -213,7 +203,7 @@ export async function removeBookmark(userId: string, tripId: string) {
 
 export async function countModVerifications(tripId: string, type: string): Promise<number> {
   const { count, error } = await supabase
-    .from("moderation-reviews")
+    .from("moderation_reviews")
     .select("*", { count: "exact", head: true })
     .eq("trip_toda_id", tripId)
     .eq("type", type)
@@ -225,31 +215,4 @@ export async function countModVerifications(tripId: string, type: string): Promi
   }
 
   return count || 0;
-}
-
-// GPS Verifications
-
-export async function countGpsVerifications(segmentIds: string[]): Promise<number> {
-  if (segmentIds.length === 0) return 0;
-
-  const { data, error } = await supabase
-    .from("journal-entries")
-    .select("segment_id", { count: "exact" })
-    .in("segment_id", segmentIds);
-
-  if (error) {
-    console.error("Error fetching GPS verifications:", error);
-    return 0;
-  }
-
-  if (!data || data.length === 0) return 0;
-
-  // Count occurrences per segment_id
-  const segmentCounts: Record<string, number> = {};
-  data.forEach((entry) => {
-    segmentCounts[entry.segment_id] = (segmentCounts[entry.segment_id] || 0) + 1;
-  });
-
-  // Return the minimum verification count among all segments
-  return Math.min(...Object.values(segmentCounts));
 }

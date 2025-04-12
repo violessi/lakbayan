@@ -1,43 +1,49 @@
 import React, { useState, useEffect } from "react";
-import { TouchableOpacity, Image, View, Text } from "react-native";
+import { TouchableOpacity, Image, View, Text, Alert } from "react-native";
 import { updateVotes, getUserVote, getPoints } from "@services/socials-service";
 
 const upvote = require("@assets/social-upvote.png");
 const downvote = require("@assets/social-downvote.png");
 
 interface VotingProps {
-  tripId: string;
+  trip: Trip;
   userId: string;
 }
 
-export default function VotingBar({ tripId, userId }: VotingProps) {
+export default function VotingBar({ trip, userId }: VotingProps) {
   const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null);
   const [points, setPoints] = useState(0);
 
   useEffect(() => {
     async function fetchUserVote() {
-      const existingVote = await getUserVote(tripId, userId);
+      const existingVote = await getUserVote(trip.id, userId);
       setUserVote(existingVote);
     }
     async function fetchTripPoints() {
-      const totalPoints = await getPoints(tripId);
+      const totalPoints = await getPoints(trip);
       setPoints(totalPoints);
     }
     fetchUserVote();
     fetchTripPoints();
-  }, [tripId, userId]);
+  }, [trip, userId]);
 
   const handleVote = async (newVote: "upvote" | "downvote" | null) => {
+    const updatedVote = userVote === newVote ? null : newVote;
+    const adjustment = updatedVote === "upvote" ? 1 : updatedVote === "downvote" ? -1 : 0;
+    const previousAdjustment = userVote === "upvote" ? -1 : userVote === "downvote" ? 1 : 0;
+
+    // Update point on UI immediately
+    setUserVote(updatedVote);
+    setPoints((prev) => prev + adjustment + previousAdjustment);
+
     try {
-      const updatedVote = userVote === newVote ? null : newVote;
-      setUserVote(updatedVote);
-
-      await updateVotes(tripId, userId, updatedVote);
-
-      const totalPoints = await getPoints(tripId);
-      setPoints(totalPoints);
+      await updateVotes(trip.id, userId, updatedVote);
     } catch (error) {
-      console.error("Error updating vote:", error);
+      console.error("Failed to update vote:", error);
+      // Rollback if failed vote
+      setUserVote(userVote);
+      setPoints((prev) => prev - (adjustment + previousAdjustment));
+      Alert.alert("Vote failed", "Could not update your vote.");
     }
   };
 

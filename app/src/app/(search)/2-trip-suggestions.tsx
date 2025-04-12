@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useRouter } from "expo-router";
 import ButtomSheet from "@gorhom/bottom-sheet";
 import { Text, SafeAreaView, View, Pressable } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 
 import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
@@ -27,9 +28,12 @@ export default function SuggestedTrips() {
     <SafeAreaView className="flex-1">
       <Header prevCallback={prevCallback} title="Suggested Trips" />
 
-      <View className="p-4">
-        <Text className="text-lg font-bold">From: {tripEndpoints!.startLocation}</Text>
-        <Text className="text-lg font-bold">To: {tripEndpoints!.endLocation}</Text>
+      <View className="px-4 pb-0 pt-5">
+        <View className="flex-row items-center flex-wrap justify-center">
+          <Text className="text-md font-bold flex-shrink">{tripEndpoints!.startLocation}</Text>
+          <MaterialIcons name="arrow-forward" size={10} color="black" className="px-2" />
+          <Text className="text-md font-bold flex-shrink">{tripEndpoints!.endLocation}</Text>
+        </View>
       </View>
 
       {filteredTrips.length === 0 ? (

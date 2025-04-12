@@ -6,10 +6,13 @@ import ModerateTripReview from "@app/(moderation)/moderate-trip-review";
 import { updateModerationStatus } from "@services/moderation-service";
 
 jest.mock("@contexts/SessionContext");
+jest.mock("@services/socials-service");
 
 jest.mock("@services/moderation-service", () => ({
   updateModerationStatus: jest.fn(() => Promise.resolve()),
 }));
+
+jest.mock("@components/VotingBar", () => () => null);
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({ push: jest.fn(), back: jest.fn() }),
@@ -21,6 +24,8 @@ jest.mock("expo-router", () => ({
       endLocation: "End City",
       startCoords: [0, 0],
       endCoords: [1, 1],
+      upvotes: 5,
+      downvotes: 2,
       segments: [
         {
           id: "seg-1",
