@@ -61,6 +61,7 @@ export default function TransitJournal() {
 
   // abort transit and redirect to home page
   const handleAbortTrip = async () => {
+    setShowTripAbortModal(true);
     try {
       const journalPayload: Partial<TransitJournal> = {
         id: transitJournal.id,

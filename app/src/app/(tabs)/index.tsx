@@ -26,6 +26,7 @@ export default function Index() {
     updateLiveStatus(newCoordinates);
   };
 
+  console.log("userLocation", userLocation);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Hi, user!" hasBack={false} />

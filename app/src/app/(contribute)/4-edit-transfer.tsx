@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import ButtomSheet from "@gorhom/bottom-sheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 import React, { useRef, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { Alert, SafeAreaView, View, BackHandler } from "react-native";
@@ -20,7 +20,7 @@ import { useTripCreator } from "@contexts/TripCreator";
 import { TRANSPORTATION_COLORS as COLORS } from "@constants/transportation-color";
 
 export default function RouteInput() {
-  const buttomSheetRef = useRef<ButtomSheet>(null);
+  const bottomSheetRef = useRef<BottomSheet>(null);
 
   const {
     trip,
@@ -35,18 +35,21 @@ export default function RouteInput() {
     addSegment,
     clearRouteData,
   } = useTripCreator();
-  const { cameraRef, zoomLevel, center, handleMapPress } = useMapView();
+  const { cameraRef, zoomLevel, center, setCoordinates, setCenter } = useMapView();
   const [isEditingWaypoint, setIsEditingWaypoints] = useState(false);
 
   const handleMapClick = async (feature: any) => {
     if (!isEditingWaypoint) return;
     setCustomWaypoint((prev) => [...prev, feature.geometry.coordinates]);
-    handleMapPress(feature);
+    if (!feature.geometry || feature.geometry.type !== "Point") return;
+    const coordinates = feature.geometry.coordinates as Coordinates;
+    setCoordinates(coordinates);
+    setCenter(coordinates);
   };
 
   const handleCompleteEditing = () => {
     setIsEditingWaypoints(false);
-    buttomSheetRef.current?.expand();
+    bottomSheetRef.current?.expand();
   };
 
   const handleProcessRoute = async () => {
@@ -71,6 +74,7 @@ export default function RouteInput() {
       return;
     }
     addSegment();
+    clearRouteData();
     router.replace("/(contribute)/2-review-trip");
   };
 
@@ -135,7 +139,7 @@ export default function RouteInput() {
       </View>
 
       <RouteInformation
-        sheetRef={buttomSheetRef}
+        sheetRef={bottomSheetRef}
         handleSubmit={handleSubmit}
         setIsEditingWaypoints={setIsEditingWaypoints}
       />

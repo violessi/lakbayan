@@ -158,7 +158,7 @@ async function generateWalkingSegment(
   endLocation: string,
   endCoords: Coordinates,
 ): Promise<Segment | null> {
-  if (isNearLocation(startCoords, endCoords, 100)) return null;
+  if (isNearLocation(startCoords, endCoords, 1000)) return null;
 
   const data = await getDirections(startCoords, [], endCoords, "Walk", true);
   const directions = data.routes[0];
