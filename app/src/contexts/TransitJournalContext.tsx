@@ -36,6 +36,7 @@ interface TransitJournalContextType {
   segments: Segment[] | null;
   currentStep: NavigationSteps | null;
   activeSegments: Segment[];
+  loadingSegments: boolean;
   showTripAbortModal: boolean;
   showNextSegmentModal: boolean;
   showTripFinishedModal: boolean;
@@ -63,6 +64,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   const [segments, setSegments] = useState<Segment[] | null>(null);
   const [currentStep, setCurrentStep] = useState<NavigationSteps | null>(null);
   const [activeSegments, setActiveSegments] = useState<Segment[]>([]);
+  const [loadingSegments, setLoadingSegments] = useState(true);
 
   const [showTripAbortModal, setShowTripAbortModal] = useState(false);
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
@@ -120,6 +122,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
         setTrip(fullTripData);
         setSegments(segments);
         setTransitJournal(journalData);
+        setLoadingSegments(false);
       } catch (error) {
         console.error("Error fetching transit journal data:", error);
       }
@@ -192,6 +195,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     transitJournalId,
     trip,
     segments,
+    loadingSegments,
     currentStep,
     activeSegments,
     addLiveUpdate,

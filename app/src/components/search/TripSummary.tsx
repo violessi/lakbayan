@@ -17,6 +17,7 @@ interface TripSummaryProps {
   currentUserId: string | null | undefined;
   handleCommentPress: (tripId: string) => void;
   handleStartPress?: () => void;
+  loadingTrip?: boolean;
 }
 
 const snapPoints = ["15%", "25%", "40%", "72%"];
@@ -27,6 +28,7 @@ export default function TripSummary({
   currentUserId,
   handleCommentPress,
   handleStartPress,
+  loadingTrip = false,
 }: TripSummaryProps) {
   const router = useRouter();
 
@@ -42,11 +44,16 @@ export default function TripSummary({
   return (
     <BottomSheet snapPoints={snapPoints} index={2} maxDynamicContentSize={75}>
       <View className="px-5 gap-4">
-        {handleStartPress && (
-          <View className="w-full">
-            <PrimaryButton label="Start Transit Journal" onPress={handleStartPress} />
-          </View>
-        )}
+        {handleStartPress &&
+          (loadingTrip ? (
+            <View className="w-full">
+              <PrimaryButton label="Loading trip..." onPress={() => {}} disabled={true} />
+            </View>
+          ) : (
+            <View className="w-full">
+              <PrimaryButton label="Start Transit Journal" onPress={handleStartPress} />
+            </View>
+          ))}
         <View className="flex flex-row justify-between">
           <View className="flex flex-row gap-2">
             <Text>Contributed by</Text>

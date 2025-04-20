@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import React, { useState, useEffect } from "react";
-import { Alert, SafeAreaView, View, Text, BackHandler } from "react-native";
+import { ActivityIndicator, Alert, SafeAreaView, View, Text, BackHandler } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
 import LocationSearchBar from "@components/LocationSearchBar";
@@ -99,6 +99,7 @@ export default function TodaStops() {
       </MapShell>
       {loadingStops && (
         <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-black/50 z-50">
+          <ActivityIndicator size="large" color="#fff" />
           <Text className="text-white">Loading stops...</Text>
         </View>
       )}

@@ -1,6 +1,6 @@
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { Alert, SafeAreaView, View } from "react-native";
+import { ActivityIndicator, Alert, BackHandler, SafeAreaView, Text, View } from "react-native";
 
 import Header from "@components/ui/Header";
 import NotFound from "@components/journal/NotFound";
@@ -33,6 +33,7 @@ export default function TransitJournal() {
     lineRef,
     circleRef,
     segments,
+    loadingSegments,
     currentStep,
     transitJournal,
     activeSegments,
@@ -92,11 +93,19 @@ export default function TransitJournal() {
     updateLiveStatus(segments.flatMap(({ waypoints }) => waypoints));
   }, [segments]);
 
-  if (!segments) return <NotFound />;
+  if (loadingSegments)
+    return (
+      <View className="flex-1 justify-center items-center bg-black/50 z-50">
+        <ActivityIndicator size="large" color="#fff" />
+        <Text className="text-white">Loading trip...</Text>
+      </View>
+    );
+
+  // if still no segments after loading segments, show not found
+  if (!segments || segments.length === 0) return <NotFound />;
 
   return (
     <SafeAreaView className="flex-1">
-      <Header title="Transit Journal" />
       <JournalInstructions currentStep={currentStep} currentSegment={activeSegments[0]} />
       <MapShell
         cameraRef={cameraRef}
