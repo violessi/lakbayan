@@ -1,6 +1,8 @@
 import React from "react";
 import { router } from "expo-router";
 import { SafeAreaView, View, Alert } from "react-native";
+import { SafeAreaView, View, Alert, BackHandler } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -64,6 +66,14 @@ export default function CustomTrip() {
 
   // Navigate back to the previous screen.
   const prevCallback = () => router.replace("/(tabs)/contribute");
+
+  useFocusEffect(() => {
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
+      prevCallback();
+      return true;
+    });
+    return () => backHandler.remove();
+  });
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

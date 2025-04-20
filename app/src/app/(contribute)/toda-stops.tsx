@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { SafeAreaView, View } from "react-native";
+import { Alert, SafeAreaView, View, Text, BackHandler } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 import LocationSearchBar from "@components/LocationSearchBar";
 import Header from "@components/ui/Header";
 import TodaInformation from "@components/contribute/TodaInformation";
 import TodaMarker from "@components/map/TodaMarker";
 import pin from "@assets/pin-purple.png";
+import UnsavedChangesAlert from "@components/contribute/UnsavedChangesAlert";
 
 import { MapShell } from "@components/map/MapShell";
 
@@ -38,9 +41,24 @@ export default function TodaStops() {
     loadStops();
   }, []);
 
+  // navigation
+
+  const prevCallback = () => {
+    UnsavedChangesAlert(() => router.replace("/(tabs)/contribute"));
+  };
+
+  useFocusEffect(() => {
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
+      UnsavedChangesAlert(prevCallback);
+      return true;
+    });
+    return () => backHandler.remove();
+  });
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title="Pin Toda Stops" />
+      <Header title="Pin Toda Stops" prevCallback={prevCallback} />
 
       <View>
         <LocationSearchBar onSuggestionSelect={handleSuggestionSelect} onClear={handleClear} />
