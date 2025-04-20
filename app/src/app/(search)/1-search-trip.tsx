@@ -43,7 +43,11 @@ export default function SearchTrip() {
 
   // Allow users to use current location as start or end location.
   const handleUseCurrentLoc = async () => {
-    if (!userLocation) throw new Error("User location not found.");
+    console.log(userLocation);
+    if (!userLocation) {
+      Alert.alert("Error", "User location not found.");
+      throw new Error("User location not found.");
+    }
     confirmationAlert(userLocation);
   };
 
@@ -98,7 +102,7 @@ export default function SearchTrip() {
       </View>
 
       <MapShell
-        center={center}
+        center={userLocation}
         zoomLevel={zoomLevel}
         cameraRef={cameraRef}
         handleMapPress={handlePress}
