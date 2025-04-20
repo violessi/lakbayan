@@ -15,7 +15,7 @@ interface HeaderProps {
 
 export default function Header({ title, subtitle, hasBack = true, prevCallback }: HeaderProps) {
   return (
-    <View className="h-24 bg-primary px-5 py-5 flex-col justify-end">
+    <View className="h-24 bg-primary px-5 py-5 flex-col justify-end z-100">
       <View className="flex-row gap-3 items-center">
         {hasBack && (
           <TouchableOpacity
