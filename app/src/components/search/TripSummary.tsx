@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "expo-router";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Text, View, FlatList, Image, TouchableOpacity } from "react-native";
 
 import VotingBar from "@components/VotingBar";
@@ -40,8 +40,8 @@ export default function TripSummary({
   };
 
   return (
-    <BottomSheet snapPoints={snapPoints} index={2}>
-      <BottomSheetView className="flex flex-col px-5 gap-6">
+    <BottomSheet snapPoints={snapPoints} index={2} maxDynamicContentSize={75}>
+      <View className="px-5 gap-4">
         {handleStartPress && (
           <View className="w-full">
             <PrimaryButton label="Start Transit Journal" onPress={handleStartPress} />
@@ -63,6 +63,8 @@ export default function TripSummary({
             </TouchableOpacity>
           </View>
         </View>
+      </View>
+      <BottomSheetScrollView className="flex flex-col px-5 gap-6">
         <View className="flex flex-row justify-center">
           {segments.length === 0 ? (
             <Text className="text-secondary mt-5">No transfers added yet.</Text>
@@ -79,7 +81,7 @@ export default function TripSummary({
             />
           )}
         </View>
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheet>
   );
 }
