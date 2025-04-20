@@ -11,6 +11,9 @@ const iconMap: Record<string, any> = {
   blue: require("@assets/toda-blue.png"),
   red: require("@assets/toda-red.png"),
   green: require("@assets/toda-green.png"),
+  violet: require("@assets/toda-violet.png"),
+  orange: require("@assets/toda-orange.png"),
+  pink: require("@assets/toda-pink.png"),
 };
 
 interface TodaMarkerProps {
