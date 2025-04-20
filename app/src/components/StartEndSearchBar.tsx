@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, FlatList, Keyboard } from "react-native";
 import { TextInput, IconButton } from "react-native-paper";
 
@@ -11,6 +11,8 @@ interface StartEndSearchProps {
   defaultStart?: string | null;
   isStartActive?: boolean;
   defaultEnd?: string | null;
+  start: [string | null, [number, number] | null] | null;
+  end: [string | null, [number, number] | null] | null;
 }
 
 // FIXME: map click doesnt override the search query
@@ -20,11 +22,25 @@ export default function StartEndSearch({
   defaultStart = null,
   isStartActive = true,
   defaultEnd = null,
+  start = null,
+  end = null,
 }: StartEndSearchProps) {
   const [startSearchQuery, setStartSearchQuery] = useState("");
   const [endSearchQuery, setEndSearchQuery] = useState("");
   const [startSuggestions, setStartSuggestions] = useState<Suggestion[]>([]);
   const [endSuggestions, setEndSuggestions] = useState<Suggestion[]>([]);
+
+  useEffect(() => {
+    if (start?.[0] !== undefined && start?.[0] !== startSearchQuery) {
+      setStartSearchQuery(start[0] ?? "");
+    }
+  }, [start]);
+
+  useEffect(() => {
+    if (end?.[0] !== undefined && end?.[0] !== endSearchQuery) {
+      setEndSearchQuery(end[0] ?? "");
+    }
+  }, [end]);
 
   const handleFetchSuggestions = async (text: string, type: "start" | "end") => {
     const response = await fetchSuggestions(text);
@@ -66,7 +82,7 @@ export default function StartEndSearch({
     <View>
       <View className="absolute top-0 left-0 z-50 m-5 flex-row items-center bg-white rounded-[8]">
         <TextInput
-          placeholder={defaultStart || "Starting location"}
+          placeholder={"Starting location"}
           value={startSearchQuery}
           onChangeText={(text) => {
             setStartSearchQuery(text);
@@ -83,7 +99,7 @@ export default function StartEndSearch({
 
       <View className="absolute top-16 left-0 z-50 mx-5 my-3 flex-row items-center bg-white rounded-[8]">
         <TextInput
-          placeholder={defaultEnd || "Destination"}
+          placeholder={"Destination"}
           value={endSearchQuery}
           onChangeText={(text) => {
             setEndSearchQuery(text);

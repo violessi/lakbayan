@@ -90,6 +90,8 @@ export default function SearchTrip() {
         <StartEndSearchBar
           defaultStart={startLocation || "Starting location"}
           defaultEnd={endLocation || "Destination"}
+          start={[startLocation ?? null, startCoords ?? null]}
+          end={[endLocation ?? null, endCoords ?? null]}
           onStartChange={handleStartChange}
           onEndChange={handleEndChange}
         />

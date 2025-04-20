@@ -83,6 +83,8 @@ export default function CustomTrip() {
         <StartEndSearchBar
           defaultStart={trip.startLocation || "Starting location"}
           defaultEnd={trip.endLocation || "Destination"}
+          start={[trip.startLocation, trip.startCoords]}
+          end={[trip.endLocation, trip.endCoords]}
           onStartChange={handleStartChange}
           onEndChange={handleEndChange}
         />
