@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActivityIndicator, Alert, BackHandler, SafeAreaView, Text, View } from "react-native";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -80,8 +81,29 @@ export default function TripOverview() {
     }
   }, [transitJournalId]);
 
+  // navigation
+  const prevCallback = () => {
+    if (loadingTrip) return;
+    router.replace("/(search)/2-trip-suggestions");
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (loadingTrip) return true;
+        router.replace("/(search)/2-trip-suggestions");
+        return true;
+      };
+
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+      return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+    }, [loadingTrip]),
+  );
+
   return (
     <SafeAreaView className="flex-1">
+      <Header title="Trip Overview" prevCallback={prevCallback} />
 
       <MapShell cameraRef={cameraRef} fitBounds={[trip.startCoords, trip.endCoords]}>
         <SymbolMarker id="start" label="Start" coordinates={trip.startCoords} />

@@ -93,6 +93,28 @@ export default function TransitJournal() {
     updateLiveStatus(segments.flatMap(({ waypoints }) => waypoints));
   }, [segments]);
 
+  // navigation
+
+  const prevCallback = () => {
+    Alert.alert("Do you wish to go back to the homepage?", "Your progress will be saved.", [
+      { text: "No", style: "cancel" },
+      {
+        text: "Yes",
+        onPress: () => {
+          router.replace("/(tabs)");
+        },
+      },
+    ]);
+  };
+
+  useFocusEffect(() => {
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
+      prevCallback();
+      return true;
+    });
+    return () => backHandler.remove();
+  });
+
   if (loadingSegments)
     return (
       <View className="flex-1 justify-center items-center bg-black/50 z-50">
@@ -106,6 +128,7 @@ export default function TransitJournal() {
 
   return (
     <SafeAreaView className="flex-1">
+      <Header title="Transit Journal" prevCallback={prevCallback} />
       <JournalInstructions currentStep={currentStep} currentSegment={activeSegments[0]} />
       <MapShell
         cameraRef={cameraRef}
