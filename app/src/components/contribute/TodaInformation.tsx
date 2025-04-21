@@ -24,7 +24,17 @@ const todaStopSchema = z.object({
   contributor_id: z.string().optional(),
 });
 
-const TODA_COLORS = ["Red", "Blue", "Green", "Yellow", "Black", "White", "None"];
+const TODA_COLORS = [
+  "Red",
+  "Orange",
+  "Yellow",
+  "Green",
+  "Blue",
+  "Violet",
+  "Black",
+  "White",
+  "None",
+];
 
 interface TodaStopsProps {
   coordinates: Coordinates | null;

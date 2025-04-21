@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { Alert, SafeAreaView } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState, useCallback } from "react";
+import { ActivityIndicator, Alert, BackHandler, SafeAreaView, Text, View } from "react-native";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -16,6 +16,8 @@ import { useTransitJournal } from "@contexts/TransitJournalContext";
 import { insertSegments, insertTransitJournal, updateProfile } from "@services/trip-service";
 
 export default function TripOverview() {
+  const [loadingTrip, setLoadingTrip] = useState(false);
+
   const router = useRouter();
   const { tripData } = useLocalSearchParams();
 
@@ -45,11 +47,16 @@ export default function TripOverview() {
       );
       return;
     }
+
+    // loading state
+    setLoadingTrip(true);
     try {
       // if trip has pre/post segments, insert them first to segments table
       const { preSegment, postSegment } = trip;
       const preSegmentId = preSegment ? (await insertSegments([preSegment]))[0] : null;
+      console.log("Done adding preSegmentId", preSegmentId);
       const postSegmentId = postSegment ? (await insertSegments([postSegment]))[0] : null;
+      console.log("Done adding postSegmentId", postSegmentId);
 
       // insert transit journal for the trip
       const transitJournalId = await insertTransitJournal({
@@ -58,9 +65,11 @@ export default function TripOverview() {
         preSegmentId,
         postSegmentId,
       });
+      console.log("Done adding transitJournalId", transitJournalId);
 
       // bind transit journal to user
       await updateProfile({ id: user.id, transitJournalId });
+      console.log("Done adding transitJournalId to user", transitJournalId);
     } catch (error) {
       Alert.alert("Error starting trip, please try again");
     }
@@ -72,9 +81,29 @@ export default function TripOverview() {
     }
   }, [transitJournalId]);
 
+  // navigation
+  const prevCallback = () => {
+    if (loadingTrip) return;
+    router.replace("/(search)/2-trip-suggestions");
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (loadingTrip) return true;
+        router.replace("/(search)/2-trip-suggestions");
+        return true;
+      };
+
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+      return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+    }, [loadingTrip]),
+  );
+
   return (
     <SafeAreaView className="flex-1">
-      <Header title="Trip Overview" />
+      <Header title="Trip Overview" prevCallback={prevCallback} />
 
       <MapShell cameraRef={cameraRef} fitBounds={[trip.startCoords, trip.endCoords]}>
         <SymbolMarker id="start" label="Start" coordinates={trip.startCoords} />
@@ -88,7 +117,15 @@ export default function TripOverview() {
         currentUserId={user?.id}
         handleCommentPress={handleCommentPress}
         handleStartPress={handleStartPress}
+        loadingTrip={loadingTrip}
       />
+
+      {loadingTrip && (
+        <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-black/50 z-50">
+          <ActivityIndicator size="large" color="#fff" />
+          <Text className="text-white text-lg">Please wait while we load your trip...</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }

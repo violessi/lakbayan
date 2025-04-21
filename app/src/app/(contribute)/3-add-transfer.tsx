@@ -1,5 +1,6 @@
 import { router } from "expo-router";
-import { SafeAreaView, View, Alert } from "react-native";
+import { SafeAreaView, View, Alert, BackHandler } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -44,13 +45,21 @@ export default function RouteSelectInfo() {
     router.replace("/(contribute)/2-review-trip");
   };
 
+  useFocusEffect(() => {
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
+      prevCallback();
+      return true;
+    });
+    return () => backHandler.remove();
+  });
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header prevCallback={prevCallback} title="Route Information" />
       <StartEndSearchBar
         isStartActive={false}
-        defaultStart={route.startLocation}
-        defaultEnd={route.endLocation}
+        start={[route.startLocation, route.endCoords]}
+        end={[route.endLocation, route.endCoords]}
         onEndChange={(l, c) => handleEndChange(c, l)}
       />
       <MapShell

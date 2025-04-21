@@ -61,5 +61,7 @@ export function useMapView(defaultZoom: number = 12) {
     handleSuggestionSelect,
     handleClear,
     handleUserLocation,
+    setCoordinates,
+    setCenter,
   };
 }

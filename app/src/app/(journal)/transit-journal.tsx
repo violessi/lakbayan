@@ -1,6 +1,6 @@
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { Alert, SafeAreaView, View } from "react-native";
+import { ActivityIndicator, Alert, BackHandler, SafeAreaView, Text, View } from "react-native";
 
 import Header from "@components/ui/Header";
 import NotFound from "@components/journal/NotFound";
@@ -33,6 +33,7 @@ export default function TransitJournal() {
     lineRef,
     circleRef,
     segments,
+    loadingSegments,
     currentStep,
     transitJournal,
     activeSegments,
@@ -61,6 +62,7 @@ export default function TransitJournal() {
 
   // abort transit and redirect to home page
   const handleAbortTrip = async () => {
+    setShowTripAbortModal(true);
     try {
       const journalPayload: Partial<TransitJournal> = {
         id: transitJournal.id,
@@ -91,11 +93,42 @@ export default function TransitJournal() {
     updateLiveStatus(segments.flatMap(({ waypoints }) => waypoints));
   }, [segments]);
 
-  if (!segments) return <NotFound />;
+  // navigation
+
+  const prevCallback = () => {
+    Alert.alert("Do you wish to go back to the homepage?", "Your progress will be saved.", [
+      { text: "No", style: "cancel" },
+      {
+        text: "Yes",
+        onPress: () => {
+          router.replace("/(tabs)");
+        },
+      },
+    ]);
+  };
+
+  useFocusEffect(() => {
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
+      prevCallback();
+      return true;
+    });
+    return () => backHandler.remove();
+  });
+
+  if (loadingSegments)
+    return (
+      <View className="flex-1 justify-center items-center bg-black/50 z-50">
+        <ActivityIndicator size="large" color="#fff" />
+        <Text className="text-white">Loading trip...</Text>
+      </View>
+    );
+
+  // if still no segments after loading segments, show not found
+  if (!segments || segments.length === 0) return <NotFound />;
 
   return (
     <SafeAreaView className="flex-1">
-      <Header title="Transit Journal" />
+      <Header title="Transit Journal" prevCallback={prevCallback} />
       <JournalInstructions currentStep={currentStep} currentSegment={activeSegments[0]} />
       <MapShell
         cameraRef={cameraRef}

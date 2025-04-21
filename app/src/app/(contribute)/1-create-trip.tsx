@@ -1,6 +1,7 @@
 import React from "react";
 import { router } from "expo-router";
-import { SafeAreaView, View, Alert } from "react-native";
+import { SafeAreaView, View, Alert, BackHandler } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -14,7 +15,8 @@ import { useTripCreator } from "@contexts/TripCreator";
 
 export default function CustomTrip() {
   const { trip, updateTrip } = useTripCreator();
-  const { userLocation, cameraRef, zoomLevel, center, handleMapPress } = useMapView();
+  const { userLocation, cameraRef, zoomLevel, center, handleMapPress, handleUserLocation } =
+    useMapView();
 
   // When the user updates a location as "Source".
   const handleStartChange = (location: string, coords: Coordinates) => {
@@ -30,7 +32,11 @@ export default function CustomTrip() {
 
   // Allow users to use current location as start or end location.
   const handleUseCurrentLoc = async () => {
-    if (!userLocation) throw new Error("User location not found.");
+    console.log(userLocation);
+    if (!userLocation) {
+      Alert.alert("Error", "User location not found.");
+      throw new Error("User location not found.");
+    }
     confirmationAlert(userLocation);
   };
 
@@ -65,14 +71,22 @@ export default function CustomTrip() {
   // Navigate back to the previous screen.
   const prevCallback = () => router.replace("/(tabs)/contribute");
 
+  useFocusEffect(() => {
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
+      prevCallback();
+      return true;
+    });
+    return () => backHandler.remove();
+  });
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header prevCallback={prevCallback} title="Custom Trips" />
 
       <View>
         <StartEndSearchBar
-          defaultStart={trip.startLocation || "Starting location"}
-          defaultEnd={trip.endLocation || "Destination"}
+          start={[trip.startLocation, trip.startCoords]}
+          end={[trip.endLocation, trip.endCoords]}
           onStartChange={handleStartChange}
           onEndChange={handleEndChange}
         />
@@ -83,6 +97,7 @@ export default function CustomTrip() {
         zoomLevel={zoomLevel}
         cameraRef={cameraRef}
         handleMapPress={handlePress}
+        handleUserLocation={handleUserLocation}
       >
         <SymbolMarker id="start-loc" label="Start" coordinates={trip.startCoords} />
         <SymbolMarker id="end-loc" label="Destination" coordinates={trip.endCoords} />

@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "expo-router";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Text, View, FlatList, Image, TouchableOpacity } from "react-native";
 
 import VotingBar from "@components/VotingBar";
@@ -17,6 +17,7 @@ interface TripSummaryProps {
   currentUserId: string | null | undefined;
   handleCommentPress: (tripId: string) => void;
   handleStartPress?: () => void;
+  loadingTrip?: boolean;
 }
 
 const snapPoints = ["15%", "25%", "40%", "72%"];
@@ -27,6 +28,7 @@ export default function TripSummary({
   currentUserId,
   handleCommentPress,
   handleStartPress,
+  loadingTrip = false,
 }: TripSummaryProps) {
   const router = useRouter();
 
@@ -40,13 +42,18 @@ export default function TripSummary({
   };
 
   return (
-    <BottomSheet snapPoints={snapPoints} index={2}>
-      <BottomSheetView className="flex flex-col px-5 gap-6">
-        {handleStartPress && (
-          <View className="w-full">
-            <PrimaryButton label="Start Transit Journal" onPress={handleStartPress} />
-          </View>
-        )}
+    <BottomSheet snapPoints={snapPoints} index={2} maxDynamicContentSize={75}>
+      <View className="px-5 gap-4">
+        {handleStartPress &&
+          (loadingTrip ? (
+            <View className="w-full">
+              <PrimaryButton label="Loading trip..." onPress={() => {}} disabled={true} />
+            </View>
+          ) : (
+            <View className="w-full">
+              <PrimaryButton label="Start Transit Journal" onPress={handleStartPress} />
+            </View>
+          ))}
         <View className="flex flex-row justify-between">
           <View className="flex flex-row gap-2">
             <Text>Contributed by</Text>
@@ -63,6 +70,8 @@ export default function TripSummary({
             </TouchableOpacity>
           </View>
         </View>
+      </View>
+      <BottomSheetScrollView className="flex flex-col px-5 gap-6">
         <View className="flex flex-row justify-center">
           {segments.length === 0 ? (
             <Text className="text-secondary mt-5">No transfers added yet.</Text>
@@ -79,7 +88,7 @@ export default function TripSummary({
             />
           )}
         </View>
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheet>
   );
 }
