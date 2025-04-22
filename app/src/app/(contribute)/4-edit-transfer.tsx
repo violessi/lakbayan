@@ -11,6 +11,7 @@ import CircleSource from "@components/map/CircleSource";
 import SymbolMarker from "@components/map/SymbolMarker";
 import TripTitle from "@components/contribute/TripTitle";
 import PrimaryButton from "@components/ui/PrimaryButton";
+import PrimaryButtonOutline from "@components/ui/PrimaryButtonOutline";
 import RouteInformation from "@components/contribute/RouteInformation";
 import UnsavedChangesAlert from "@components/contribute/UnsavedChangesAlert";
 
@@ -78,7 +79,10 @@ export default function RouteInput() {
       setCustomWaypoint([]);
       router.replace("/(contribute)/2-review-trip");
     } catch (error) {
-      Alert.alert("Error", error instanceof Error ? error.message : "Something went wrong. Please try again.");
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "Something went wrong. Please try again.",
+      );
     }
   };
 
@@ -124,7 +128,7 @@ export default function RouteInput() {
 
         <CircleSource id="waypoints" data={customWaypoints} />
         <SymbolMarker id="start-loc" label="Start" coordinates={trip.startCoords} />
-        <SymbolMarker id="end-loc" label="destination" coordinates={trip.endCoords} />
+        <SymbolMarker id="end-loc" label="Destination" coordinates={trip.endCoords} />
         {trip.endLocation !== route.endLocation && (
           <SymbolMarker id="next-loc" coordinates={route.endCoords} label="Next Transfer" />
         )}
@@ -132,10 +136,12 @@ export default function RouteInput() {
 
       <View className="absolute bottom-0 z-50 w-full px-10 pb-12">
         {isEditingWaypoint && (
-          <View className="flex flex-row w-full justify-between">
+          <View className="flex flex-col w-full justify-between gap-5">
+            <View className="flex flex-row justify-center gap-5">
+              <PrimaryButtonOutline onPress={handleProcessRoute}>Calculate</PrimaryButtonOutline>
+              <PrimaryButtonOutline onPress={handleResetWaypoints}>Clear</PrimaryButtonOutline>
+            </View>
             <PrimaryButton label="Done" onPress={handleCompleteEditing} />
-            <PrimaryButton label="Calculate" onPress={handleProcessRoute} />
-            <PrimaryButton label="Clear" onPress={handleResetWaypoints} />
           </View>
         )}
       </View>
