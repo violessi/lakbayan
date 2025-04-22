@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "expo-router";
-import ButtomSheet from "@gorhom/bottom-sheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 import { Text, SafeAreaView, View, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -10,12 +10,42 @@ import PrimaryButton from "@components/ui/PrimaryButton";
 import FilterSearch from "@components/search/FilterSearch";
 
 import { useTripSearch } from "@contexts/TripSearchContext";
+import { useSession } from "@contexts/SessionContext";
+import { insertSearchLog } from "@services/logs-service";
 
 export default function SuggestedTrips() {
+  const { user } = useSession();
   const router = useRouter();
-  const filterSheetRef = useRef<ButtomSheet>(null);
+  const filterSheetRef = useRef<BottomSheet>(null);
   const { tripEndpoints, filteredTrips, filters, applyFilters, setTrip } = useTripSearch();
+  if (!user) throw new Error("User must be logged in to search for a trip!");
 
+
+  useEffect(() => {
+    // TODO: move to context
+    const logSearch = async () => {
+      if (!tripEndpoints?.startLocation || !tripEndpoints?.endLocation) {
+        throw Error ("Please select both a source and destination.");
+      }
+
+      await insertSearchLog({
+        userId: user?.id,
+        startLocation: tripEndpoints.startLocation,
+        startCoords: tripEndpoints.startCoords ?? [0, 0],
+        endLocation: tripEndpoints.endLocation,
+        endCoords: tripEndpoints.endCoords ?? [0, 0],
+        resultCount: filteredTrips.length,
+        didTransitJournal: false,
+      });
+    };
+  
+    try {
+      logSearch();
+    } catch (error) {
+      console.error("Error logging search: ", error);
+    }
+  }, []);
+  
   const handleSelectTrip = (trip: TripSearch) => {
     setTrip(trip);
     router.push("/(search)/3-trip-overview");

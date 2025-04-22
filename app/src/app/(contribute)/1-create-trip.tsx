@@ -12,8 +12,12 @@ import StartEndSearchBar from "@components/StartEndSearchBar";
 import { useMapView } from "@hooks/use-map-view";
 import { reverseGeocode } from "@services/mapbox-service";
 import { useTripCreator } from "@contexts/TripCreator";
+import { insertSubmitLog } from "@services/logs-service";
+import { useSession } from "@contexts/SessionContext";
 
 export default function CustomTrip() {
+  const { user } = useSession();
+  if (!user) throw new Error("User must be logged in to create a trip!");
   const { trip, updateTrip } = useTripCreator();
   const { userLocation, cameraRef, zoomLevel, center, handleMapPress, handleUserLocation } =
     useMapView();
@@ -41,8 +45,17 @@ export default function CustomTrip() {
   };
 
   // When the user presses Confirm, navigate to the next screen if both locations are set.
-  const handleConfirmLocation = () => {
+  const handleConfirmLocation = async () => {
     if (trip.startLocation && trip.endLocation) {
+      await insertSubmitLog({
+        userId: user?.id,
+        startLocation: trip.startLocation,
+        startCoords: trip.startCoords ?? [0, 0],
+        endLocation: trip.endLocation,
+        endCoords: trip.endCoords ?? [0, 0],
+        status: 'ongoing',
+      });
+      console.log("Trip log created successfully.");
       router.replace("/(contribute)/2-review-trip");
     } else {
       Alert.alert("Please select both a source and destination.");

@@ -1,3 +1,4 @@
+import { create } from "lodash";
 import { z } from "zod";
 
 const numberStringNullable = z.string().transform((val) => (val ? parseFloat(val) : null));
@@ -188,4 +189,31 @@ export const RouteInputSchema = z.object({
   instruction: z.string().nullable(),
   waypoints: z.array(CoordinatesSchema).min(2, "Please generate the route"),
   navigationSteps: z.array(NavigationStepsSchema),
+});
+
+// ================== LOGS SCHEMA ==================
+
+export const SearchLogSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  startLocation: z.string(),
+  startCoords: CoordinatesSchema,
+  endLocation: z.string(),
+  endCoords: CoordinatesSchema,
+  resultCount: z.number(),
+  didTransitJournal: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const SubmitLogSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  startLocation: z.string(),
+  startCoords: CoordinatesSchema,
+  endLocation: z.string(),
+  endCoords: CoordinatesSchema,
+  status: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });

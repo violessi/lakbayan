@@ -19,6 +19,8 @@ import type {
   TransitJournalSchema,
   LiveUpdateSchema,
   ProfileSchema,
+  SearchLogSchema,
+  SubmitLogSchema,
 } from "./schema";
 
 declare global {
@@ -86,4 +88,12 @@ declare global {
   // ==================== INPUT ====================
 
   export type RouteInput = z.infer<typeof RouteInputSchema>;
+  
+  // ==================== LOGS ====================
+
+  export type SearchLog = z.infer<typeof SearchLogSchema>;
+  export type CreateSearchLog = Omit<SearchLog, "id" | "createdAt" | "updatedAt">;
+  
+  export type SubmitLog = z.infer<typeof SubmitLogSchema>;
+  export type CreateSubmitLog = Omit<SubmitLog, "id" | "createdAt" | "updatedAt">;
 }
