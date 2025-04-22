@@ -18,17 +18,16 @@ export default function Header({ title, subtitle, hasBack = true, prevCallback }
     <View className="h-24 bg-primary px-5 py-5 flex-col justify-end z-100">
       <View className="flex-row gap-3 items-center">
         {hasBack && (
-          <View style={{ padding: 10, margin: -10 }}>
-            <TouchableOpacity
-              testID="back-button"
-              onPress={() => {
-                if (prevCallback) prevCallback();
-                else router.back();
-              }}
-            >
-              <Image source={back} className="w-5 h-5" />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            testID="back-button"
+            onPress={() => {
+              if (prevCallback) prevCallback();
+              else router.back();
+            }}
+            hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
+          >
+            <Image source={back} className="w-5 h-5" />
+          </TouchableOpacity>
         )}
         <Text style={styles.title}>{title}</Text>
       </View>

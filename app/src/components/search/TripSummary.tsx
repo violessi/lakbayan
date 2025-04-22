@@ -54,7 +54,7 @@ export default function TripSummary({
               <PrimaryButton label="Start Transit Journal" onPress={handleStartPress} />
             </View>
           ))}
-        <View className="flex flex-row justify-between">
+        <View className="flex flex-row justify-between mb-3">
           <View className="flex flex-row gap-2">
             <Text>Contributed by</Text>
             <TouchableOpacity

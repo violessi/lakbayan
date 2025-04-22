@@ -48,7 +48,7 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
             ))}
           </View>
         </View>
-        <View className="gap-1" style={{ flex: 6 }}>
+        <View className="gap-1 justify-start" style={{ flex: 6 }}>
           <Text className="text-md font-bold text-gray-500" style={{ fontWeight: 700 }}>
             Arrive at {arrivalTimeString}
           </Text>
@@ -85,7 +85,10 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
           </View>
         </View>
         <View style={{ flex: 1, alignItems: "flex-end" }}>
-          <TouchableOpacity onPress={toggleBookmark}>
+          <TouchableOpacity
+            onPress={toggleBookmark}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Image
               source={bookmarked ? bookmarkedIcon : bookmarkIcon}
               testID={bookmarked ? "bookmarked-icon" : "bookmark-icon"}
