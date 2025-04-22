@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
 import { Text, Image, View, SafeAreaView, Pressable } from "react-native";
+import { useEffect, useState } from "react";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -9,10 +10,25 @@ import RecentTrips from "@components/search/RecentTrips";
 import { useMapView } from "@hooks/use-map-view";
 import { useLiveUpdates } from "@hooks/use-live-updates";
 
+import { useSession } from "@contexts/SessionContext";
+import { getUsername } from "@services/account-service";
+
 export default function Index() {
+  const { user } = useSession();
   const router = useRouter();
   const { userLocation } = useMapView();
   const { symbolRef, updateLiveStatus } = useLiveUpdates("box", 10);
+
+  const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchUsername(id: string) {
+      const fetchedUsername = await getUsername(id);
+      setUsername(fetchedUsername);
+    }
+    if (!user) return;
+    fetchUsername(user.id);
+  }, [user]);
 
   const handleTextInputFocus = () => {
     router.push("/(search)/1-search-trip");
@@ -28,7 +44,8 @@ export default function Index() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Hi, user!" hasBack={false} />
+      <Header title={`Hi, ${username || "user"}!`} hasBack={false} />
+
       <View>
         <Pressable
           onPress={handleTextInputFocus}
