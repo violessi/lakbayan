@@ -76,6 +76,7 @@ export default function RouteInput() {
     addSegment();
     clearRouteData();
     router.replace("/(contribute)/2-review-trip");
+      setCustomWaypoint([]);
   };
 
   // ==================== App Navigation ==================== //
