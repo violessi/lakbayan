@@ -61,6 +61,7 @@ export async function fetchData(
   table: string,
   columns: string[] = ["*"],
   filters: Record<string, any> = {},
+  options: { order_by?: { column: string; ascending: boolean }; limit?: number } = {},
 ): Promise<any[]> {
   const errMsg = `Failed to fetch data from ${table}`;
   try {
@@ -68,6 +69,13 @@ export async function fetchData(
 
     for (const [key, value] of Object.entries(filters)) {
       query = query.eq(key, value);
+    }
+
+    if (options.order_by) {
+      query = query.order(options.order_by.column, { ascending: options.order_by.ascending });
+    }
+    if (options.limit !== undefined) {
+      query = query.limit(options.limit);
     }
 
     const { data, error } = await query;
