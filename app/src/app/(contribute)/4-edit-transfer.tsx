@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import BottomSheet from "@gorhom/bottom-sheet";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { Alert, SafeAreaView, View, BackHandler } from "react-native";
 
@@ -36,8 +36,23 @@ export default function RouteInput() {
     addSegment,
     clearRouteData,
   } = useTripCreator();
-  const { cameraRef, zoomLevel, center, setCoordinates, setCenter } = useMapView();
+  const { center, setCoordinates } = useMapView();
   const [isEditingWaypoint, setIsEditingWaypoints] = useState(false);
+
+  // Calculate route on initial load for better UX
+  useEffect(() => {
+    if (!isEditingWaypoint && customWaypoints.length === 0) {
+      console.log("kooper");
+
+      handleProcessRoute();
+    }
+  }, []);
+
+  // Calculate route when segment mode changes for better UX
+  useEffect(() => {
+    console.log("kooper");
+    handleProcessRoute();
+  }, [route.segmentMode]);
 
   const handleMapClick = async (feature: any) => {
     if (!isEditingWaypoint) return;
