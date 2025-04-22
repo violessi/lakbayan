@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Text, SafeAreaView, View, Alert } from "react-native";
 
 import { logoutUser } from "@services/account-service";
@@ -30,6 +30,17 @@ export default function Account() {
         Alert.alert("An unexpected error occurred.");
       }
     }
+  }
+
+  function handleLogoutPress() {
+    Alert.alert(
+      "Confirm Logout",
+      "Do you really want to log out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Log Out", style: "destructive", onPress: () => handleLogout() },
+      ]
+    );
   }
 
   return (
@@ -88,7 +99,7 @@ export default function Account() {
             </View>
           )}
         </View>
-        <SecondaryButton label="Log out" onPress={handleLogout} />
+        <SecondaryButton label="Log out" onPress={handleLogoutPress} />
       </View>
     </SafeAreaView>
   );
