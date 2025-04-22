@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
 import { Text, Image, View, SafeAreaView, Pressable } from "react-native";
+import { useEffect, useState } from "react";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
