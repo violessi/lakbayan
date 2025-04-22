@@ -35,9 +35,11 @@ export const MapShell = ({
   cameraProps,
   userLocationProps,
 }: MapShellProps) => {
+  const [hasLoaded, setHasLoaded] = React.useState(false);
   const finalCenter = center ?? [121.05, 14.63]; // Fallback to QC
 
   const handleMapLoaded = () => {
+    setHasLoaded(true);
     if (cameraRef?.current && fitBounds) {
       const padding = [150, 50, 300, 50];
       cameraRef.current.fitBounds(fitBounds[0], fitBounds[1], padding);
@@ -50,6 +52,8 @@ export const MapShell = ({
     Disruption: disruptionIcon,
     "Long Line": lineIcon,
   };
+
+  const animationMode = Platform.OS === "android" ? (hasLoaded ? "easeTo" : "none") : "easeTo";
 
   return (
     <MapView
@@ -66,7 +70,7 @@ export const MapShell = ({
         ref={cameraRef}
         centerCoordinate={finalCenter}
         zoomLevel={zoomLevel ?? 12}
-        animationMode={Platform.OS === "ios" ? "easeTo" : "none"}
+        animationMode={animationMode}
         animationDuration={500}
         {...cameraProps}
       />
