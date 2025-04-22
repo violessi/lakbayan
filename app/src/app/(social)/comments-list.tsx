@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, FlatList, SafeAreaView, Alert } from "react-native";
+import { ActivityIndicator } from "react-native-paper";
 import { useLocalSearchParams } from "expo-router";
 import { useSession } from "@contexts/SessionContext";
 import { getComments, addComment } from "@services/socials-service";
@@ -52,23 +53,27 @@ export default function CommentsList() {
       <Header title="Comments" />
 
       <View className="flex-1 px-4 py-2">
-        {loading ? (
-          <Text>Loading comments...</Text>
-        ) : (
-          <FlatList
-            data={comments}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <CommentItem
-                userId={item.userId}
-                username={item.username}
-                content={item.content}
-                createdAt={item.createdAt}
-                isGpsVerified={item.isGpsVerified}
-              />
-            )}
-          />
-        )}
+        <View className="flex-1">
+          {loading ? (
+            <View className="flex-1 justify-center items-center">
+              <ActivityIndicator animating={true} size="large" />
+            </View>
+          ) : (
+            <FlatList
+              data={comments}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <CommentItem
+                  userId={item.userId}
+                  username={item.username}
+                  content={item.content}
+                  createdAt={item.createdAt}
+                  isGpsVerified={item.isGpsVerified}
+                />
+              )}
+            />
+          )}
+        </View>
 
         {/* Add Comment Input */}
         <View className="flex-row mt-4 gap-3">

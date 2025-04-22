@@ -63,9 +63,9 @@ export default function TripSummary({
               <Text className="text-primary font-bold">{contributor || ""}</Text>
             </TouchableOpacity>
           </View>
-          <View className="flex flex-row gap-3 items-center">
+          <View className="flex flex-row gap-5 items-center">
             {currentUserId && <VotingBar trip={trip} userId={currentUserId} />}
-            <TouchableOpacity onPress={() => handleCommentPress(trip.id)}>
+            <TouchableOpacity onPress={() => handleCommentPress(trip.id)} hitSlop={10}>
               <Image source={comment} style={{ width: 12, height: 12 }} resizeMode="contain" />
             </TouchableOpacity>
           </View>
