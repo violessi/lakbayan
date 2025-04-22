@@ -38,19 +38,17 @@ export default function RouteInput() {
   } = useTripCreator();
   const { center, setCoordinates } = useMapView();
   const [isEditingWaypoint, setIsEditingWaypoints] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   // Calculate route on initial load for better UX
   useEffect(() => {
     if (!isEditingWaypoint && customWaypoints.length === 0) {
-      console.log("kooper");
-
       handleProcessRoute();
     }
   }, []);
 
   // Calculate route when segment mode changes for better UX
   useEffect(() => {
-    console.log("kooper");
     handleProcessRoute();
   }, [route.segmentMode]);
 
@@ -82,14 +80,17 @@ export default function RouteInput() {
   };
 
   // NOTE: handle custom error msg at schema
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     const result = RouteInputSchema.safeParse(route);
     if (!result.success) {
       Alert.alert("Error", result.error.errors[0].message);
+      setSubmitting(false);
       return;
     }
     try {
-      addSegment();
+      await addSegment();
       clearRouteData();
       setCustomWaypoint([]);
       router.replace("/(contribute)/2-review-trip");
@@ -98,6 +99,8 @@ export default function RouteInput() {
         "Error",
         error instanceof Error ? error.message : "Something went wrong. Please try again.",
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 

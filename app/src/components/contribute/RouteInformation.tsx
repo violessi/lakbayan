@@ -23,6 +23,16 @@ export default function RouteInformation({
   const { route, updateRoute } = useTripCreator();
   const snapPoints = ["25%"];
 
+  React.useEffect(() => {
+    if (route.segmentMode === "Walk" && route.segmentName !== "Walk") {
+      updateRoute({ segmentName: "Walk" });
+    } else if (route.segmentName === "Walk") {
+      updateRoute({ segmentName: "" });
+    } else {
+      updateRoute({ segmentName: route.segmentName });
+    }
+  }, [route.segmentMode]);
+
   const handleEditRoute = () => {
     setIsEditingWaypoints(true);
     sheetRef.current?.close();
