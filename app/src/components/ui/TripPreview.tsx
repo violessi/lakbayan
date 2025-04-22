@@ -21,6 +21,13 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
   const totalCost = trip.segments.reduce((sum, seg) => sum + seg.cost, 0);
   const transportModes = trip.segments.map((seg) => seg.segmentMode);
 
+  const currentTime = new Date();
+  const arrivalTime = new Date(currentTime.getTime() + totalDuration * 1000);
+  const arrivalTimeString = arrivalTime.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return (
     <View className="w-full border-b border-gray-200 py-6 px-2">
       <View className="flex-row items-center">
@@ -42,10 +49,11 @@ export default function TripPreview({ trip }: { trip: FullTrip }) {
           </View>
         </View>
         <View className="gap-1" style={{ flex: 6 }}>
+          <Text className="text-md font-bold text-gray-500" style={{ fontWeight: 700 }}>
+            Arrive at {arrivalTimeString}
+          </Text>
           <View className="flex flex-row justify-between gap-1 items-center">
-            <Text className="text-md" style={{ fontWeight: 700 }}>
-              Time: {Math.round(totalDuration / 60)} min
-            </Text>
+            <Text className="text-sm">Time: {Math.round(totalDuration / 60)} min</Text>
             <Text className="text-sm">₱{totalCost.toFixed(2)}</Text>
           </View>
           <View className="flex flex-row gap-4 items-center">
