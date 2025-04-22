@@ -2,9 +2,9 @@ import React from "react";
 import Mapbox, { Images, MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
 
 import pinIcon from "@assets/pin-purple.png";
-import lineIcon from "@assets/report-lines.png";
-import trafficIcon from "@assets/report-traffic.png";
-import disruptionIcon from "@assets/report-disruption.png";
+import lineIcon from "@assets/status-colored-lines.png";
+import trafficIcon from "@assets/status-colored-traffic.png";
+import disruptionIcon from "@assets/status-colored-disruption.png";
 
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
