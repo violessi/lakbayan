@@ -1,4 +1,5 @@
 import React from "react";
+import { Platform } from "react-native";
 import Mapbox, { Images, MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
 
 import pinIcon from "@assets/pin-purple.png";
@@ -65,7 +66,7 @@ export const MapShell = ({
         ref={cameraRef}
         centerCoordinate={finalCenter}
         zoomLevel={zoomLevel ?? 12}
-        animationMode={"easeTo"}
+        animationMode={Platform.OS === "ios" ? "easeTo" : "none"}
         animationDuration={500}
         {...cameraProps}
       />
