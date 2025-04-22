@@ -16,7 +16,7 @@ import { reverseGeocode } from "@services/mapbox-service";
 // NOTE: Same component as contribyte-create-trip
 export default function SearchTrip() {
   const router = useRouter();
-  const { userLocation, cameraRef, zoomLevel, center, handleMapPress } = useMapView();
+  const { userLocation, cameraRef, zoomLevel, handleMapPress } = useMapView();
   const { tripEndpoints, updateTripEndpoints, fetchSuggestedTrips } = useTripSearch();
   const { startLocation, endLocation, startCoords, endCoords } = tripEndpoints || {};
 
