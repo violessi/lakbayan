@@ -1,6 +1,5 @@
 import { useRouter } from "expo-router";
 import { Text, Image, View, SafeAreaView, Pressable } from "react-native";
-import { useEffect, useState } from "react";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -35,6 +34,7 @@ export default function Index() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title={`Welcome back, ${username}!`} hasBack={false} />
+
       <View>
         <Pressable
           onPress={handleTextInputFocus}
