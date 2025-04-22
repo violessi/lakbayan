@@ -58,8 +58,13 @@ export function TripCreatorProvider({ children }: TripCreatorProviderProps) {
   };
 
   const addSegment = () => {
-    const segment = { ...route, contributorId: user.id };
+    const isDuplicate = segments.some((segment) => segment.segmentName === route.segmentName);
 
+    if (isDuplicate && editingIndex === -1) {
+      throw new Error("Segment name already exists");
+    }
+
+    const segment = { ...route, contributorId: user.id };
     if (editingIndex === -1) {
       setSegments((prevSegments) => [...prevSegments, segment]);
     } else {

@@ -44,7 +44,6 @@ export default function RouteInput() {
     if (!feature.geometry || feature.geometry.type !== "Point") return;
     const coordinates = feature.geometry.coordinates as Coordinates;
     setCoordinates(coordinates);
-    setCenter(coordinates);
   };
 
   const handleCompleteEditing = () => {
@@ -73,10 +72,14 @@ export default function RouteInput() {
       Alert.alert("Error", result.error.errors[0].message);
       return;
     }
-    addSegment();
-    clearRouteData();
-    router.replace("/(contribute)/2-review-trip");
+    try {
+      addSegment();
+      clearRouteData();
       setCustomWaypoint([]);
+      router.replace("/(contribute)/2-review-trip");
+    } catch (error) {
+      Alert.alert("Error", error instanceof Error ? error.message : "Something went wrong. Please try again.");
+    }
   };
 
   // ==================== App Navigation ==================== //
@@ -113,8 +116,6 @@ export default function RouteInput() {
 
       <MapShell
         center={center}
-        zoomLevel={zoomLevel}
-        cameraRef={cameraRef}
         handleMapPress={handleMapClick}
         fitBounds={[route.startCoords, route.endCoords]}
       >
