@@ -15,6 +15,8 @@ import { useBookmarks } from "@hooks/use-bookmarks";
 import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
 
+import { SourceDestinationTitle } from "@components/ui/SourceDestinationTitle";
+
 export default function BookmarkedTrips() {
   const { user } = useSession();
   const { bookmarks, loading } = useBookmarks(user?.id || null);
@@ -37,7 +39,7 @@ export default function BookmarkedTrips() {
   return (
     <SafeAreaView className="flex-1">
       <Header title="Bookmarked Trips" />
-      <View className="flex-1 p-4">
+      <View className="flex-1 px-4">
         {loading ? (
           <ActivityIndicator size="small" testID="activity-indicator" />
         ) : bookmarks.length === 0 ? (
@@ -49,13 +51,12 @@ export default function BookmarkedTrips() {
             data={bookmarks}
             keyExtractor={(trip) => trip.id}
             renderItem={({ item: trip }) => (
-              <View className="flex flex-col justify-center mt-5">
+              <View className="flex flex-col justify-center mt-2">
                 <TouchableOpacity onPress={() => handleTripPress(trip)}>
-                  <View className="flex flex-row justify-center">
-                    <Text className="text-sm text-center">
-                      {trip.startLocation} to {trip.endLocation}
-                    </Text>
-                  </View>
+                  <SourceDestinationTitle
+                    start={trip.startLocation ?? ""}
+                    end={trip.endLocation ?? ""}
+                  />
                   <View>
                     <TripPreview trip={trip} />
                   </View>
