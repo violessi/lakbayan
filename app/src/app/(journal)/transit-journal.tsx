@@ -22,6 +22,8 @@ import { useLiveUpdates } from "@hooks/use-live-updates";
 import { useUserLocation } from "@contexts/LocationContext";
 import { useTransitJournal } from "@contexts/TransitJournalContext";
 import { updateTransitJournal, updateProfile } from "@services/trip-service";
+import { updateSearchLog, fetchSearchLogId } from "@services/logs-service";
+
 
 export default function TransitJournal() {
   const router = useRouter();
@@ -47,6 +49,7 @@ export default function TransitJournal() {
     followUser,
     setFollowUser,
   } = useTransitJournal();
+  if (!user) throw new Error("User must be logged in to view this page.");
 
   // complete transit and redirect to review page
   const handleNavigateToReview = () => {
@@ -70,6 +73,16 @@ export default function TransitJournal() {
       };
       await updateTransitJournal(journalPayload);
       await updateProfile({ id: user!.id, transitJournalId: null });
+
+      const id = await fetchSearchLogId({ userId: user.id });
+      if (!id) throw new Error("Search log not found");
+
+      const logsPayload: Partial<SearchLog> = {
+        id: id,
+        didTransitJournal: false,
+      };
+      await updateSearchLog(logsPayload);
+
       setShowTripAbortModal(false);
       router.replace("/(tabs)");
       Alert.alert("Transit Ended", "Your transit journal has been Cancelled!", [{ text: "OK" }]);

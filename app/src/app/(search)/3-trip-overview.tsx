@@ -14,9 +14,11 @@ import { useTripSearch } from "@contexts/TripSearchContext";
 import { useSession } from "@contexts/SessionContext";
 import { useTransitJournal } from "@contexts/TransitJournalContext";
 import { insertSegments, insertTransitJournal, updateProfile } from "@services/trip-service";
+import { updateSearchLog, fetchSearchLogId } from "@services/logs-service";
 
 export default function TripOverview() {
   const [loadingTrip, setLoadingTrip] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const router = useRouter();
   const { tripData } = useLocalSearchParams();
@@ -50,13 +52,12 @@ export default function TripOverview() {
 
     // loading state
     setLoadingTrip(true);
+    setHasError(false);
     try {
       // if trip has pre/post segments, insert them first to segments table
       const { preSegment, postSegment } = trip;
       const preSegmentId = preSegment ? (await insertSegments([preSegment]))[0] : null;
-      console.log("Done adding preSegmentId", preSegmentId);
       const postSegmentId = postSegment ? (await insertSegments([postSegment]))[0] : null;
-      console.log("Done adding postSegmentId", postSegmentId);
 
       // insert transit journal for the trip
       const transitJournalId = await insertTransitJournal({
@@ -65,18 +66,28 @@ export default function TripOverview() {
         preSegmentId,
         postSegmentId,
       });
-      console.log("Done adding transitJournalId", transitJournalId);
 
       // bind transit journal to user
       await updateProfile({ id: user.id, transitJournalId });
-      console.log("Done adding transitJournalId to user", transitJournalId);
+
+      // TODO: MOVE TO CONTEXT
+      const id = await fetchSearchLogId({ userId: user.id });
+      if (!id) throw new Error("Search log not found");
+
+      const logsPayload: Partial<SearchLog> = {
+        id: id,
+        didTransitJournal: true,
+      };
+      await updateSearchLog(logsPayload);
+      
     } catch (error) {
       Alert.alert("Error starting trip, please try again");
+      setHasError(true);
     }
   }
 
   useEffect(() => {
-    if (!!transitJournalId) {
+    if (!!transitJournalId && !hasError) {
       router.replace("/(journal)/transit-journal");
     }
   }, [transitJournalId]);
