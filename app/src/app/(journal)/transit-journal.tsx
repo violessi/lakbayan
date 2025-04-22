@@ -6,6 +6,7 @@ import Header from "@components/ui/Header";
 import NotFound from "@components/journal/NotFound";
 import AbortModal from "@components/journal/AbortModal";
 import PrimaryButton from "@components/ui/PrimaryButton";
+import PrimaryButtonOutline from "@components/ui/PrimaryButtonOutline";
 import TransferModal from "@components/journal/TransferModal";
 import CompleteModal from "@components/journal/CompleteModal";
 import ReportLiveUpdates from "@components/journal/ReportLiveUpdates";
@@ -23,7 +24,6 @@ import { useUserLocation } from "@contexts/LocationContext";
 import { useTransitJournal } from "@contexts/TransitJournalContext";
 import { updateTransitJournal, updateProfile } from "@services/trip-service";
 import { updateSearchLog, fetchSearchLogId } from "@services/logs-service";
-
 
 export default function TransitJournal() {
   const router = useRouter();
@@ -142,7 +142,6 @@ export default function TransitJournal() {
   return (
     <SafeAreaView className="flex-1">
       <Header title="Transit Journal" prevCallback={prevCallback} />
-      <JournalInstructions currentStep={currentStep} currentSegment={activeSegments[0]} />
       <MapShell
         cameraRef={cameraRef}
         handleUserLocation={handleUserLocationUpdate}
@@ -154,12 +153,15 @@ export default function TransitJournal() {
         <SymbolSource id={"live-update"} ref={symbolRef} />
       </MapShell>
 
+      <JournalInstructions currentStep={currentStep} currentSegment={activeSegments[0]} />
+
       {!followUser && (
-        <PrimaryButton
+        <PrimaryButtonOutline
           className="absolute bottom-64 right-6"
-          label="Follow User"
           onPress={() => setFollowUser(true)}
-        />
+        >
+          Follow User
+        </PrimaryButtonOutline>
       )}
 
       <PrimaryButton
