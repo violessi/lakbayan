@@ -13,6 +13,7 @@ interface OutlinedTextInputProps {
   placeholder?: string;
   disabled?: boolean;
   testID?: string;
+  editable?: boolean;
 }
 
 export default function OutlinedTextInput({
@@ -26,6 +27,7 @@ export default function OutlinedTextInput({
   placeholder,
   disabled = false,
   testID,
+  editable = true,
 }: OutlinedTextInputProps) {
   return (
     <TextInput
@@ -43,6 +45,7 @@ export default function OutlinedTextInput({
       disabled={disabled}
       testID={testID}
       onBlur={onBlur}
+      editable={editable}
     />
   );
 }

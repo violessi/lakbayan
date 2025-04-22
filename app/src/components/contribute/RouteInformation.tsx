@@ -41,6 +41,8 @@ export default function RouteInformation({
               <OutlinedTextInput
                 label="Route Name"
                 value={route.segmentName}
+                editable={route.segmentMode !== "Walk"}
+                disabled={route.segmentMode === "Walk"}
                 onChangeText={(segmentName) => updateRoute({ segmentName })}
               />
             </View>
@@ -48,6 +50,8 @@ export default function RouteInformation({
               <OutlinedTextInput
                 label="Cost"
                 value={String(route.cost) ?? ""}
+                editable={route.segmentMode !== "Walk"}
+                disabled={route.segmentMode === "Walk"}
                 onChangeText={(cost) => {
                   const parsedCost = Number(cost);
                   updateRoute({ cost: isNaN(parsedCost) ? 0 : parsedCost });
