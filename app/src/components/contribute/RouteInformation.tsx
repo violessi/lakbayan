@@ -7,6 +7,7 @@ import TransportModeInput from "@components/contribute/TransportModeInput";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
 import { useTripCreator } from "@contexts/TripCreator";
+import PrimaryButtonOutline from "@components/ui/PrimaryButtonOutline";
 
 interface RouteInformationProps {
   sheetRef: React.RefObject<BottomSheet>;
@@ -20,7 +21,7 @@ export default function RouteInformation({
   setIsEditingWaypoints,
 }: RouteInformationProps) {
   const { route, updateRoute } = useTripCreator();
-  const snapPoints = ["25%", "50%"];
+  const snapPoints = ["25%"];
 
   const handleEditRoute = () => {
     setIsEditingWaypoints(true);
@@ -71,8 +72,8 @@ export default function RouteInformation({
           />
         </View>
         <View className="flex flex-row gap-2 p-5 w-full justify-center">
+          <PrimaryButtonOutline onPress={() => handleEditRoute()}>Edit Route</PrimaryButtonOutline>
           <PrimaryButton label={"Submit Route"} onPress={() => handleSubmit()} />
-          <PrimaryButton label={"Edit Route"} onPress={() => handleEditRoute()} />
         </View>
       </BottomSheetScrollView>
     </BottomSheet>
