@@ -1,10 +1,11 @@
 import React from "react";
+import { Platform } from "react-native";
 import Mapbox, { Images, MapView, Camera, UserLocation, Location } from "@rnmapbox/maps";
 
 import pinIcon from "@assets/pin-purple.png";
-import lineIcon from "@assets/report-lines.png";
-import trafficIcon from "@assets/report-traffic.png";
-import disruptionIcon from "@assets/report-disruption.png";
+import lineIcon from "@assets/status-colored-lines.png";
+import trafficIcon from "@assets/status-colored-traffic.png";
+import disruptionIcon from "@assets/status-colored-disruption.png";
 
 import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
@@ -34,9 +35,11 @@ export const MapShell = ({
   cameraProps,
   userLocationProps,
 }: MapShellProps) => {
+  const [hasLoaded, setHasLoaded] = React.useState(false);
   const finalCenter = center ?? [121.05, 14.63]; // Fallback to QC
 
   const handleMapLoaded = () => {
+    setHasLoaded(true);
     if (cameraRef?.current && fitBounds) {
       const padding = [150, 50, 300, 50];
       cameraRef.current.fitBounds(fitBounds[0], fitBounds[1], padding);
@@ -49,6 +52,8 @@ export const MapShell = ({
     Disruption: disruptionIcon,
     "Long Line": lineIcon,
   };
+
+  const animationMode = Platform.OS === "android" ? (hasLoaded ? "easeTo" : "none") : "easeTo";
 
   return (
     <MapView
@@ -65,7 +70,7 @@ export const MapShell = ({
         ref={cameraRef}
         centerCoordinate={finalCenter}
         zoomLevel={zoomLevel ?? 12}
-        animationMode={"easeTo"}
+        animationMode={animationMode}
         animationDuration={500}
         {...cameraProps}
       />

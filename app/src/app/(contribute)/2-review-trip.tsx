@@ -9,13 +9,19 @@ import { MapShell } from "@components/map/MapShell";
 import SymbolMarker from "@components/map/SymbolMarker";
 import TripTitle from "@components/contribute/TripTitle";
 import PrimaryButton from "@components/ui/PrimaryButton";
+import { SourceDestinationTitle } from "@components/ui/SourceDestinationTitle";
 import TripSummary from "@components/contribute/TripSummary";
 import UnsavedChangesAlert from "@components/contribute/UnsavedChangesAlert";
 
 import { useMapView } from "@hooks/use-map-view";
 import { useTripCreator } from "@contexts/TripCreator";
 import { useSession } from "@contexts/SessionContext";
-import { insertSubmitLog, updateSubmitLog, fetchSubmitLogId, deleteSubmitLog } from "@services/logs-service";
+import {
+  insertSubmitLog,
+  updateSubmitLog,
+  fetchSubmitLogId,
+  deleteSubmitLog,
+} from "@services/logs-service";
 
 export default function TripReview() {
   const { user } = useSession();
@@ -32,7 +38,7 @@ export default function TripReview() {
     clearRouteData,
     submitTrip,
   } = useTripCreator();
-  if(!user) throw new Error("User must be logged in to create a trip!");
+  if (!user) throw new Error("User must be logged in to create a trip!");
 
   const handleCreateSegment = async () => {
     clearRouteData();
@@ -56,13 +62,13 @@ export default function TripReview() {
     try {
       await submitTrip();
       Alert.alert("Trip Submitted", "Your trip has been submitted successfully!");
-      const id = await fetchSubmitLogId({userId: user.id});
+      const id = await fetchSubmitLogId({ userId: user.id });
       if (!id) {
         console.error("No submit log ID found.");
         return;
       }
       console.log("Submit log ID:", id);
-  
+
       await updateSubmitLog({ id, status: "completed" });
       console.log("Submit log updated to completed");
       router.replace("/(tabs)");
@@ -75,12 +81,12 @@ export default function TripReview() {
   const handleBackNavigation = async () => {
     const id = await fetchSubmitLogId({ userId: user.id });
     console.log("Submit log ID:", id);
-  
+
     if (!id) {
       console.error("No submit log ID found.");
       return;
     }
-  
+
     if (!isSegmentEmpty) {
       await updateSubmitLog({ id, status: "cancelled" });
       console.log("Submit log updated to cancelled");
@@ -92,7 +98,6 @@ export default function TripReview() {
     clearTripData();
     router.replace("/(contribute)/1-create-trip");
   };
-  
 
   // Handle back navigation from the header
   const prevCallback = () => {
@@ -111,7 +116,7 @@ export default function TripReview() {
     const backHandler = BackHandler.addEventListener(action, backAction);
     return () => backHandler.remove();
   });
-  
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header prevCallback={prevCallback} title="Trip Review" />

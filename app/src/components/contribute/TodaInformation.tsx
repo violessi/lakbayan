@@ -81,7 +81,7 @@ export default function TodaStops({ coordinates, onNewStopAdded }: TodaStopsProp
 
     const moderationReview = {
       id: uuid.v4(),
-      trip_toda_id: stopData.id,
+      trip_id: stopData.id,
       moderator_id: user?.id || "",
       status: "pending",
       type: "toda",
@@ -89,7 +89,7 @@ export default function TodaStops({ coordinates, onNewStopAdded }: TodaStopsProp
 
     try {
       await insertStop(stopData);
-      await addToPendingModeratorReview(moderationReview.trip_toda_id, moderationReview.type);
+      await addToPendingModeratorReview(moderationReview.trip_id, moderationReview.type);
       Alert.alert("Success!", "TODA stop information submitted successfully!");
       resetForm();
       onNewStopAdded();

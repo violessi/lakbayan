@@ -7,17 +7,19 @@ interface Props {
 
 const JournalInstructions = ({ currentStep, currentSegment }: Props) => {
   return (
-    <View className="w-full bg-white px-4 py-2">
-      {currentStep ? (
-        <Text className="font-bold text-lg">{currentStep.instruction}</Text>
-      ) : (
-        <Text className="font-bold text-lg">Follow the instructions on the map.</Text>
-      )}
+    <View style={{ top: 100 }} className="absolute left-5 right-5 bg-white px-5 py-4 rounded-md">
+      <Text className="font-bold text-lg text-gray-800 mb-1">
+        {currentStep ? currentStep.instruction : "Follow the instructions on the map."}
+      </Text>
       {currentSegment?.landmark && (
-        <Text className="text-sm">Landmark: {currentSegment.landmark}</Text>
+        <Text className="text-sm text-gray-600 mb-1">
+          <Text className="font-semibold">Landmark:</Text> {currentSegment.landmark}
+        </Text>
       )}
       {currentSegment?.instruction && (
-        <Text className="text-sm">Instruction: {currentSegment.instruction}</Text>
+        <Text className="text-sm text-gray-600">
+          <Text className="font-semibold">Instruction:</Text> {currentSegment.instruction}
+        </Text>
       )}
     </View>
   );

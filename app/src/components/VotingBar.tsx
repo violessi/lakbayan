@@ -52,6 +52,7 @@ export default function VotingBar({ trip, userId }: VotingProps) {
       <TouchableOpacity
         onPress={() => handleVote("upvote")}
         style={{ flexDirection: "row", alignItems: "center" }}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <Image
           source={upvote}
@@ -76,6 +77,7 @@ export default function VotingBar({ trip, userId }: VotingProps) {
       <TouchableOpacity
         onPress={() => handleVote("downvote")}
         style={{ flexDirection: "row", alignItems: "center" }}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <Image
           source={downvote}

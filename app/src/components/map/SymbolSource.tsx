@@ -11,7 +11,7 @@ export type SymbolSourceRef = { update: (data: Data) => void };
 // This component renders symbols/icons dynamically on the map
 // Takes in a list of coordinates or live updates or segments
 const SymbolSource = forwardRef<SymbolSourceRef, Props>(
-  ({ id, data, iconImage = "pin", iconSize = 0.03 }, ref) => {
+  ({ id, data, iconImage = "pin", iconSize = 0.05 }, ref) => {
     const symbolRef = useRef<ShapeSource | null>(null);
     const initialShape = generateShape(data ?? [], iconImage);
 

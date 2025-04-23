@@ -15,11 +15,11 @@ import { usePendingVerifications } from "@hooks/use-pending-verifications";
 import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
 
+import { SourceDestinationTitle } from "@components/ui/SourceDestinationTitle";
+
 export default function ModerateTripsList() {
   const { user } = useSession();
-  const { pendingTrips, pendingTodas, loading, refetch } = usePendingVerifications(
-    user?.id || null,
-  );
+  const { pendingTrips, loading, refetch } = usePendingVerifications(user?.id || null);
   const router = useRouter();
 
   useFocusEffect(
@@ -58,12 +58,13 @@ export default function ModerateTripsList() {
             data={pendingTrips}
             keyExtractor={(trip) => trip.id}
             renderItem={({ item: trip }) => (
-              <View className="flex flex-col justify-center mt-5">
+              <View className="flex flex-col justify-center mt-">
                 <TouchableOpacity onPress={() => handleTripPress(trip)}>
                   <View className="flex flex-row justify-center">
-                    <Text className="text-sm text-center">
-                      {trip.startLocation} to {trip.endLocation}
-                    </Text>
+                    <SourceDestinationTitle
+                      start={trip.startLocation ?? ""}
+                      end={trip.endLocation ?? ""}
+                    />
                   </View>
                   <View>
                     <TripPreview trip={trip} />

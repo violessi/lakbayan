@@ -24,6 +24,7 @@ export default function Header({ title, subtitle, hasBack = true, prevCallback }
               if (prevCallback) prevCallback();
               else router.back();
             }}
+            hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
           >
             <Image source={back} className="w-5 h-5" />
           </TouchableOpacity>

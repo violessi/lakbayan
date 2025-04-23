@@ -8,6 +8,7 @@ import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
 import PrimaryButton from "@components/ui/PrimaryButton";
 import FilterSearch from "@components/search/FilterSearch";
+import { SourceDestinationTitle } from "@components/ui/SourceDestinationTitle";
 
 import { useTripSearch } from "@contexts/TripSearchContext";
 import { useSession } from "@contexts/SessionContext";
@@ -20,12 +21,11 @@ export default function SuggestedTrips() {
   const { tripEndpoints, filteredTrips, filters, applyFilters, setTrip } = useTripSearch();
   if (!user) throw new Error("User must be logged in to search for a trip!");
 
-
   useEffect(() => {
     // TODO: move to context
     const logSearch = async () => {
       if (!tripEndpoints?.startLocation || !tripEndpoints?.endLocation) {
-        throw Error ("Please select both a source and destination.");
+        throw Error("Please select both a source and destination.");
       }
 
       await insertSearchLog({
@@ -38,14 +38,14 @@ export default function SuggestedTrips() {
         didTransitJournal: false,
       });
     };
-  
+
     try {
       logSearch();
     } catch (error) {
       console.error("Error logging search: ", error);
     }
   }, []);
-  
+
   const handleSelectTrip = (trip: TripSearch) => {
     setTrip(trip);
     router.push("/(search)/3-trip-overview");
@@ -58,13 +58,10 @@ export default function SuggestedTrips() {
     <SafeAreaView className="flex-1">
       <Header prevCallback={prevCallback} title="Suggested Trips" />
 
-      <View className="px-4 pb-0 pt-5">
-        <View className="flex-row items-center flex-wrap justify-center">
-          <Text className="text-md font-bold flex-shrink">{tripEndpoints!.startLocation}</Text>
-          <MaterialIcons name="arrow-forward" size={10} color="black" className="px-2" />
-          <Text className="text-md font-bold flex-shrink">{tripEndpoints!.endLocation}</Text>
-        </View>
-      </View>
+      <SourceDestinationTitle
+        start={tripEndpoints!.startLocation ?? ""}
+        end={tripEndpoints!.endLocation ?? ""}
+      />
 
       {filteredTrips.length === 0 ? (
         <View className="flex-1 justify-center items-center">

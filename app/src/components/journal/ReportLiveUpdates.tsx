@@ -40,7 +40,7 @@ export default function ReportTab() {
                 key={label}
                 onPress={() => handleReportPress(label)}
                 className={
-                  "border border-primary rounded-xl w-20 aspect-square flex justify-center items-center"
+                  "border  border-gray-300 rounded-xl w-20 aspect-square flex justify-center items-center"
                 }
               >
                 <Image
@@ -49,7 +49,7 @@ export default function ReportTab() {
                   resizeMode="contain"
                   style={{ tintColor: "#9CA3AF" }} // Purple when selected, gray when not
                 />
-                <Text className={`text-gray-600 text-sm`}>{label}</Text>
+                <Text className={`text-gray-600 text-[11px]`}>{label}</Text>
               </TouchableOpacity>
             );
           })}

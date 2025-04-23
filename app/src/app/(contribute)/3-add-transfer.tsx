@@ -12,6 +12,7 @@ import StartEndSearchBar from "@components/StartEndSearchBar";
 import { useMapView } from "@hooks/use-map-view";
 import { reverseGeocode } from "@services/mapbox-service";
 import { useTripCreator } from "@contexts/TripCreator";
+import PrimaryButtonOutline from "@components/ui/PrimaryButtonOutline";
 
 export default function RouteSelectInfo() {
   const { cameraRef, handleMapPress } = useMapView();
@@ -74,7 +75,7 @@ export default function RouteSelectInfo() {
       </MapShell>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
-        <PrimaryButton label="Final Location" onPress={handleFinalTransfer} />
+        <PrimaryButtonOutline onPress={handleFinalTransfer}>Final Location</PrimaryButtonOutline>
         <PrimaryButton label="Add Transfer" onPress={handleAddTransfer} />
       </View>
     </SafeAreaView>

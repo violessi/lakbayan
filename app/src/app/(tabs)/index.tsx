@@ -34,6 +34,7 @@ export default function Index() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header title={`Welcome back, ${username}!`} hasBack={false} />
+
       <View>
         <Pressable
           onPress={handleTextInputFocus}

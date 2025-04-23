@@ -10,10 +10,12 @@ import PrimaryButton from "@components/ui/PrimaryButton";
 import StartEndSearchBar from "@components/StartEndSearchBar";
 
 import { useMapView } from "@hooks/use-map-view";
+import { useDefaultStartLocation } from "@hooks/use-default-start-location";
 import { reverseGeocode } from "@services/mapbox-service";
 import { useTripCreator } from "@contexts/TripCreator";
 import { insertSubmitLog } from "@services/logs-service";
 import { useSession } from "@contexts/SessionContext";
+import PrimaryButtonOutline from "@components/ui/PrimaryButtonOutline";
 
 export default function CustomTrip() {
   const { user } = useSession();
@@ -34,6 +36,15 @@ export default function CustomTrip() {
     cameraRef.current?.moveTo(coords, 1000);
   };
 
+  // Set the default start location to the user's current location if not already set
+  useDefaultStartLocation({
+    userLocation: userLocation ?? undefined,
+    startLocation: trip.startLocation,
+    onSetStart: handleStartChange,
+    cameraRef,
+    zoomLevel,
+  });
+
   // Allow users to use current location as start or end location.
   const handleUseCurrentLoc = async () => {
     console.log(userLocation);
@@ -53,7 +64,7 @@ export default function CustomTrip() {
         startCoords: trip.startCoords ?? [0, 0],
         endLocation: trip.endLocation,
         endCoords: trip.endCoords ?? [0, 0],
-        status: 'ongoing',
+        status: "ongoing",
       });
       console.log("Trip log created successfully.");
       router.replace("/(contribute)/2-review-trip");
@@ -117,7 +128,9 @@ export default function CustomTrip() {
       </MapShell>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
-        <PrimaryButton label="Use Current Location" onPress={handleUseCurrentLoc} />
+        <PrimaryButtonOutline onPress={handleUseCurrentLoc}>
+          Use Current Location
+        </PrimaryButtonOutline>
         <PrimaryButton label="Confirm" onPress={handleConfirmLocation} />
       </View>
     </SafeAreaView>
