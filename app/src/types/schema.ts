@@ -149,6 +149,8 @@ export const TransitJournalSchema = z.object({
   startTime: z.string(),
   endTime: z.string().nullable(),
   status: TransitJournalStatusSchema,
+  hasDeviated: z.boolean().nullable(),
+  rating: z.number().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

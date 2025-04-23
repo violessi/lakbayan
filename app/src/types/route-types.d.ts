@@ -74,7 +74,7 @@ declare global {
   export type TransitJournal = z.infer<typeof TransitJournalSchema>;
   export type CreateTransitJournal = Omit<
     TransitJournal,
-    "id" | "createdAt" | "updatedAt" | "startTime" | "endTime" | "status"
+    "id" | "createdAt" | "updatedAt" | "startTime" | "endTime" | "status" | "hasDeviated" | "rating"
   >;
 
   export type LiveUpdate = z.infer<typeof LiveUpdateSchema>;
