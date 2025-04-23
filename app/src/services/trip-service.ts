@@ -112,18 +112,32 @@ export async function fetchTransitJournal(journalId: string): Promise<TransitJou
   }
 }
 
-// Fetches the latest 3 transit journals done by a user
+// Fetches the latest 3 unique transit journals done by a user
 export async function fetchLatestTransitJournals(userId: string): Promise<TransitJournal[]> {
   try {
     const data = await fetchData(
       "transit_journals",
       ["*"],
       { user_id: userId },
-      { order_by: { column: "created_at", ascending: false }, limit: 3 },
+      { order_by: { column: "created_at", ascending: false }, limit: 15 } // Fetch more than 3 for deduplication
     );
+
     const formattedData = data.map(convertKeysToCamelCase);
-    const result = TransitJournalSchema.array().safeParse(formattedData);
+
+    // Deduplicate by tripId and keep most recent
+    const uniqueByTripId = new Map<string, TransitJournal>();
+    for (const journal of formattedData) {
+      if (!uniqueByTripId.has(journal.tripId)) {
+        const validatedJournal = TransitJournalSchema.parse(journal);
+        uniqueByTripId.set(validatedJournal.tripId, validatedJournal);
+      }
+    }
+
+    const uniqueJournals = Array.from(uniqueByTripId.values()).slice(0, 3);
+
+    const result = TransitJournalSchema.array().safeParse(uniqueJournals);
     if (!result.success) throw new Error("Invalid Transit Journal Data");
+
     return result.data;
   } catch (error) {
     throw new Error("Error fetching latest transit journals");
