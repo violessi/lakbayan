@@ -205,7 +205,7 @@ export async function countModVerifications(tripId: string, type: string): Promi
   const { count, error } = await supabase
     .from("moderation_reviews")
     .select("*", { count: "exact", head: true })
-    .eq("trip_toda_id", tripId)
+    .eq("trip_id", tripId)
     .eq("type", type)
     .eq("status", "verified");
 

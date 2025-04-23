@@ -6,7 +6,7 @@ import { fetchStops } from "./toda-stop-service";
 
 export const ModerationReviewSchema = z.object({
   id: z.string(),
-  tripTodaId: z.string(),
+  tripId: z.string(),
   moderatorId: z.string(),
   status: z.enum(["pending", "approved", "dismissed"]),
   type: z.enum(["trip", "toda"]),
@@ -17,7 +17,7 @@ export type ModerationReview = z.infer<typeof ModerationReviewSchema>;
 export async function getPendingTripVerifications(moderatorId: string): Promise<FullTrip[]> {
   const { data: reviewData, error: reviewError } = await supabase
     .from("moderation_reviews")
-    .select("trip_toda_id")
+    .select("trip_id")
     .eq("moderator_id", moderatorId)
     .eq("status", "pending")
     .eq("type", "trip");
@@ -27,7 +27,7 @@ export async function getPendingTripVerifications(moderatorId: string): Promise<
     return [];
   }
 
-  const tripIds = reviewData.map((review) => review.trip_toda_id);
+  const tripIds = reviewData.map((review) => review.trip_id);
   if (tripIds.length === 0) return [];
 
   const trips = await Promise.all(
@@ -47,7 +47,7 @@ export async function getPendingTripVerifications(moderatorId: string): Promise<
 export async function getPendingTodaVerifications(moderatorId: string): Promise<StopData[]> {
   const { data: reviewData, error: reviewError } = await supabase
     .from("moderation_reviews")
-    .select("trip_toda_id")
+    .select("trip_id")
     .eq("moderator_id", moderatorId)
     .eq("status", "pending")
     .eq("type", "toda");
@@ -57,7 +57,7 @@ export async function getPendingTodaVerifications(moderatorId: string): Promise<
     return [];
   }
 
-  const todaIds = reviewData.map((review) => review.trip_toda_id);
+  const todaIds = reviewData.map((review) => review.trip_id);
   if (todaIds.length === 0) return [];
 
   const todas = await fetchStops(todaIds);
@@ -86,7 +86,7 @@ export async function addToPendingModeratorReview(tripId: string, type: string):
     }
 
     const moderationEntries = moderators.map((mod) => ({
-      trip_toda_id: tripId,
+      trip_id: tripId,
       moderator_id: mod.id,
       status: "pending",
       type,
@@ -114,7 +114,7 @@ export async function updateModerationStatus(
     .from("moderation_reviews")
     .update({ status })
     .eq("moderator_id", moderatorId)
-    .eq("trip_toda_id", tripId);
+    .eq("trip_id", tripId);
 
   if (error) {
     console.error("Error updating moderation status:", error);
