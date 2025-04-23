@@ -15,7 +15,19 @@ interface JournalFeedbackProps {
   handleSubmit: () => void;
   newComment: string;
   setNewComment: (comment: string) => void;
+  rating: number | null;
+  setRating: (rating: number | null) => void;
+  hasDeviated: boolean | null;
+  setHasDeviated: (hasDeviated: boolean | null) => void;
 }
+
+const RATING: Record<number, string> = {
+  0: "Very Bad",
+  1: "Bad",
+  2: "Okay",
+  3: "Good",
+  4: "Very Good",
+};
 
 export default function JournalFeedback({
   trip,
@@ -24,6 +36,10 @@ export default function JournalFeedback({
   handleSubmit,
   newComment,
   setNewComment,
+  rating,
+  setRating,
+  hasDeviated,
+  setHasDeviated,
 }: JournalFeedbackProps) {
   const snapPoints = ["10%", "18%", "40%", "72%"];
 
@@ -31,12 +47,14 @@ export default function JournalFeedback({
 
   useEffect(() => {
     async function fetchPoints() {
-      const points = await getPoints(trip.id);
+      const points = await getPoints(trip);
       setPoints(points || 0);
     }
 
     fetchPoints();
   }, [trip.contributorId, trip.id]);
+
+  const canSubmit = rating !== null && hasDeviated !== null;
 
   return (
     <BottomSheet snapPoints={snapPoints} index={2}>
@@ -52,14 +70,56 @@ export default function JournalFeedback({
             </TouchableOpacity>
           </View>
         </View>
-        <View className="flex-row mt-4 gap-3">
+
+        <View className="flex gap-4">
+          <Text className="text-sm text-gray-500">How can you rate the trip on its accuracy?</Text>
+          <View className="flex-row justify-center gap-2">
+            {Object.entries(RATING).map(([key, label]) => {
+              const numericKey = parseInt(key);
+              const isSelected = rating === numericKey;
+              return (
+                <TouchableOpacity
+                  key={key}
+                  onPress={() => setRating(numericKey)}
+                  className={`px-3 py-2 rounded-lg ${isSelected ? "bg-blue-500" : "bg-gray-200"}`}
+                >
+                  <Text className={`text-sm ${isSelected ? "text-white font-bold" : "text-gray-800"}`}>
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          <Text className="text-sm text-gray-500">Has your actual transit deviate from the trip?</Text>
+          <View className="flex-row justify-center gap-2">
+            <TouchableOpacity
+              onPress={() => setHasDeviated(true)}
+              className={`px-3 py-2 rounded-lg ${hasDeviated === true ? "bg-blue-500" : "bg-gray-200"}`}
+            >
+              <Text className={`text-sm ${hasDeviated === true ? "text-white font-bold" : "text-gray-800"}`}>
+                Yes
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setHasDeviated(false)}
+              className={`px-3 py-2 rounded-lg ${hasDeviated === false ? "bg-blue-500" : "bg-gray-200"}`}
+            >
+              <Text className={`text-sm ${hasDeviated === false ? "text-white font-bold" : "text-gray-800"}`}>
+                No
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text className="text-sm text-gray-500">Share your thoughts on the trip!</Text>
           <TextInput
             value={newComment}
             onChangeText={setNewComment}
             placeholder="Add a comment..."
-            className="flex-1 border border-gray-200 rounded-lg px-3"
+            className="border border-gray-200 rounded-lg p-4"
+            multiline
           />
-          <PrimaryButton label="Submit" onPress={handleSubmit} />
+          <PrimaryButton label="Submit" onPress={handleSubmit} disabled={!canSubmit} />
         </View>
       </BottomSheetView>
     </BottomSheet>

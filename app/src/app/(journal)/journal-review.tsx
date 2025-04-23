@@ -1,6 +1,4 @@
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { SafeAreaView, Alert } from "react-native";
 import React, { useState, useCallback } from "react";
 import { SafeAreaView, Alert, BackHandler } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
@@ -28,7 +26,7 @@ export default function JournalReview() {
   const router = useRouter();
   const { user } = useSession();
   const { cameraRef } = useMapView();
-  const { trip, segments, transitJournal } = useTransitJournal();
+  const { trip, segments, transitJournal, rating, hasDeviated, setRating, setHasDeviated } = useTransitJournal();
   const [newComment, setNewComment] = useState("");
 
   function handleCommentPress(tripId: string) {
@@ -46,6 +44,8 @@ export default function JournalReview() {
       id: transitJournal.id,
       status: "success",
       endTime: new Date().toISOString(),
+      rating: rating,
+      hasDeviated: hasDeviated,
     };
 
     try {
@@ -91,7 +91,6 @@ export default function JournalReview() {
 
   return (
     <SafeAreaView className="flex-1">
-      <Header title="Journal Review" />
       <Header title="Journal Review" prevCallback={prevCallback}/>
 
       <MapShell fitBounds={[trip.startCoords, trip.endCoords]} cameraRef={cameraRef}>
@@ -107,6 +106,10 @@ export default function JournalReview() {
         handleSubmit={handleSubmit}
         newComment={newComment}
         setNewComment={setNewComment}
+        rating={rating}
+        setRating={setRating}
+        hasDeviated={hasDeviated}
+        setHasDeviated={setHasDeviated}
       />
     </SafeAreaView>
   );
