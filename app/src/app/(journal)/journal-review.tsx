@@ -1,6 +1,9 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { SafeAreaView, Alert } from "react-native";
+import React, { useState, useCallback } from "react";
+import { SafeAreaView, Alert, BackHandler } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 import Header from "@components/ui/Header";
 import NotFound from "@components/journal/NotFound";
@@ -8,6 +11,7 @@ import { MapShell } from "@components/map/MapShell";
 import LineSource from "@components/map/LineSource";
 import CircleSource from "@components/map/CircleSource";
 import JournalFeedback from "@components/journal/JournalFeedback";
+import UnsavedChangesAlert from "@components/contribute/UnsavedChangesAlert";
 
 import { useMapView } from "@hooks/use-map-view";
 import { useSession } from "@contexts/SessionContext";
@@ -58,11 +62,37 @@ export default function JournalReview() {
     }
   };
 
+  // navigation
+  function handleBackNavigation() {
+    router.replace("/(journal)/transit-journal");
+  }
+
+  function prevCallback() {
+    UnsavedChangesAlert(handleBackNavigation);
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      const backAction = () => {
+        prevCallback();
+        return true;
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction,
+      );
+
+      return () => backHandler.remove();
+    }, []),
+  );
+
   if (!trip || !segments || !user) return <NotFound />;
 
   return (
     <SafeAreaView className="flex-1">
       <Header title="Journal Review" />
+      <Header title="Journal Review" prevCallback={prevCallback}/>
 
       <MapShell fitBounds={[trip.startCoords, trip.endCoords]} cameraRef={cameraRef}>
         <CircleSource id="start" data={[trip.startCoords]} radius={6} />
