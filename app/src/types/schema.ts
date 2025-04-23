@@ -151,6 +151,7 @@ export const TransitJournalSchema = z.object({
   status: TransitJournalStatusSchema,
   hasDeviated: z.boolean().nullable(),
   rating: z.number().nullable(),
+  gpsTrace: z.array(CoordinatesSchema).nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
