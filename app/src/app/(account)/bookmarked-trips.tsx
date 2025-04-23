@@ -6,8 +6,11 @@ import {
   ActivityIndicator,
   Text,
   TouchableOpacity,
+  BackHandler
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 import { useSession } from "@contexts/SessionContext";
 import { useBookmarks } from "@hooks/use-bookmarks";
@@ -32,9 +35,30 @@ export default function BookmarkedTrips() {
 
     router.push({
       pathname: "/(search)/3-trip-overview",
-      params: { tripData: JSON.stringify(tripSearch) },
+      params: { tripData: JSON.stringify(tripSearch), from: "bookmarked-trips" },
     });
   }
+
+  // navigation
+  function prevCallback() {
+    router.replace("/(tabs)/account");
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      const backAction = () => {
+        prevCallback();
+        return true;
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction,
+      );
+
+      return () => backHandler.remove();
+    }, []),
+  );
 
   return (
     <SafeAreaView className="flex-1">

@@ -29,7 +29,7 @@ export default function RecentTrips() {
 
     router.push({
       pathname: "/(search)/3-trip-overview",
-      params: { tripData: JSON.stringify(tripSearch) },
+      params: { tripData: JSON.stringify(tripSearch), from: "recent-trips" },
     });
   }
 

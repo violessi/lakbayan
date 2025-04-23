@@ -21,7 +21,7 @@ export default function TripOverview() {
   const [hasError, setHasError] = useState(false);
 
   const router = useRouter();
-  const { tripData } = useLocalSearchParams();
+  const { tripData, from } = useLocalSearchParams();
 
   const { user } = useSession();
   const { cameraRef } = useMapView();
@@ -95,6 +95,18 @@ export default function TripOverview() {
   // navigation
   const prevCallback = () => {
     if (loadingTrip) return;
+    if (from === "submitted-trips") {
+      router.replace("/(account)/submitted-trips");
+      return;
+    }
+    if (from === "recent-trips") {
+      router.replace("/(tabs)");
+      return;
+    }
+    if (from === "bookmarked-trips") {
+      router.replace("/(account)/bookmarked-trips");
+      return;
+    }
     router.replace("/(search)/2-trip-suggestions");
   };
 
