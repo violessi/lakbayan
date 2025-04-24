@@ -76,7 +76,10 @@ export default function JournalReview() {
 
   // navigation
   function handleBackNavigation() {
-    router.replace("/(journal)/transit-journal");
+    router.replace({
+      pathname: "/(journal)/transit-journal",
+      params: { journalReview: "no" },
+    });
   }
 
   function prevCallback() {

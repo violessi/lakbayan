@@ -92,7 +92,10 @@ export default function TripOverview() {
 
   useEffect(() => {
     if (!!transitJournalId && !hasError) {
-      router.replace("/(journal)/transit-journal");
+      router.replace({
+        pathname: "/(journal)/transit-journal",
+        params: { journalReview: "no" },
+      });
     }
   }, [transitJournalId]);
 
