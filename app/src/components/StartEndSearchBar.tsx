@@ -57,9 +57,11 @@ export default function StartEndSearch({
     if (type === "start") {
       setStartSearchQuery("");
       setStartSuggestions([]);
+      onStartChange?.("", null as unknown as [number, number]);
     } else {
       setEndSearchQuery("");
       setEndSuggestions([]);
+      onEndChange?.("", null as unknown as [number, number]);
     }
     Keyboard.dismiss();
   };

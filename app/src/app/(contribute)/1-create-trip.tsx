@@ -123,8 +123,12 @@ export default function CustomTrip() {
         handleMapPress={handlePress}
         handleUserLocation={handleUserLocation}
       >
+        {trip.startCoords &&
         <SymbolMarker id="start-loc" label="Start" coordinates={trip.startCoords} />
+        }
+        {trip.endCoords &&
         <SymbolMarker id="end-loc" label="Destination" coordinates={trip.endCoords} />
+        }
       </MapShell>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">
