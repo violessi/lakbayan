@@ -54,12 +54,6 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
   };
 
   const applyFilters = ({ sortBy, transportModes }: FilterState) => {
-    console.log("[applyFilters] sortBy:", sortBy);
-    console.log(
-      "[applyFilters] durations:",
-      suggestedTrips.map((t) => t.duration),
-    );
-
     const filtered = suggestedTrips
       .filter((trip) =>
         trip.segments.every(
