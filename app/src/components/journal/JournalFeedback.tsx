@@ -54,7 +54,7 @@ export default function JournalFeedback({
     fetchPoints();
   }, [trip.contributorId, trip.id]);
 
-  const canSubmit = rating !== null && hasDeviated !== null;
+  const canSubmit = rating !== null && hasDeviated !== null && newComment.trim();
 
   return (
     <BottomSheet snapPoints={snapPoints} index={2}>
