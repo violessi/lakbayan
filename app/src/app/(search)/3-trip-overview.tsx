@@ -117,6 +117,10 @@ export default function TripOverview() {
       router.replace("/(account)/bookmarked-trips");
       return;
     }
+    if (from === "contributor-account") {
+      router.back();
+      return;
+    }
     router.replace("/(search)/2-trip-suggestions");
   };
 
