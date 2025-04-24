@@ -7,11 +7,13 @@ import { MapShell } from "@components/map/MapShell";
 import LineSource from "@components/map/LineSource";
 import CircleSource from "@components/map/CircleSource";
 import SymbolMarker from "@components/map/SymbolMarker";
+import SymbolSource from "@components/map/SymbolSource";
 import TripSummary from "@components/search/TripSummary";
 
 import { useMapView } from "@hooks/use-map-view";
 import { useTripSearch } from "@contexts/TripSearchContext";
 import { useSession } from "@contexts/SessionContext";
+import { useLiveUpdates } from "@hooks/use-live-updates";
 import { useTransitJournal } from "@contexts/TransitJournalContext";
 import { insertSegments, insertTransitJournal, updateProfile } from "@services/trip-service";
 import { updateSearchLog, fetchSearchLogId } from "@services/logs-service";
@@ -27,6 +29,7 @@ export default function TripOverview() {
   const { cameraRef } = useMapView();
   const { trip: contextTrip } = useTripSearch();
   const { transitJournalId } = useTransitJournal();
+  const { symbolRef, updateLiveStatus } = useLiveUpdates("line", 5);
 
   // NOTE: some pages redirect to this page using searchParams
   const trip =
@@ -92,6 +95,11 @@ export default function TripOverview() {
     }
   }, [transitJournalId]);
 
+  useEffect(() => {
+    if (!trip.segments) return;
+    updateLiveStatus(trip.segments.flatMap(({ waypoints }) => waypoints));
+  }, [trip.segments]);
+
   // navigation
   const prevCallback = () => {
     if (loadingTrip) return;
@@ -130,6 +138,7 @@ export default function TripOverview() {
 
       <MapShell cameraRef={cameraRef} fitBounds={[trip.startCoords, trip.endCoords]}>
         <SymbolMarker id="start" label="Start" coordinates={trip.startCoords} />
+        <SymbolSource id={"live-update"} ref={symbolRef} />
         <CircleSource id="transfers" data={trip.segments} />
         <LineSource id="segments" data={trip.segments} lineWidth={3} />
       </MapShell>
