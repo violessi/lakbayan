@@ -21,6 +21,7 @@ import { updateSearchLog, fetchSearchLogId } from "@services/logs-service";
 export default function TripOverview() {
   const [loadingTrip, setLoadingTrip] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [doneLiveStatus, setDoneLiveStatus] = useState(false);
 
   const router = useRouter();
   const { tripData, from } = useLocalSearchParams();
@@ -98,11 +99,12 @@ export default function TripOverview() {
   useEffect(() => {
     if (!trip.segments) return;
     updateLiveStatus(trip.segments.flatMap(({ waypoints }) => waypoints));
+    setDoneLiveStatus(true);
   }, [trip.segments]);
 
   // navigation
   const prevCallback = () => {
-    if (loadingTrip) return;
+    if (loadingTrip || !doneLiveStatus) return;
     if (from === "submitted-trips") {
       router.replace("/(account)/submitted-trips");
       return;
@@ -121,7 +123,7 @@ export default function TripOverview() {
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        if (loadingTrip) return true;
+        if (loadingTrip || !doneLiveStatus) return true;
         router.replace("/(search)/2-trip-suggestions");
         return true;
       };
@@ -131,6 +133,15 @@ export default function TripOverview() {
       return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress);
     }, [loadingTrip]),
   );
+  
+  if(!doneLiveStatus) {
+    return (
+      <View className="flex-1 justify-center items-center bg-black/50 z-50">
+        <ActivityIndicator size="large" color="#fff" />
+        <Text className="text-white">Loading trip...</Text>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1">
