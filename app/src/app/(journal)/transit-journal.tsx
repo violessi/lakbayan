@@ -1,4 +1,4 @@
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { ActivityIndicator, Alert, BackHandler, SafeAreaView, Text, View } from "react-native";
 
@@ -49,12 +49,17 @@ export default function TransitJournal() {
     followUser,
     setFollowUser,
   } = useTransitJournal();
+  const { journalReview } = useLocalSearchParams();
+  console.log("Journal review", { journalReview });
   if (!user) throw new Error("User must be logged in to view this page.");
 
   // complete transit and redirect to review page
   const handleNavigateToReview = () => {
     setShowTripFinishedModal(false);
-    router.push("/(journal)/journal-review");
+    router.replace({
+      pathname: "/(journal)/journal-review",
+      params: { journalReview: "yes" },
+    });
   };
 
   const handleCameraChange = (state: MapBoxMapState) => {
@@ -172,23 +177,25 @@ export default function TransitJournal() {
 
       <ReportLiveUpdates />
 
-      <View>
-        <TransferModal
-          isVisible={showNextSegmentModal}
-          currentSegment={activeSegments[0]}
-          callback={() => setShowNextSegmentModal(false)}
-        />
-        <CompleteModal
-          isVisible={showTripFinishedModal}
-          nextCallback={handleNavigateToReview}
-          cancelCallback={() => setShowTripFinishedModal(false)}
-        />
-        <AbortModal
-          isVisible={showTripAbortModal}
-          nextCallback={handleAbortTrip}
-          cancelCallback={() => setShowTripAbortModal(false)}
-        />
-      </View>
+      {journalReview !== "yes" && (
+        <View>
+          <TransferModal
+            isVisible={showNextSegmentModal}
+            currentSegment={activeSegments[0]}
+            callback={() => setShowNextSegmentModal(false)}
+          />
+          <CompleteModal
+            isVisible={showTripFinishedModal}
+            nextCallback={handleNavigateToReview}
+            cancelCallback={() => setShowTripFinishedModal(false)}
+          />
+          <AbortModal
+            isVisible={showTripAbortModal}
+            nextCallback={handleAbortTrip}
+            cancelCallback={() => setShowTripAbortModal(false)}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
