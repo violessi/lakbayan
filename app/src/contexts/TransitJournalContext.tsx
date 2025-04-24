@@ -104,6 +104,7 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
 
   // Fetch the transit journal data
   useEffect(() => {
+    setLoadingSegments(true);
     if (!transitJournalId) {
       setTrip(null);
       setSegments(null);
