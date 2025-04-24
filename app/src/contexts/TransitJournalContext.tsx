@@ -40,9 +40,13 @@ interface TransitJournalContextType {
   showTripAbortModal: boolean;
   showNextSegmentModal: boolean;
   showTripFinishedModal: boolean;
+  rating: number | null;
+  hasDeviated: boolean | null;
   setShowTripAbortModal: (showTripAbortModal: boolean) => void;
   setShowNextSegmentModal: (showNextSegmentModal: boolean) => void;
   setShowTripFinishedModal: (showTripFinishedModal: boolean) => void;
+  setRating: (rating: number | null) => void;
+  setHasDeviated: (hasDeviated: boolean | null) => void;
   addLiveUpdate: ({ type, coordinate }: AddLiveUpdate) => Promise<void>;
   handleUserLocationUpdate: ({ coords }: Location) => Promise<void>;
   followUser: boolean;
@@ -65,6 +69,9 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   const [currentStep, setCurrentStep] = useState<NavigationSteps | null>(null);
   const [activeSegments, setActiveSegments] = useState<Segment[]>([]);
   const [loadingSegments, setLoadingSegments] = useState(true);
+
+  const [rating, setRating] = useState<number | null>(null);
+  const [hasDeviated, setHasDeviated] = useState<boolean | null>(false);
 
   const [showTripAbortModal, setShowTripAbortModal] = useState(false);
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
@@ -195,6 +202,8 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     transitJournalId,
     trip,
     segments,
+    rating,
+    hasDeviated,
     loadingSegments,
     currentStep,
     activeSegments,
@@ -208,6 +217,8 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     handleUserLocationUpdate,
     followUser,
     setFollowUser,
+    setRating,
+    setHasDeviated,
   };
 
   if (!user) return <Fragment>{children}</Fragment>;

@@ -13,6 +13,7 @@ import { SourceDestinationTitle } from "@components/ui/SourceDestinationTitle";
 import { useTripSearch } from "@contexts/TripSearchContext";
 import { useSession } from "@contexts/SessionContext";
 import { insertSearchLog } from "@services/logs-service";
+import { ScrollView } from "react-native-gesture-handler";
 
 export default function SuggestedTrips() {
   const { user } = useSession();
@@ -68,13 +69,13 @@ export default function SuggestedTrips() {
           <Text>No trips match your selected locations.</Text>
         </View>
       ) : (
-        <View className="flex-1 p-4">
+        <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
           {filteredTrips.map((trip) => (
             <Pressable key={trip.id} onPress={() => handleSelectTrip(trip)}>
               <TripPreview trip={trip} />
             </Pressable>
           ))}
-        </View>
+        </ScrollView>
       )}
 
       <View className="p-4">

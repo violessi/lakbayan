@@ -1,5 +1,7 @@
 import React from "react";
-import { View, SafeAreaView, Text } from "react-native";
+import { View, SafeAreaView, Text, BackHandler } from "react-native";
+import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { useAccountSettings } from "@hooks/use-account-settings";
 import Header from "@components/ui/Header";
@@ -7,8 +9,30 @@ import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
 
 export default function AccountSettings() {
+  const router = useRouter();
   const { user, username, setUsername, originalUsername, loading, handleUpdateProfile } =
     useAccountSettings();
+
+  // navigation
+  function prevCallback() {
+    router.replace("/(tabs)/account");
+  }
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const backAction = () => {
+        prevCallback();
+        return true;
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction,
+      );
+
+      return () => backHandler.remove();
+    }, []),
+  );
 
   return (
     <SafeAreaView className="flex-1">

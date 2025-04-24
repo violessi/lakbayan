@@ -7,11 +7,13 @@ import { MapShell } from "@components/map/MapShell";
 import LineSource from "@components/map/LineSource";
 import CircleSource from "@components/map/CircleSource";
 import SymbolMarker from "@components/map/SymbolMarker";
+import SymbolSource from "@components/map/SymbolSource";
 import TripSummary from "@components/search/TripSummary";
 
 import { useMapView } from "@hooks/use-map-view";
 import { useTripSearch } from "@contexts/TripSearchContext";
 import { useSession } from "@contexts/SessionContext";
+import { useLiveUpdates } from "@hooks/use-live-updates";
 import { useTransitJournal } from "@contexts/TransitJournalContext";
 import { insertSegments, insertTransitJournal, updateProfile } from "@services/trip-service";
 import { updateSearchLog, fetchSearchLogId } from "@services/logs-service";
@@ -19,14 +21,16 @@ import { updateSearchLog, fetchSearchLogId } from "@services/logs-service";
 export default function TripOverview() {
   const [loadingTrip, setLoadingTrip] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [doneLiveStatus, setDoneLiveStatus] = useState(false);
 
   const router = useRouter();
-  const { tripData } = useLocalSearchParams();
+  const { tripData, from } = useLocalSearchParams();
 
   const { user } = useSession();
   const { cameraRef } = useMapView();
   const { trip: contextTrip } = useTripSearch();
   const { transitJournalId } = useTransitJournal();
+  const { symbolRef, updateLiveStatus } = useLiveUpdates("line", 5);
 
   // NOTE: some pages redirect to this page using searchParams
   const trip =
@@ -92,16 +96,34 @@ export default function TripOverview() {
     }
   }, [transitJournalId]);
 
+  useEffect(() => {
+    if (!trip.segments) return;
+    updateLiveStatus(trip.segments.flatMap(({ waypoints }) => waypoints));
+    setDoneLiveStatus(true);
+  }, [trip.segments]);
+
   // navigation
   const prevCallback = () => {
-    if (loadingTrip) return;
+    if (loadingTrip || !doneLiveStatus) return;
+    if (from === "submitted-trips") {
+      router.replace("/(account)/submitted-trips");
+      return;
+    }
+    if (from === "recent-trips") {
+      router.replace("/(tabs)");
+      return;
+    }
+    if (from === "bookmarked-trips") {
+      router.replace("/(account)/bookmarked-trips");
+      return;
+    }
     router.replace("/(search)/2-trip-suggestions");
   };
 
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        if (loadingTrip) return true;
+        if (loadingTrip || !doneLiveStatus) return true;
         router.replace("/(search)/2-trip-suggestions");
         return true;
       };
@@ -111,6 +133,15 @@ export default function TripOverview() {
       return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress);
     }, [loadingTrip]),
   );
+  
+  if(!doneLiveStatus) {
+    return (
+      <View className="flex-1 justify-center items-center bg-black/50 z-50">
+        <ActivityIndicator size="large" color="#fff" />
+        <Text className="text-white">Loading trip...</Text>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1">
@@ -118,6 +149,7 @@ export default function TripOverview() {
 
       <MapShell cameraRef={cameraRef} fitBounds={[trip.startCoords, trip.endCoords]}>
         <SymbolMarker id="start" label="Start" coordinates={trip.startCoords} />
+        <SymbolSource id={"live-update"} ref={symbolRef} />
         <CircleSource id="transfers" data={trip.segments} />
         <LineSource id="segments" data={trip.segments} lineWidth={3} />
       </MapShell>

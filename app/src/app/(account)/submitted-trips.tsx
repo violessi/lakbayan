@@ -5,8 +5,11 @@ import {
   ActivityIndicator,
   Text,
   TouchableOpacity,
+  BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 import { useSession } from "@contexts/SessionContext";
 import { useSubmittedTrips } from "@hooks/use-submitted-trips";
@@ -24,13 +27,34 @@ export default function SubmittedTrips() {
   function handleTripPress(trip: TripSearch) {
     router.push({
       pathname: "/(search)/3-trip-overview",
-      params: { tripData: JSON.stringify(trip) },
+      params: { tripData: JSON.stringify(trip), from: "submitted-trips" },
     });
   }
 
+  // navigation
+  function prevCallback() {
+    router.replace("/(tabs)/account");
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      const backAction = () => {
+        prevCallback();
+        return true;
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction,
+      );
+
+      return () => backHandler.remove();
+    }, []),
+  );
+
   return (
     <SafeAreaView className="flex-1">
-      <Header title="Submitted Trips" />
+      <Header title="Submitted Trips" prevCallback={prevCallback}/>
       <View className="flex-1 px-4">
         {loading ? (
           <ActivityIndicator size="small" testID="activity-indicator" />
