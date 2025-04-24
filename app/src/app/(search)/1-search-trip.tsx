@@ -1,3 +1,4 @@
+import React, { useMemo } from "react";
 import { useRouter } from "expo-router";
 import { Alert, SafeAreaView, View } from "react-native";
 
@@ -16,7 +17,7 @@ import { reverseGeocode } from "@services/mapbox-service";
 // NOTE: Same component as contribyte-create-trip
 export default function SearchTrip() {
   const router = useRouter();
-  const { userLocation, cameraRef, zoomLevel, handleMapPress } = useMapView();
+  const { userLocation, cameraRef, zoomLevel, handleMapPress, center } = useMapView();
   const { tripEndpoints, updateTripEndpoints, fetchSuggestedTrips } = useTripSearch();
   const { startLocation, endLocation, startCoords, endCoords } = tripEndpoints || {};
 
@@ -87,32 +88,36 @@ export default function SearchTrip() {
   // Navigate back to the previous screen.
   const prevCallback = () => router.replace("/(tabs)");
 
+  const memoizedStart: [string | null, [number, number] | null] = useMemo(
+    () => [startLocation ?? null, startCoords ?? null],
+    [startLocation, startCoords],
+  );
+
+  const memoizedEnd: [string | null, [number, number] | null] = useMemo(
+    () => [endLocation ?? null, endCoords ?? null],
+    [endLocation, endCoords],
+  );
+
   return (
     <SafeAreaView className="flex-1">
       <Header prevCallback={prevCallback} title="Where are we off to today?" />
       <View>
         <StartEndSearchBar
-          defaultStart={startLocation || "Starting location"}
-          defaultEnd={endLocation || "Destination"}
-          start={[startLocation ?? null, startCoords ?? null]}
-          end={[endLocation ?? null, endCoords ?? null]}
+          start={memoizedStart}
+          end={memoizedEnd}
           onStartChange={handleStartChange}
           onEndChange={handleEndChange}
         />
       </View>
 
       <MapShell
-        center={userLocation}
+        center={center}
         zoomLevel={zoomLevel}
         cameraRef={cameraRef}
         handleMapPress={handlePress}
       >
-        {startCoords &&
-        <SymbolMarker id="start-loc" label="Start" coordinates={startCoords} />
-        }
-        {endCoords &&
-        <SymbolMarker id="end-loc" label="Destination" coordinates={endCoords} />
-        }
+        {startCoords && <SymbolMarker id="start-loc" label="Start" coordinates={startCoords} />}
+        {endCoords && <SymbolMarker id="end-loc" label="Destination" coordinates={endCoords} />}
       </MapShell>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">

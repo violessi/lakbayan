@@ -18,7 +18,7 @@ export function useDefaultStartLocation({
   const hasSetDefault = useRef(false);
 
   useEffect(() => {
-    if (userLocation && !startLocation && !hasSetDefault.current) {
+    if (!hasSetDefault.current && userLocation && !startLocation) {
       hasSetDefault.current = true;
 
       (async () => {
@@ -36,5 +36,5 @@ export function useDefaultStartLocation({
         }
       })();
     }
-  }, [userLocation, startLocation, onSetStart, cameraRef, zoomLevel]);
+  }, [userLocation, startLocation]);
 }
