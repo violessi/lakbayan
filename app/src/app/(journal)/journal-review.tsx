@@ -28,6 +28,7 @@ export default function JournalReview() {
   const { cameraRef } = useMapView();
   const { trip, segments, transitJournal, rating, hasDeviated, setRating, setHasDeviated } = useTransitJournal();
   const [newComment, setNewComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleCommentPress(tripId: string) {
     router.push({
@@ -37,8 +38,9 @@ export default function JournalReview() {
   }
 
   const handleSubmit = async () => {
-    if (!newComment.trim()) return;
-    if (!trip || !segments || !user) return;
+    setIsSubmitting(true);
+    if (!newComment.trim()) { setIsSubmitting(false); return; }
+    if (!trip || !segments || !user) { setIsSubmitting(false); return; }
 
     const journalPayload: Partial<TransitJournal> = {
       id: transitJournal.id,
@@ -54,7 +56,7 @@ export default function JournalReview() {
       await addComment(trip.id, user.id, newComment, Boolean(!hasDeviated));
 
       // // if did not deviate, increment GPS count
-      if(!Boolean(hasDeviated)){
+      if (!Boolean(hasDeviated)) {
         await incrementSegmentGPSCount(trip.segments.map(({ id }) => id), !Boolean(hasDeviated));
         console.log("Segment GPS count incremented successfully");
       } else {
@@ -65,6 +67,7 @@ export default function JournalReview() {
       await updateProfile({ id: user.id, transitJournalId: null });
 
       Alert.alert("Success", "Your transit journal has been submitted!", [{ text: "OK" }]);
+      setIsSubmitting(false);
       router.replace("/(tabs)");
     } catch (error) {
       Alert.alert("Error", "Failed to submit your transit journal. Please try again.");
@@ -100,7 +103,7 @@ export default function JournalReview() {
 
   return (
     <SafeAreaView className="flex-1">
-      <Header title="Journal Review" prevCallback={prevCallback}/>
+      <Header title="Journal Review" prevCallback={prevCallback} />
 
       <MapShell fitBounds={[trip.startCoords, trip.endCoords]} cameraRef={cameraRef}>
         <CircleSource id="start" data={[trip.startCoords]} radius={6} />
@@ -119,6 +122,7 @@ export default function JournalReview() {
         setRating={setRating}
         hasDeviated={hasDeviated}
         setHasDeviated={setHasDeviated}
+        isSubmitting={isSubmitting}
       />
     </SafeAreaView>
   );

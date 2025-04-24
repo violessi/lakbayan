@@ -19,6 +19,7 @@ interface JournalFeedbackProps {
   setRating: (rating: number | null) => void;
   hasDeviated: boolean | null;
   setHasDeviated: (hasDeviated: boolean | null) => void;
+  isSubmitting?: boolean;
 }
 
 const RATING: Record<number, string> = {
@@ -40,6 +41,7 @@ export default function JournalFeedback({
   setRating,
   hasDeviated,
   setHasDeviated,
+  isSubmitting,
 }: JournalFeedbackProps) {
   const snapPoints = ["10%", "18%", "40%", "72%"];
 
@@ -119,7 +121,7 @@ export default function JournalFeedback({
             className="border border-gray-200 rounded-lg p-4"
             multiline
           />
-          <PrimaryButton label="Submit" onPress={handleSubmit} disabled={!canSubmit} />
+          <PrimaryButton label="Submit" onPress={handleSubmit} disabled={!canSubmit || isSubmitting} />
         </View>
       </BottomSheetView>
     </BottomSheet>
