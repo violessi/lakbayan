@@ -249,12 +249,12 @@ export async function updateTransitJournal(transitJournal: Partial<TransitJourna
   }
 }
 
-export async function incrementSegmentGPSCount(segmentIds: string[]): Promise<void> {
+export async function incrementSegmentGPSCount(segmentIds: string[], toVerify: Boolean): Promise<void> {
   try {
     const segments = await fetchSegments(segmentIds);
     const payload = segments.map((segment) => ({
       id: segment.id,
-      gps_verified: segment.gpsVerified + 1,
+      gps_verified: toVerify ? segment.gpsVerified + 1 : segment.gpsVerified,
     }));
     await Promise.all(
       payload.map(async (segment) => {

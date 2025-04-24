@@ -47,11 +47,20 @@ export default function JournalReview() {
       rating: rating,
       hasDeviated: hasDeviated,
     };
+    console.log((Boolean(hasDeviated) ? "User deviated from the route" : "User did not deviate from the route"));
 
     try {
-      // TODO: make this atomic
-      await addComment(trip.id, user.id, newComment, true);
-      await incrementSegmentGPSCount(trip.segments.map(({ id }) => id));
+      // // TODO: make this atomic
+      await addComment(trip.id, user.id, newComment, Boolean(!hasDeviated));
+
+      // // if did not deviate, increment GPS count
+      if(!Boolean(hasDeviated)){
+        await incrementSegmentGPSCount(trip.segments.map(({ id }) => id), !Boolean(hasDeviated));
+        console.log("Segment GPS count incremented successfully");
+      } else {
+        console.log("User deviated from the route, not incrementing GPS count");
+      }
+
       await updateTransitJournal(journalPayload);
       await updateProfile({ id: user.id, transitJournalId: null });
 
