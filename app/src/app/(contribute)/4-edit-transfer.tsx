@@ -36,7 +36,7 @@ export default function RouteInput() {
     addSegment,
     clearRouteData,
   } = useTripCreator();
-  const { center, setCoordinates } = useMapView();
+  const { cameraRef, setCoordinates } = useMapView();
   const [isEditingWaypoint, setIsEditingWaypoints] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -137,7 +137,7 @@ export default function RouteInput() {
       </View>
 
       <MapShell
-        center={center}
+        cameraRef={cameraRef}
         handleMapPress={handleMapClick}
         fitBounds={[route.startCoords, route.endCoords]}
       >

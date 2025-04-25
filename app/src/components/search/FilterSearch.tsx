@@ -27,9 +27,17 @@ export default function FilterSearch({ sheetRef, filters, applyFilters }: Props)
     );
   };
 
-  // Apply filters and close the sheet
+  // Apply filters only if changed, then close the sheet
   const handleApplyFilters = () => {
-    applyFilters({ sortBy, transportModes: selectedModes });
+    const isSortSame = sortBy === filters.sortBy;
+    const areModesSame =
+      selectedModes.length === filters.transportModes.length &&
+      selectedModes.every((m) => filters.transportModes.includes(m));
+
+    const isUnchanged = isSortSame && areModesSame;
+    if (!isUnchanged) {
+      applyFilters({ sortBy, transportModes: selectedModes });
+    }
     sheetRef.current?.close();
   };
 

@@ -39,11 +39,13 @@ export const MapShell = ({
   const finalCenter = center ?? [121.05, 14.63]; // Fallback to QC
 
   const handleMapLoaded = () => {
-    setHasLoaded(true);
     if (cameraRef?.current && fitBounds) {
-      const padding = [150, 50, 300, 50];
-      cameraRef.current.fitBounds(fitBounds[0], fitBounds[1], padding);
+      setTimeout(() => {
+        const padding = [150, 50, 300, 50];
+        cameraRef.current?.fitBounds(fitBounds[0], fitBounds[1], padding);
+      }, 100);
     }
+    setHasLoaded(true);
   };
 
   const markers = {
