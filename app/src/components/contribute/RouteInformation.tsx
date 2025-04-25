@@ -21,7 +21,7 @@ export default function RouteInformation({
   setIsEditingWaypoints,
 }: RouteInformationProps) {
   const { route, updateRoute } = useTripCreator();
-  const snapPoints = ["40%"];
+  const snapPoints = ["48%"];
 
   React.useEffect(() => {
     if (route.segmentMode === "Walk" && route.segmentName !== "Walk") {
@@ -39,7 +39,7 @@ export default function RouteInformation({
   };
 
   return (
-    <BottomSheet ref={sheetRef} snapPoints={snapPoints} index={1}>
+    <BottomSheet ref={sheetRef} enableDynamicSizing>
       <BottomSheetScrollView className="flex flex-col mx-4 pb-20">
         <Text className="text-2xl font-bold mb-4">Route Information</Text>
         <View className="flex flex-col gap-2">
@@ -81,7 +81,7 @@ export default function RouteInformation({
             onChangeText={(instruction) => updateRoute({ instruction })}
           />
         </View>
-        <View className="flex flex-row gap-2 p-5 w-full justify-center">
+        <View className="flex flex-row gap-2 p-5 mb-5 w-full justify-center">
           <PrimaryButtonOutline onPress={() => handleEditRoute()}>Edit Route</PrimaryButtonOutline>
           <PrimaryButton label={"Submit Route"} onPress={() => handleSubmit()} />
         </View>
