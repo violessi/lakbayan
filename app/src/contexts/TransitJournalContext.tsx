@@ -77,6 +77,8 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
   const [showNextSegmentModal, setShowNextSegmentModal] = useState(false);
   const [showTripFinishedModal, setShowTripFinishedModal] = useState(false);
   const [followUser, setFollowUser] = useState(true);
+  const [lastSegmentChangeTime, setLastSegmentChangeTime] = useState<number>(Date.now());
+  const [lastTripFinishedTime, setLastTripFinishedTime] = useState<number>(Date.now());
 
   // Check if the user has a transit journal
   useEffect(() => {
@@ -177,17 +179,37 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
     lineRef.current.update(activeRoutes);
     circleRef.current.update(activeRoutes);
 
-    // Show transfer modal everytime segment changes
-    if (activeSegments[0]?.id !== _currentSegment.id) {
+    // Show transfer modal if segment changes and enough time has passed
+    const now = Date.now();
+    const MIN_SEGMENT_CHANGE_INTERVAL = 5000; // 5 seconds
+    
+    if (
+      activeSegments[0]?.id !== _currentSegment.id &&
+      now - lastSegmentChangeTime >= MIN_SEGMENT_CHANGE_INTERVAL
+    ) {
+      setLastSegmentChangeTime(now);
       setShowTripFinishedModal(false);
       setShowNextSegmentModal(true);
+      setActiveSegments(segments.slice(segmentIndex));
     }
-
+    
     // check if currentLocation is near destination
     const destination = segments[segments.length - 1].endCoords;
-    if (isNearLocation(newLocation, destination, 20)) {
+    const FINISHED_MODAL_COOLDOWN = 30000; // 30 seconds
+    
+    if (
+      isNearLocation(newLocation, destination, 20) &&
+      now - lastTripFinishedTime >= FINISHED_MODAL_COOLDOWN
+    ) {
+      setLastTripFinishedTime(now);
       setShowNextSegmentModal(false);
       setShowTripFinishedModal(true);
+    } else {
+      if (now - lastTripFinishedTime < FINISHED_MODAL_COOLDOWN) {
+        console.log('⏱ Trip finished cooldown active');
+      } else {
+        console.log('🛣 Still far from destination');
+      }
     }
 
     // update the active segments and step information
