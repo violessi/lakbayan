@@ -49,7 +49,6 @@ export function useAccountSettings() {
 
       if (!isUsernameUnchanged) {
         const exists = await checkUsernameExists(username);
-        console.log("Username exists:", exists);
         if (exists) {
           Alert.alert("Error", "Username already taken. Please choose another.");
           return;

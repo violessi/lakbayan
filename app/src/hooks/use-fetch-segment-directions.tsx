@@ -10,10 +10,10 @@ export function useFetchSegmentDirections(segmentData: Segment[]) {
       setLoading(true);
       try {
         const segmentPromises = segmentData.map(async (segment, index) => {
-          const { start_coords, end_coords, segment_mode } = segment;
+          const { startCoords, endCoords, segmentMode } = segment;
           const waypoints = Array.isArray(segment.waypoints) ? segment.waypoints : [];
 
-          const res = await getDirections(start_coords, waypoints, end_coords, segment_mode);
+          const res = await getDirections(startCoords, waypoints, endCoords, segmentMode);
           return res?.routes?.[0]?.geometry?.coordinates || [];
         });
 

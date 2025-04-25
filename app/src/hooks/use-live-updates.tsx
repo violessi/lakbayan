@@ -33,10 +33,8 @@ export const useLiveUpdates = (type: "box" | "line", interval: number) => {
   const updateLiveStatus = debounce(async (newCoordinates: Coordinates[]) => {
     clearExistingInterval();
     if (!newCoordinates.length) return;
-    // console.log(`[LIVE UPDATES][${type}] Fetching initial updates...`);
     await fetchAndUpdate(newCoordinates);
     intervalRef.current = setInterval(async () => {
-      // console.log(`[LIVE UPDATES][${type}] Fetching live updates...`);
       await fetchAndUpdate(newCoordinates);
     }, interval * 1000);
   }, 2000);

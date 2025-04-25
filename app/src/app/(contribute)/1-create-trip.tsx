@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { router } from "expo-router";
 import { SafeAreaView, View, Alert, BackHandler } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
@@ -47,7 +47,6 @@ export default function CustomTrip() {
 
   // Allow users to use current location as start or end location.
   const handleUseCurrentLoc = async () => {
-    console.log(userLocation);
     if (!userLocation) {
       Alert.alert("Error", "User location not found.");
       throw new Error("User location not found.");
@@ -66,7 +65,6 @@ export default function CustomTrip() {
         endCoords: trip.endCoords ?? [0, 0],
         status: "ongoing",
       });
-      console.log("Trip log created successfully.");
       router.replace("/(contribute)/2-review-trip");
     } else {
       Alert.alert("Please select both a source and destination.");
@@ -103,23 +101,14 @@ export default function CustomTrip() {
     return () => backHandler.remove();
   });
 
-  const memoizedStart: [string | null, [number, number] | null] = useMemo(
-    () => [trip.startLocation ?? null, trip.startCoords ?? null],
-    [trip.startLocation, trip.startCoords],
-  );
-  const memoizedEnd: [string | null, [number, number] | null] = useMemo(
-    () => [trip.endLocation ?? null, trip.endCoords ?? null],
-    [trip.endLocation, trip.endCoords],
-  );
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header prevCallback={prevCallback} title="Custom Trips" />
 
       <View>
         <StartEndSearchBar
-          start={memoizedStart}
-          end={memoizedEnd}
+          start={[trip.startLocation, trip.startCoords]}
+          end={[trip.endLocation, trip.endCoords]}
           onStartChange={handleStartChange}
           onEndChange={handleEndChange}
         />
@@ -132,12 +121,12 @@ export default function CustomTrip() {
         handleMapPress={handlePress}
         handleUserLocation={handleUserLocation}
       >
-        {trip.startCoords && (
-          <SymbolMarker id="start-loc" label="Start" coordinates={trip.startCoords} />
-        )}
-        {trip.endCoords && (
-          <SymbolMarker id="end-loc" label="Destination" coordinates={trip.endCoords} />
-        )}
+        {trip.startCoords &&
+        <SymbolMarker id="start-loc" label="Start" coordinates={trip.startCoords} />
+        }
+        {trip.endCoords &&
+        <SymbolMarker id="end-loc" label="Destination" coordinates={trip.endCoords} />
+        }
       </MapShell>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">

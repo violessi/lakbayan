@@ -60,7 +60,6 @@ export async function getDirections(
   );
 
   const responseJSON = await response.json();
-  console.log("Directions response:", responseJSON);
 
   return { routes: responseJSON.routes, waypoints: responseJSON.waypoints };
 }
@@ -103,7 +102,6 @@ export async function getDistanceDuration(start: Coordinates, end: Coordinates) 
   );
 
   const responseJSON = await response.json();
-  console.log("Directions response:", responseJSON);
   const walkingInfo = {
     distance: responseJSON.routes[0].distance,
     duration: responseJSON.routes[0].duration,

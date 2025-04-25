@@ -67,10 +67,8 @@ export default function TripReview() {
         console.error("No submit log ID found.");
         return;
       }
-      console.log("Submit log ID:", id);
 
       await updateSubmitLog({ id, status: "completed" });
-      console.log("Submit log updated to completed");
       router.replace("/(tabs)");
     } catch (error) {
       Alert.alert("Error", "Failed to submit your trip. Please try again.");
@@ -80,7 +78,6 @@ export default function TripReview() {
   // Clear data when navigating back to the first screen
   const handleBackNavigation = async () => {
     const id = await fetchSubmitLogId({ userId: user.id });
-    console.log("Submit log ID:", id);
 
     if (!id) {
       console.error("No submit log ID found.");
@@ -89,10 +86,8 @@ export default function TripReview() {
 
     if (!isSegmentEmpty) {
       await updateSubmitLog({ id, status: "cancelled" });
-      console.log("Submit log updated to cancelled");
     } else {
       await deleteSubmitLog({ id });
-      console.log("Submit log deleted");
     }
 
     clearTripData();

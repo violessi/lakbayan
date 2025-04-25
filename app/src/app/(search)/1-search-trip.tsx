@@ -44,7 +44,6 @@ export default function SearchTrip() {
 
   // Allow users to use current location as start or end location.
   const handleUseCurrentLoc = async () => {
-    console.log(userLocation);
     if (!userLocation) {
       Alert.alert("Error", "User location not found.");
       throw new Error("User location not found.");

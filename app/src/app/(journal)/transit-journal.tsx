@@ -50,7 +50,6 @@ export default function TransitJournal() {
     setFollowUser,
   } = useTransitJournal();
   const { journalReview } = useLocalSearchParams();
-  console.log("Journal review", { journalReview });
   if (!user) throw new Error("User must be logged in to view this page.");
 
   // complete transit and redirect to review page

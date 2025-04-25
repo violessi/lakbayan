@@ -23,14 +23,11 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({ children }
       try {
         const { status: foregroundStatus } = await ExpoLocation.requestForegroundPermissionsAsync();
 
-        console.log("Foreground permission:", foregroundStatus);
-
         if (foregroundStatus === "granted") {
           setPermissionGranted(true);
           const location = await ExpoLocation.getCurrentPositionAsync({});
           const newCoords: Coordinates = [location.coords.longitude, location.coords.latitude];
           setUserLocation(newCoords);
-          console.log("User location set:", newCoords);
         } else {
           console.warn("Permission denied");
         }
@@ -49,7 +46,6 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({ children }
           (location) => {
             const newCoords: Coordinates = [location.coords.longitude, location.coords.latitude];
             setUserLocation(newCoords);
-            console.log("User location updated:", newCoords);
           },
         );
         return () => subscription.remove();

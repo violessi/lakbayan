@@ -72,7 +72,6 @@ export async function getAllModerators(): Promise<{ id: string }[]> {
     throw error;
   }
 
-  console.log("Fetched moderators:", data);
   return data || [];
 }
 
@@ -99,7 +98,6 @@ export async function addToPendingModeratorReview(tripId: string, type: string):
       throw error;
     }
 
-    console.log("Trip added to moderation successfully.");
   } catch (error) {
     console.error("Error adding trip to moderation:", error);
   }
