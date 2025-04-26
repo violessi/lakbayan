@@ -175,7 +175,7 @@ async function generateWalkingSegment(
   return {
     id: `walk-${startLocation}-${endLocation}`,
     contributorId: userId,
-    segmentName: "Walk",
+    segmentName: `Walk from ${startLocation} to ${endLocation}`,
     segmentMode: "Walk",
     landmark: "",
     instruction: `Walk from ${startLocation} to ${endLocation}`,

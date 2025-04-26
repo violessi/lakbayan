@@ -28,7 +28,9 @@ export default function RouteItem({ segment, color }: RouteItemProps) {
             </Text>
           </View>
           <View className="w-6/12 flex-col justify-end gap-3">
-            <Text className="text-lg font-bold text-black">{segment.segmentName}</Text>
+            <Text className="text-lg font-bold text-black">
+              {segment.segmentName.toLowerCase().includes("walk") ? "Walk" : segment.segmentName}
+            </Text>
           </View>
           <View className="w-3/12 flex-row items-center">
             <Text className="text-lg font-bold text-black">{estimatedTime} min</Text>
