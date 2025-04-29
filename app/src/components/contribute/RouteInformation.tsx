@@ -35,6 +35,7 @@ export default function RouteInformation({
 
   const handleEditRoute = () => {
     setIsEditingWaypoints(true);
+    updateRoute({ ...route, duration: 0, distance: 0, waypoints: [], navigationSteps: [] });
     sheetRef.current?.close();
   };
 
