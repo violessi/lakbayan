@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
@@ -42,10 +43,12 @@ export default function RouteInformation({
       <BottomSheetScrollView className="flex flex-col mx-4 pb-20">
         <Text className="text-2xl font-bold mb-4">Route Information</Text>
         <View className="flex flex-col gap-2">
-          <TransportModeInput
-            value={route.segmentMode}
-            onChange={(segmentMode) => updateRoute({ segmentMode })}
-          />
+          <ScrollView horizontal scrollEnabled showsHorizontalScrollIndicator={true}>
+            <TransportModeInput
+              value={route.segmentMode}
+              onChange={(segmentMode) => updateRoute({ segmentMode })}
+            />
+          </ScrollView>
           <View className="flex-row gap-3">
             <View className="flex-1">
               <OutlinedTextInput
