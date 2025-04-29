@@ -1,5 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActivityIndicator, Alert, BackHandler, SafeAreaView, Text, View } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -123,6 +126,13 @@ export default function TripOverview() {
     router.replace("/(search)/2-trip-suggestions");
   };
 
+  useFocusEffect(() => {
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
+      prevCallback();
+      return true;
+    });
+    return () => backHandler.remove();
+  });
 
   
   if(!doneLiveStatus) {
