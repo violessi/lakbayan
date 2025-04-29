@@ -21,12 +21,11 @@ export default function RouteInformation({
   setIsEditingWaypoints,
 }: RouteInformationProps) {
   const { route, updateRoute } = useTripCreator();
-  const snapPoints = ["48%"];
 
   React.useEffect(() => {
-    if (route.segmentMode === "Walk" && route.segmentName !== "Walk") {
-      updateRoute({ segmentName: "Walk" });
-    } else if (route.segmentName === "Walk") {
+    if (route.segmentMode === "Walk" && !route.segmentName.toLowerCase().includes("walk")) {
+      updateRoute({ segmentName: `Walk from ${route.startLocation} to ${route.endLocation}` });
+    } else if (route.segmentName.toLowerCase().includes("walk")) {
       updateRoute({ segmentName: "" });
     } else {
       updateRoute({ segmentName: route.segmentName });
@@ -51,7 +50,7 @@ export default function RouteInformation({
             <View className="flex-1">
               <OutlinedTextInput
                 label="Route Name"
-                value={route.segmentName}
+                value={route.segmentName.startsWith("Walk") ? "Walk" : route.segmentName}
                 editable={route.segmentMode !== "Walk"}
                 disabled={route.segmentMode === "Walk"}
                 onChangeText={(segmentName) => updateRoute({ segmentName })}
