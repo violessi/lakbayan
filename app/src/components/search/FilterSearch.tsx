@@ -14,9 +14,9 @@ interface Props {
 export default function FilterSearch({ sheetRef, filters, applyFilters }: Props) {
   const snapPoints = ["60%"];
 
-  const [timeToLeave, setTimeToLeave] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
 
+  const [timeToLeave, setTimeToLeave] = useState(filters.timeToLeave);
   const [sortBy, setSortBy] = useState(filters.sortBy);
   const [selectedModes, setSelectedModes] = useState(filters.transportModes);
 
@@ -34,9 +34,11 @@ export default function FilterSearch({ sheetRef, filters, applyFilters }: Props)
       selectedModes.length === filters.transportModes.length &&
       selectedModes.every((m) => filters.transportModes.includes(m));
 
-    const isUnchanged = isSortSame && areModesSame;
+    const isTimeSame = timeToLeave.getTime() === filters.timeToLeave.getTime();
+
+    const isUnchanged = isSortSame && areModesSame && isTimeSame;
     if (!isUnchanged) {
-      applyFilters({ sortBy, transportModes: selectedModes });
+      applyFilters({ timeToLeave, sortBy, transportModes: selectedModes });
     }
     sheetRef.current?.close();
   };

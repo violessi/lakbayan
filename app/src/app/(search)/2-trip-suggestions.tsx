@@ -71,8 +71,11 @@ export default function SuggestedTrips() {
       ) : (
         <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
           {filteredTrips.map((trip) => (
-            <Pressable key={trip.id} onPress={() => handleSelectTrip(trip)}>
-              <TripPreview trip={trip} />
+            <Pressable
+              key={`${trip.id}-${filters.timeToLeave}`}
+              onPress={() => handleSelectTrip(trip)}
+            >
+              <TripPreview trip={trip} timeToLeave={filters.timeToLeave} />
             </Pressable>
           ))}
         </ScrollView>

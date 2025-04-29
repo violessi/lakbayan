@@ -7,6 +7,7 @@ declare global {
   };
 
   type FilterState = {
+    timeToLeave: Date;
     sortBy: string;
     transportModes: string[];
   };

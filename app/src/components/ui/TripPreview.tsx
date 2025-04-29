@@ -13,16 +13,20 @@ const comment = require("@assets/social-comment.png");
 const bookmarkIcon = require("@assets/social-bookmark.png");
 const bookmarkedIcon = require("@assets/social-bookmarked.png");
 
-export default function TripPreview({ trip }: { trip: FullTrip }) {
+export default function TripPreview({
+  trip,
+  timeToLeave = new Date(),
+}: {
+  trip: FullTrip;
+  timeToLeave?: Date;
+}) {
   const { user } = useSession();
   const { bookmarked, toggleBookmark } = useTripPreviewData(user?.id || null, trip);
 
   const totalDuration = trip.segments.reduce((sum, seg) => sum + seg.duration, 0);
   const totalCost = trip.segments.reduce((sum, seg) => sum + seg.cost, 0);
   const transportModes = trip.segments.map((seg) => seg.segmentMode);
-
-  const currentTime = new Date();
-  const arrivalTime = new Date(currentTime.getTime() + totalDuration * 1000);
+  const arrivalTime = new Date(timeToLeave.getTime() + totalDuration * 1000);
   const arrivalTimeString = arrivalTime.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
