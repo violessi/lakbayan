@@ -17,8 +17,8 @@ const tagIcon = require("@assets/option-tag.png");
 const todaIcon = require("@assets/transpo-tricycle.png");
 
 export default function Account() {
-  const { user } = useSession();
-  const { username, userRole, points, joinedDate, loading } = useAccountDetails(user?.id);
+  const { user, username } = useSession();
+  const { userRole, points, joinedDate, loading } = useAccountDetails(user?.id);
 
   async function handleLogout() {
     try {
