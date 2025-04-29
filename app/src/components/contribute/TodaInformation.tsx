@@ -33,6 +33,7 @@ const TODA_COLORS = [
   "Violet",
   "Black",
   "White",
+  "Pink",
   "None",
 ];
 
