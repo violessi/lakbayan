@@ -10,6 +10,7 @@ import SymbolMarker from "@components/map/SymbolMarker";
 import SymbolSource from "@components/map/SymbolSource";
 import TripSummary from "@components/search/TripSummary";
 
+import "@contexts/LocationContext";
 import { useMapView } from "@hooks/use-map-view";
 import { useTripSearch } from "@contexts/TripSearchContext";
 import { useSession } from "@contexts/SessionContext";
