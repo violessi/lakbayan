@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-  getUsername,
-  getUserRole,
-  getUserPoints,
-  getUserJoinedDate,
-} from "@services/account-service";
+import { getUserRole, getUserPoints, getUserJoinedDate } from "@services/account-service";
 
 export interface AccountDetails {
-  username: string;
   userRole: string;
   points: number;
   joinedDate: string | null;
@@ -15,7 +9,6 @@ export interface AccountDetails {
 }
 
 export function useAccountDetails(userId: string | undefined): AccountDetails {
-  const [username, setUsername] = useState<string>("Unknown user");
   const [userRole, setUserRole] = useState<string>("Commuter");
   const [points, setPoints] = useState<number>(0);
   const [joinedDate, setJoinedDate] = useState<string | null>(null);
@@ -25,14 +18,12 @@ export function useAccountDetails(userId: string | undefined): AccountDetails {
     async function fetchUserDetails() {
       if (userId) {
         setLoading(true);
-        const [fetchedRole, fetchedUsername, fetchedPoints, fetchedJoinedDate] = await Promise.all([
+        const [fetchedRole, fetchedPoints, fetchedJoinedDate] = await Promise.all([
           getUserRole(userId),
-          getUsername(userId),
           getUserPoints(userId),
           getUserJoinedDate(userId),
         ]);
         setUserRole(fetchedRole || "Unknown user");
-        setUsername(fetchedUsername || "Commuter");
         setPoints(fetchedPoints);
         setJoinedDate(fetchedJoinedDate);
       }
@@ -41,5 +32,5 @@ export function useAccountDetails(userId: string | undefined): AccountDetails {
     fetchUserDetails();
   }, [userId]);
 
-  return { username, userRole, points, joinedDate, loading };
+  return { userRole, points, joinedDate, loading };
 }
