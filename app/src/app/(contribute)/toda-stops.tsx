@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ActivityIndicator, Alert, SafeAreaView, View, Text, BackHandler } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -32,6 +32,7 @@ export default function TodaStops() {
 
   const [stops, setStops] = useState<StopData[]>([]);
   const [loadingStops, setLoadingStops] = useState(false);
+  const [formSnapshot, setFormSnapshot] = useState("");
 
   const loadStops = async () => {
     setLoadingStops(true);
@@ -50,15 +51,21 @@ export default function TodaStops() {
     loadStops();
   }, []);
 
-  // navigation
+  // Navigation
 
-  const prevCallback = () => {
-    UnsavedChangesAlert(() => router.replace("/(tabs)/contribute"));
-  };
+  const hasChanges = !!formSnapshot;
+
+  const handleBackPress = useCallback(() => {
+    if (hasChanges) {
+      UnsavedChangesAlert(() => router.replace("/(tabs)/contribute"));
+    } else {
+      router.replace("/(tabs)/contribute");
+    }
+  }, [hasChanges]);
 
   useFocusEffect(() => {
     const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
-      UnsavedChangesAlert(prevCallback);
+      handleBackPress();
       return true;
     });
     return () => backHandler.remove();
@@ -66,7 +73,7 @@ export default function TodaStops() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header title="Pin Toda Stops" prevCallback={prevCallback} />
+      <Header title="Pin Toda Stops" prevCallback={handleBackPress} />
 
       <View>
         <LocationSearchBar onSuggestionSelect={handleSuggestionSelect} onClear={handleClear} />
@@ -103,7 +110,11 @@ export default function TodaStops() {
           <Text className="text-white">Loading stops...</Text>
         </View>
       )}
-      <TodaInformation coordinates={coordinates} onNewStopAdded={loadStops} />
+      <TodaInformation
+        coordinates={coordinates}
+        onNewStopAdded={loadStops}
+        onFormChange={(form) => setFormSnapshot(JSON.stringify(form))}
+      />
     </SafeAreaView>
   );
 }

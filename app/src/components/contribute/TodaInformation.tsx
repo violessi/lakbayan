@@ -40,15 +40,18 @@ const TODA_COLORS = [
 interface TodaStopsProps {
   coordinates: Coordinates | null;
   onNewStopAdded: () => void;
+  onFormChange?: (form: { todaName: string; color: string; landmark: string }) => void;
 }
 
-export default function TodaStops({ coordinates, onNewStopAdded }: TodaStopsProps) {
+export default function TodaStops({ coordinates, onNewStopAdded, onFormChange }: TodaStopsProps) {
   const { user } = useSession();
   const [form, setForm] = useState({ todaName: "", color: "", landmark: "" });
   const [dialogVisible, setDialogVisible] = useState(false);
 
   const updateForm = (key: keyof typeof form, value: string) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    const newForm = { ...form, [key]: value };
+    setForm(newForm);
+    onFormChange?.(newForm);
   };
 
   const resetForm = () => {
