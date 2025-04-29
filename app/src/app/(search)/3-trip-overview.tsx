@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActivityIndicator, Alert, BackHandler, SafeAreaView, Text, View } from "react-native";
-import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -85,20 +84,16 @@ export default function TripOverview() {
       };
       await updateSearchLog(logsPayload);
       
+      router.replace({
+        pathname: "/(journal)/transit-journal",
+        params: { journalReview: "no" },
+      });
+      
     } catch (error) {
       Alert.alert("Error starting trip, please try again");
       setHasError(true);
     }
   }
-
-  useEffect(() => {
-    if (!!transitJournalId && !hasError) {
-      router.replace({
-        pathname: "/(journal)/transit-journal",
-        params: { journalReview: "no" },
-      });
-    }
-  }, [transitJournalId]);
 
   useEffect(() => {
     if (!trip.segments) return;
@@ -128,19 +123,7 @@ export default function TripOverview() {
     router.replace("/(search)/2-trip-suggestions");
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => {
-        if (loadingTrip || !doneLiveStatus) return true;
-        router.replace("/(search)/2-trip-suggestions");
-        return true;
-      };
 
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
-
-      return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress);
-    }, [loadingTrip]),
-  );
   
   if(!doneLiveStatus) {
     return (
