@@ -74,12 +74,14 @@ export default function RouteInformation({
             </View>
           </View>
           <OutlinedTextInput
-            label="Landmark"
+            label="Landmark of destination"
+            placeholder="e.g., Near Jollibee Katipunan or beside LRT Station"
             value={route.landmark ?? ""}
             onChangeText={(landmark) => updateRoute({ landmark })}
           />
           <OutlinedTextInput
             label="Instruction"
+            placeholder="e.g., Ride the jeep labeled 'Cubao' and get off at the destination"
             value={route.instruction ?? ""}
             onChangeText={(instruction) => updateRoute({ instruction })}
           />
