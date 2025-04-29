@@ -51,7 +51,7 @@ export default function FilterSearch({ sheetRef, filters, applyFilters }: Props)
     >
       <BottomSheetView className="flex flex-col px-5 pb-8 gap-3">
         <View className="flex-row items-center gap-2">
-          <Text className="text-xl font-bold">Filter trips</Text>
+          <Text className="text-xl font-bold">Filter & sort trips</Text>
         </View>
 
         <View>

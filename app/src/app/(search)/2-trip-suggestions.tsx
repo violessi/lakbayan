@@ -79,7 +79,7 @@ export default function SuggestedTrips() {
       )}
 
       <View className="p-4">
-        <PrimaryButton label="Filter" onPress={handleOpenFilters} />
+        <PrimaryButton label="Filter & Sort" onPress={handleOpenFilters} />
       </View>
 
       <FilterSearch sheetRef={filterSheetRef} filters={filters} applyFilters={applyFilters} />
