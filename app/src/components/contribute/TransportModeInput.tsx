@@ -16,7 +16,7 @@ export default function TransportModeInput({ value, onChange }: Props) {
   };
 
   return (
-    <View className="flex flex-col px-5 gap-3">
+    <View className="flex flex-col gap-3">
       <View className="flex flex-row gap-2 justify-center">
         {TRANSPORTATION_MODES.map((mode) => (
           <TouchableOpacity

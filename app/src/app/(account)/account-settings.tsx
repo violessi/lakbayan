@@ -4,16 +4,16 @@ import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 
 import { useAccountSettings } from "@hooks/use-account-settings";
+import { useSession } from "@contexts/SessionContext";
 import Header from "@components/ui/Header";
 import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
 
 export default function AccountSettings() {
   const router = useRouter();
-  const { user, username, setUsername, originalUsername, loading, handleUpdateProfile } =
-    useAccountSettings();
+  const { user, username, setUsername } = useSession();
+  const { originalUsername, loading, handleUpdateProfile } = useAccountSettings();
 
-  // navigation
   function prevCallback() {
     router.replace("/(tabs)/account");
   }
@@ -25,10 +25,7 @@ export default function AccountSettings() {
         return true;
       };
 
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        backAction,
-      );
+      const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
       return () => backHandler.remove();
     }, []),
@@ -47,7 +44,7 @@ export default function AccountSettings() {
             <View className="flex-1">
               <OutlinedTextInput
                 label="Username"
-                value={username}
+                value={username || ""}
                 onChangeText={setUsername}
                 testID="username"
               />

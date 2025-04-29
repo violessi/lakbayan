@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 import OutlinedTextInput from "@components/ui/OutlinedTextInput";
 import PrimaryButton from "@components/ui/PrimaryButton";
@@ -21,12 +22,11 @@ export default function RouteInformation({
   setIsEditingWaypoints,
 }: RouteInformationProps) {
   const { route, updateRoute } = useTripCreator();
-  const snapPoints = ["48%"];
 
   React.useEffect(() => {
-    if (route.segmentMode === "Walk" && route.segmentName !== "Walk") {
-      updateRoute({ segmentName: "Walk" });
-    } else if (route.segmentName === "Walk") {
+    if (route.segmentMode === "Walk" && !route.segmentName.toLowerCase().includes("walk")) {
+      updateRoute({ segmentName: `Walk from ${route.startLocation} to ${route.endLocation}` });
+    } else if (route.segmentName.toLowerCase().includes("walk")) {
       updateRoute({ segmentName: "" });
     } else {
       updateRoute({ segmentName: route.segmentName });
@@ -43,15 +43,17 @@ export default function RouteInformation({
       <BottomSheetScrollView className="flex flex-col mx-4 pb-20">
         <Text className="text-2xl font-bold mb-4">Route Information</Text>
         <View className="flex flex-col gap-2">
-          <TransportModeInput
-            value={route.segmentMode}
-            onChange={(segmentMode) => updateRoute({ segmentMode })}
-          />
+          <ScrollView horizontal scrollEnabled showsHorizontalScrollIndicator={true}>
+            <TransportModeInput
+              value={route.segmentMode}
+              onChange={(segmentMode) => updateRoute({ segmentMode })}
+            />
+          </ScrollView>
           <View className="flex-row gap-3">
             <View className="flex-1">
               <OutlinedTextInput
                 label="Route Name"
-                value={route.segmentName}
+                value={route.segmentName.startsWith("Walk") ? "Walk" : route.segmentName}
                 editable={route.segmentMode !== "Walk"}
                 disabled={route.segmentMode === "Walk"}
                 onChangeText={(segmentName) => updateRoute({ segmentName })}

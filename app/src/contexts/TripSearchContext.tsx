@@ -7,6 +7,7 @@ import { useSession } from "@contexts/SessionContext";
 import { fetchTripData } from "@services/trip-service";
 
 const FILTER_INITIAL_STATE = {
+  timeToLeave: new Date(),
   sortBy: "Verified by moderators",
   transportModes: ["Train", "Bus", "Jeep", "UV", "Tricycle"],
 };
@@ -53,7 +54,7 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const applyFilters = ({ sortBy, transportModes }: FilterState) => {
+  const applyFilters = ({ timeToLeave, sortBy, transportModes }: FilterState) => {
     const filtered = suggestedTrips
       .filter((trip) =>
         trip.segments.every(
@@ -62,7 +63,7 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
       )
       .sort(getSortFunction(sortBy));
 
-    setFilters({ sortBy, transportModes });
+    setFilters({ timeToLeave, sortBy, transportModes });
     setFilteredTrips(filtered);
   };
 

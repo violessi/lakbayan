@@ -7,14 +7,12 @@ import SymbolSource from "@components/map/SymbolSource";
 import RecentTrips from "@components/search/RecentTrips";
 
 import { useSession } from "@contexts/SessionContext";
-import { useAccountDetails } from "@hooks/use-account-details";
 import { useMapView } from "@hooks/use-map-view";
 import { useLiveUpdates } from "@hooks/use-live-updates";
 
 export default function Index() {
-  const { user } = useSession();
+  const { user, username } = useSession();
   if (!user) throw new Error("User must be logged in to view this page.");
-  const { username } = useAccountDetails(user.id);
   const router = useRouter();
   const { userLocation } = useMapView();
   const { symbolRef, updateLiveStatus } = useLiveUpdates("box", 10);
