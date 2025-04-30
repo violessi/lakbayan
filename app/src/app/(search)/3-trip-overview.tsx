@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActivityIndicator, Alert, BackHandler, SafeAreaView, Text, View } from "react-native";
-import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+
 
 import Header from "@components/ui/Header";
 import { MapShell } from "@components/map/MapShell";
@@ -10,6 +12,7 @@ import SymbolMarker from "@components/map/SymbolMarker";
 import SymbolSource from "@components/map/SymbolSource";
 import TripSummary from "@components/search/TripSummary";
 
+import "@contexts/LocationContext";
 import { useMapView } from "@hooks/use-map-view";
 import { useTripSearch } from "@contexts/TripSearchContext";
 import { useSession } from "@contexts/SessionContext";
@@ -84,20 +87,16 @@ export default function TripOverview() {
       };
       await updateSearchLog(logsPayload);
       
+      router.replace({
+        pathname: "/(journal)/transit-journal",
+        params: { journalReview: "no" },
+      });
+      
     } catch (error) {
       Alert.alert("Error starting trip, please try again");
       setHasError(true);
     }
   }
-
-  useEffect(() => {
-    if (!!transitJournalId && !hasError) {
-      router.replace({
-        pathname: "/(journal)/transit-journal",
-        params: { journalReview: "no" },
-      });
-    }
-  }, [transitJournalId]);
 
   useEffect(() => {
     if (!trip.segments) return;
@@ -127,19 +126,14 @@ export default function TripOverview() {
     router.replace("/(search)/2-trip-suggestions");
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => {
-        if (loadingTrip || !doneLiveStatus) return true;
-        router.replace("/(search)/2-trip-suggestions");
-        return true;
-      };
+  useFocusEffect(() => {
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
+      prevCallback();
+      return true;
+    });
+    return () => backHandler.remove();
+  });
 
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
-
-      return () => BackHandler.removeEventListener("hardwareBackPress", onBackPress);
-    }, [loadingTrip]),
-  );
   
   if(!doneLiveStatus) {
     return (

@@ -74,8 +74,9 @@ export default function RouteInput() {
     }
   };
 
-  const handleResetWaypoints = () => {
-    setCustomWaypoint([]);
+  const handleUndoWaypoint = () => {
+    if (customWaypoints.length === 0) return;
+    setCustomWaypoint((prev) => prev.slice(0, -1));
     updateRoute({ ...route, duration: 0, distance: 0, waypoints: [], navigationSteps: [] });
   };
 
@@ -157,7 +158,7 @@ export default function RouteInput() {
           <View className="flex flex-col w-full justify-between gap-5">
             <View className="flex flex-row justify-center gap-5">
               <PrimaryButtonOutline onPress={handleProcessRoute}>Calculate</PrimaryButtonOutline>
-              <PrimaryButtonOutline onPress={handleResetWaypoints}>Clear</PrimaryButtonOutline>
+              <PrimaryButtonOutline onPress={handleUndoWaypoint}>Undo</PrimaryButtonOutline>
             </View>
             <PrimaryButton label="Done" onPress={handleCompleteEditing} />
           </View>

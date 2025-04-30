@@ -204,12 +204,6 @@ export function TransitJournalProvider({ children }: { children: ReactNode }) {
       setLastTripFinishedTime(now);
       setShowNextSegmentModal(false);
       setShowTripFinishedModal(true);
-    } else {
-      if (now - lastTripFinishedTime < FINISHED_MODAL_COOLDOWN) {
-        console.log('⏱ Trip finished cooldown active');
-      } else {
-        console.log('🛣 Still far from destination');
-      }
     }
 
     // update the active segments and step information
