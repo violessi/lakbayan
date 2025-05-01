@@ -47,7 +47,7 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
       const existingTrips = await fetchTripData(trip, 1500);
       const fullTrips = await appendWalkingSegments(user.id, existingTrips, trip);
       setSuggestedTrips(fullTrips);
-      setFilteredTrips(fullTrips);
+      applyFilters(filters);
     } catch (error) {
       console.error("[ERROR] Fetching suggester trips: ", error);
       throw new Error("Failed to fetch trips");
