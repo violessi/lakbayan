@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "expo-router";
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Text, View, FlatList, Image, TouchableOpacity } from "react-native";
 
 import VotingBar from "@components/VotingBar";
@@ -74,24 +74,22 @@ export default function TripSummary({
           </View>
         </View>
       </View>
-      <BottomSheetScrollView className="flex flex-col px-5 gap-6">
-        <View className="flex flex-row justify-center">
-          {segments.length === 0 ? (
+      <BottomSheetFlatList
+        data={segments}
+        contentContainerStyle={{ paddingHorizontal: 20, gap: 24, paddingBottom: 60 }}
+        ListEmptyComponent={
+          <View className="flex flex-row justify-center">
             <Text className="text-secondary mt-5">No transfers added yet.</Text>
-          ) : (
-            <FlatList
-              data={segments}
-              renderItem={({ item, index }) => (
-                <RouteItem
-                  segment={item}
-                  color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
-                />
-              )}
-              keyExtractor={(item) => item.id}
-            />
-          )}
-        </View>
-      </BottomSheetScrollView>
+          </View>
+        }
+        renderItem={({ item, index }) => (
+          <RouteItem
+            segment={item}
+            color={TRANSPORTATION_COLORS[index % TRANSPORTATION_COLORS.length]}
+          />
+        )}
+        keyExtractor={(item) => item.id}
+      />
     </BottomSheet>
   );
 }
