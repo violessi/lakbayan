@@ -44,6 +44,7 @@ export default function RecentTrips() {
             const trip = tripData[journal.id];
             return (
               <TripCard
+                key={journal.id}
                 journal={journal}
                 trip={trip}
                 onPress={() => {
