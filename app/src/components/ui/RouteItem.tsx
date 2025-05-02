@@ -55,7 +55,7 @@ export default function RouteItem({ segment, color }: RouteItemProps) {
           </View>
         </View>
 
-        <View className="flex-row gap-7 items-start">
+        <View className="flex-row gap-7 items-start pb-5">
           <View className="w-3/12 flex-col justify-end gap-3">
             <View className="flex flex-col gap-1">
               <Text className="text-xs uppercase text-secondary" style={{ textAlign: "right" }}>
@@ -71,9 +71,39 @@ export default function RouteItem({ segment, color }: RouteItemProps) {
           <View className="w-3/12 flex-row items-center"></View>
         </View>
 
-        <Text className="text-secondary text-md" style={{ textAlign: "center" }}>
-          {segment.landmark}
-        </Text>
+        {segment.landmark && (
+          <View className="flex-row gap-7 items-start">
+            <View className="w-3/12 flex-col justify-end gap-3">
+              <View className="flex flex-col gap-1">
+                <Text className="text-xs uppercase text-secondary" style={{ textAlign: "right" }}>
+                  Landmark
+                </Text>
+              </View>
+            </View>
+            <View className="w-6/12 flex-col justify-end gap-3">
+              <View className="flex flex-col gap-1">
+                <Text className="font-medium text-sm">{segment.landmark}</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {segment.instruction && (
+          <View className="flex-row gap-7 items-start">
+            <View className="w-3/12 flex-col justify-end gap-3">
+              <View className="flex flex-col gap-1">
+                <Text className="text-xs uppercase text-secondary" style={{ textAlign: "right" }}>
+                  Instruction
+                </Text>
+              </View>
+            </View>
+            <View className="w-6/12 flex-col justify-end gap-3">
+              <View className="flex flex-col gap-1">
+                <Text className="font-medium text-sm">{segment.instruction}</Text>
+              </View>
+            </View>
+          </View>
+        )}
       </View>
     </View>
   );

@@ -76,7 +76,7 @@ export default function TripSummary({
       </View>
       <BottomSheetFlatList
         data={segments}
-        contentContainerStyle={{ paddingHorizontal: 20, gap: 24, paddingBottom: 60 }}
+        contentContainerStyle={{ paddingHorizontal: 20, gap: 5, paddingBottom: 40 }}
         ListEmptyComponent={
           <View className="flex flex-row justify-center">
             <Text className="text-secondary mt-5">No transfers added yet.</Text>
