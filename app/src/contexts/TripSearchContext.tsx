@@ -47,15 +47,20 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
       const existingTrips = await fetchTripData(trip, 1500);
       const fullTrips = await appendWalkingSegments(user.id, existingTrips, trip);
       setSuggestedTrips(fullTrips);
-      applyFilters(filters);
+      applyFilters(filters, fullTrips);
     } catch (error) {
       console.error("[ERROR] Fetching suggester trips: ", error);
       throw new Error("Failed to fetch trips");
     }
   };
 
-  const applyFilters = ({ timeToLeave, sortBy, transportModes }: FilterState) => {
-    const filtered = suggestedTrips
+  const applyFilters = (
+    { timeToLeave, sortBy, transportModes }: FilterState,
+    fullTrips?: TripSearch[],
+  ) => {
+    const currTrip = fullTrips ?? suggestedTrips;
+
+    const filtered = currTrip
       .filter((trip) =>
         trip.segments.every(
           ({ segmentMode }) => segmentMode === "Walk" || transportModes.includes(segmentMode),
