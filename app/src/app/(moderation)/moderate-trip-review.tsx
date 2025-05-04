@@ -12,7 +12,10 @@ import TripSummary from "@components/search/TripSummary";
 import DirectionsLine from "@components/ui/DirectionsLine";
 
 import { TRANSPORTATION_COLORS } from "@constants/transportation-color";
+import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
 import { updateModerationStatus } from "@services/moderation-service";
+
+Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export default function ModerateTripReview() {
   const cameraRef = useRef<Camera>(null);

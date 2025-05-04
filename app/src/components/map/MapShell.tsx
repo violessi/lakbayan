@@ -7,8 +7,8 @@ import lineIcon from "@assets/status-colored-lines.png";
 import trafficIcon from "@assets/status-colored-traffic.png";
 import disruptionIcon from "@assets/status-colored-disruption.png";
 
-import { useEffect } from "react";
-import { useMapboxToken } from "@contexts/MapboxContext";
+import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
+Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 interface MapShellProps {
   children?: React.ReactNode;
@@ -37,10 +37,6 @@ export const MapShell = ({
 }: MapShellProps) => {
   const [hasLoaded, setHasLoaded] = React.useState(false);
   const finalCenter = center ?? [121.05, 14.63]; // Fallback to QC
-  const token = useMapboxToken();
-  useEffect(() => {
-    if (token) Mapbox.setAccessToken(token);
-  }, [token]);
 
   const handleMapLoaded = () => {
     if (cameraRef?.current && fitBounds) {
