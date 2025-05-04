@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { router } from "expo-router";
 import { SafeAreaView, View, Alert, BackHandler } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
@@ -101,14 +101,23 @@ export default function CustomTrip() {
     return () => backHandler.remove();
   });
 
+  const memoizedStart: [string | null, [number, number] | null] = useMemo(
+    () => [trip.startLocation ?? null, trip.startCoords ?? null],
+    [trip.startLocation, trip.startCoords],
+  );
+  const memoizedEnd: [string | null, [number, number] | null] = useMemo(
+    () => [trip.endLocation ?? null, trip.endCoords ?? null],
+    [trip.endLocation, trip.endCoords],
+  );
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header prevCallback={prevCallback} title="Custom Trips" />
 
       <View>
         <StartEndSearchBar
-          start={[trip.startLocation, trip.startCoords]}
-          end={[trip.endLocation, trip.endCoords]}
+          start={memoizedStart}
+          end={memoizedEnd}
           onStartChange={handleStartChange}
           onEndChange={handleEndChange}
         />
@@ -121,12 +130,12 @@ export default function CustomTrip() {
         handleMapPress={handlePress}
         handleUserLocation={handleUserLocation}
       >
-        {trip.startCoords &&
-        <SymbolMarker id="start-loc" label="Start" coordinates={trip.startCoords} />
-        }
-        {trip.endCoords &&
-        <SymbolMarker id="end-loc" label="Destination" coordinates={trip.endCoords} />
-        }
+        {trip.startCoords && (
+          <SymbolMarker id="start-loc" label="Start" coordinates={trip.startCoords} />
+        )}
+        {trip.endCoords && (
+          <SymbolMarker id="end-loc" label="Destination" coordinates={trip.endCoords} />
+        )}
       </MapShell>
 
       <View className="absolute bottom-0 z-50 flex flex-row gap-2 p-5 w-full justify-center">

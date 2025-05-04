@@ -6,8 +6,8 @@ dotenv.config();
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  slug: "lakbayan",
-  name: "lakbayan",
+  slug: "Lakbayan",
+  name: "Lakbayan",
   version: "1.0.0",
   orientation: "portrait",
   scheme: "myapp",
@@ -26,6 +26,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#ffffff",
     },
     package: "com.lakbayan",
+    icon: "./src/assets/splashscreen_logo.png",
   },
   web: {
     bundler: "metro",

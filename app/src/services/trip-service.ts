@@ -5,6 +5,7 @@ import {
   FullTripSchema,
   SegmentsSchema,
   LiveUpdatesSchema,
+  LiveUpdateTypeSchema,
 } from "types/schema";
 import {
   convertKeysToSnakeCase,
@@ -13,6 +14,7 @@ import {
   convertToMultiPointWKT,
   convertToLineStringWKT,
 } from "@utils/map-utils";
+import { groupBy } from "lodash";
 
 // Inserts a new trip record into the database
 export async function insertTrip(trip: CreateTrip): Promise<string> {
@@ -119,7 +121,7 @@ export async function fetchLatestTransitJournals(userId: string): Promise<Transi
       "transit_journals",
       ["*"],
       { user_id: userId },
-      { order_by: { column: "created_at", ascending: false }, limit: 15 } // Fetch more than 3 for deduplication
+      { order_by: { column: "created_at", ascending: false }, limit: 15 }, // Fetch more than 3 for deduplication
     );
 
     const formattedData = data.map(convertKeysToCamelCase);
@@ -230,6 +232,29 @@ export async function fetchLiveUpdatesLine(line: Coordinates[], distance: number
   }
 }
 
+type HasHistory = Record<LiveUpdateType, boolean>;
+
+export async function fetchLiveUpdatesHistory(line: Coordinates[], distance: number) {
+  try {
+    const args = { line: convertToLineStringWKT(line), distance };
+    const res = await fetchDataRPC("fetch_live_updates_history", args);
+
+    // Validate the response data
+    const result = LiveUpdatesSchema.safeParse(res);
+    if (!result.success) throw new Error("Invalid Live Update Data");
+
+    const byType = groupBy(result.data, (update) => update.type);
+    const updated = Object.entries(byType).reduce((acc: HasHistory, [key, value]) => {
+      acc[key as LiveUpdateType] = value.length > 0;
+      return acc;
+    }, {} as HasHistory);
+
+    return updated;
+  } catch (error) {
+    throw new Error("Error fetching live updates");
+  }
+}
+
 // Updates the profile record
 export async function updateProfile(profile: Partial<Profile>): Promise<void> {
   try {
@@ -249,7 +274,10 @@ export async function updateTransitJournal(transitJournal: Partial<TransitJourna
   }
 }
 
-export async function incrementSegmentGPSCount(segmentIds: string[], toVerify: Boolean): Promise<void> {
+export async function incrementSegmentGPSCount(
+  segmentIds: string[],
+  toVerify: Boolean,
+): Promise<void> {
   try {
     const segments = await fetchSegments(segmentIds);
     const payload = segments.map((segment) => ({
