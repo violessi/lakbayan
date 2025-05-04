@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
 import { debounce } from "lodash";
 import { expandBoundingBox } from "@utils/map-utils";
-import { fetchLiveUpdatesBBox, fetchLiveUpdatesLine } from "@services/trip-service";
+import {
+  fetchLiveUpdatesBBox,
+  fetchLiveUpdatesHistory,
+  fetchLiveUpdatesLine,
+} from "@services/trip-service";
 import { type SymbolSourceRef } from "@components/map/SymbolSource";
 
 export const useLiveUpdates = (type: "box" | "line", interval: number) => {
@@ -23,9 +27,14 @@ export const useLiveUpdates = (type: "box" | "line", interval: number) => {
       const data = await fetchLiveUpdatesBBox(searchBounds);
       symbolRef.current?.update(data);
     } else if (type === "line") {
-      const data = await fetchLiveUpdatesLine(coordinates, 100);
+      const data = await fetchLiveUpdatesLine(coordinates, 20);
       symbolRef.current?.update(data);
     }
+  };
+
+  const fetchHistory = async (coordinates: Coordinates[], set: ({}) => void) => {
+    const res = await fetchLiveUpdatesHistory(coordinates, 20);
+    set(res);
   };
 
   // This function is used to update the live status
@@ -46,5 +55,5 @@ export const useLiveUpdates = (type: "box" | "line", interval: number) => {
     };
   }, []);
 
-  return { symbolRef, updateLiveStatus };
+  return { symbolRef, updateLiveStatus, fetchHistory };
 };
