@@ -1,10 +1,26 @@
-import { MAPBOX_ACCESS_TOKEN } from "@utils/mapbox-config";
-
 import { supabaseUrl } from "@utils/supabase";
+import { getCurrentMapboxToken } from "@contexts/MapboxContext";
+
+// Cache the token after the first successful read
+let cachedToken: string | null = null;
 
 const BASE_URL = "https://api.mapbox.com";
 
 let debounceTimer: NodeJS.Timeout;
+
+function getAccessToken(): string {
+  if (cachedToken) return cachedToken;
+
+  const token = getCurrentMapboxToken();
+  if (!token) {
+    throw new Error(
+      "Mapbox access token not yet available – ensure MapboxTokenProvider has finished loading.",
+    );
+  }
+
+  cachedToken = token;
+  return token;
+}
 
 export async function fetchSuggestions(query: string): Promise<any[]> {
   return new Promise((resolve) => {
@@ -48,6 +64,8 @@ export async function getDirections(
   transportationMode: string,
   includeSteps: boolean = false, // Default: false
 ): Promise<{ routes: MapboxDirectionsResponse["routes"]; waypoints: any; steps?: string[] }> {
+  const MAPBOX_ACCESS_TOKEN = getAccessToken();
+
   let mode = transportationMode === "Walk" ? "walking" : "driving"; // Mapbox only supports specific modes
   const coordinates = [
     `${start[0]},${start[1]}`,
@@ -95,6 +113,8 @@ export function paraphraseStep(instruction: string): string {
 }
 
 export async function getDistanceDuration(start: Coordinates, end: Coordinates) {
+  const MAPBOX_ACCESS_TOKEN = getAccessToken();
+
   const coordinates = [`${start[0]},${start[1]}`, `${end[0]},${end[1]}`].join(";");
 
   const response = await fetch(
@@ -110,6 +130,8 @@ export async function getDistanceDuration(start: Coordinates, end: Coordinates) 
 }
 
 export async function reverseGeocode(coordinates: Coordinates) {
+  const MAPBOX_ACCESS_TOKEN = getAccessToken();
+
   try {
     const response = await fetch(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${MAPBOX_ACCESS_TOKEN}`,
