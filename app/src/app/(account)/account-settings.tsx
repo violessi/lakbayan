@@ -11,12 +11,24 @@ import PrimaryButton from "@components/ui/PrimaryButton";
 
 export default function AccountSettings() {
   const router = useRouter();
-  const { user, username, setUsername } = useSession();
-  const { originalUsername, loading, handleUpdateProfile } = useAccountSettings();
+  const { user, setUsername: setUsernameContext } = useSession();
+  const {
+    username,
+    setUsername: setUsernameLocal,
+    originalUsername,
+    loading,
+    handleUpdateProfile,
+  } = useAccountSettings();
 
   function prevCallback() {
     router.replace("/(tabs)/account");
   }
+
+  // Keep local draft in sync and also push to session context
+  const handleUsernameChange = (value: string) => {
+    setUsernameLocal(value); // updates the input instantly
+    setUsernameContext(value); // persist draft to context (and DB via SessionContext)
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -45,7 +57,7 @@ export default function AccountSettings() {
               <OutlinedTextInput
                 label="Username"
                 value={username || ""}
-                onChangeText={setUsername}
+                onChangeText={handleUsernameChange}
                 testID="username"
               />
             </View>
