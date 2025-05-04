@@ -9,6 +9,7 @@ import PrimaryButton from "@components/ui/PrimaryButton";
 
 import { supabase } from "@utils/supabase";
 import { createUserProfile, checkUsernameExists } from "@services/account-service";
+import { useSession } from "@contexts/SessionContext";
 
 const back = require("@assets/left-arrow.png");
 
@@ -24,6 +25,7 @@ const signUpSchema = z.object({
 
 export default function SignUp() {
   const router = useRouter();
+  const { setUsername } = useSession();
 
   const [form, setForm] = useState({ username: "", email: "", password: "", isCommuter: false });
   const [loading, setLoading] = useState(false);
@@ -74,6 +76,8 @@ export default function SignUp() {
 
     try {
       await createUserProfile(user.id, form.username, form.isCommuter);
+      // Update global session context so other components can see the new username right away
+      setUsername(form.username);
       Alert.alert("Sign-up successful!");
     } catch (err) {
       let errorMessage = "An unknown error occurred.";
