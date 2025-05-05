@@ -53,7 +53,11 @@ export default function FilterSearch({ sheetRef, filters, applyFilters }: Props)
       index={-1}
       enablePanDownToClose
       onClose={() => {
-        if (!hasAppliedRef.current) handleApplyFilters();
+        if (!hasAppliedRef.current) {
+          setTimeToLeave(filters.timeToLeave);
+          setSortBy(filters.sortBy);
+          setSelectedModes(filters.transportModes);
+        }
         hasAppliedRef.current = false; // reset for next open
       }}
     >
