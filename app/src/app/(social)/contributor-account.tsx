@@ -18,6 +18,7 @@ import {
 
 import UserHeader from "@components/account/UserHeader";
 import TripPreview from "@components/ui/TripPreview";
+import { SourceDestinationTitle } from "@components/ui/SourceDestinationTitle";
 
 import { useUserTrips } from "@hooks/use-trip-data";
 
@@ -121,6 +122,10 @@ export default function ContributorAccount() {
                 keyExtractor={(trip) => trip.id}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => handleTripPress(item)}>
+                    <SourceDestinationTitle
+                      start={item.startLocation ?? ""}
+                      end={item.endLocation ?? ""}
+                    />
                     <TripPreview trip={item} />
                   </TouchableOpacity>
                 )}
