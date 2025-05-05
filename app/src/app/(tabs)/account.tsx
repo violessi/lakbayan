@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, SafeAreaView, View, Alert, ScrollView } from "react-native";
+import Constants from "expo-constants";
 
 import { logoutUser } from "@services/account-service";
 import { useSession } from "@contexts/SessionContext";
@@ -19,6 +20,9 @@ const todaIcon = require("@assets/transpo-tricycle.png");
 export default function Account() {
   const { user, username } = useSession();
   const { userRole, points, joinedDate, loading } = useAccountDetails(user?.id);
+
+  const appVersion =
+    Constants.expoConfig?.version ?? (Constants?.manifest as any)?.version ?? "dev";
 
   async function handleLogout() {
     try {
@@ -96,6 +100,7 @@ export default function Account() {
             )}
           </View>
           <SecondaryButton label="Log out" onPress={handleLogoutPress} />
+          <Text className="text-gray-500 text-center mt-4">Version {appVersion}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
