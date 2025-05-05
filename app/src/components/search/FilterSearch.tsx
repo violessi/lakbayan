@@ -20,6 +20,8 @@ export default function FilterSearch({ sheetRef, filters, applyFilters }: Props)
   const [sortBy, setSortBy] = useState(filters.sortBy);
   const [selectedModes, setSelectedModes] = useState(filters.transportModes);
 
+  const hasAppliedRef = React.useRef(false);
+
   // Toggle transport mode selection
   const toggleTransportMode = (mode: string) => {
     setSelectedModes((prev) =>
@@ -40,6 +42,7 @@ export default function FilterSearch({ sheetRef, filters, applyFilters }: Props)
     if (!isUnchanged) {
       applyFilters({ timeToLeave, sortBy, transportModes: selectedModes });
     }
+    hasAppliedRef.current = true; // <— mark as handled
     sheetRef.current?.close();
   };
 
@@ -49,7 +52,10 @@ export default function FilterSearch({ sheetRef, filters, applyFilters }: Props)
       snapPoints={snapPoints}
       index={-1}
       enablePanDownToClose
-      onClose={handleApplyFilters}
+      onClose={() => {
+        if (!hasAppliedRef.current) handleApplyFilters();
+        hasAppliedRef.current = false; // reset for next open
+      }}
     >
       <BottomSheetView className="flex flex-col px-5 pb-8 gap-3">
         <View className="flex-row items-center gap-2">
