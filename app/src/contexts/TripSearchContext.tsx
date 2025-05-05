@@ -58,6 +58,7 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
     { timeToLeave, sortBy, transportModes }: FilterState,
     fullTrips?: TripSearch[],
   ) => {
+    console.debug("[TripSearch] applyFilters ⇢", sortBy);
     const currTrip = fullTrips ?? suggestedTrips;
 
     const filtered = currTrip
@@ -68,7 +69,14 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
       )
       .sort(getSortFunction(sortBy));
 
-    setFilters({ timeToLeave, sortBy, transportModes });
+    // Only update global filters state if array is changed
+    if (
+      timeToLeave !== filters.timeToLeave ||
+      sortBy !== filters.sortBy ||
+      !arrayEqual(transportModes, filters.transportModes)
+    ) {
+      setFilters({ timeToLeave, sortBy, transportModes });
+    }
     setFilteredTrips(filtered);
   };
 
@@ -93,7 +101,10 @@ export const useTripSearch = (): TripSearchContextType => {
   return context;
 };
 
-// =================== Helper Functions ===================
+// Helper
+
+const arrayEqual = (a: any[], b: any[]) =>
+  a.length === b.length && a.every((item, idx) => item === b[idx]);
 
 // Sorting function
 const getSortFunction = (sortBy: string) => {
