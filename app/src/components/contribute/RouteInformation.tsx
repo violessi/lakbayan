@@ -93,7 +93,7 @@ export default function RouteInformation({
         </View>
         <View className="flex flex-row gap-2 p-5 mb-5 w-full justify-center">
           <PrimaryButtonOutline onPress={() => handleEditRoute()}>Edit Route</PrimaryButtonOutline>
-          <PrimaryButton label={"Submit Route"} onPress={() => handleSubmit()} />
+          <PrimaryButton label={"Submit Transfer"} onPress={() => handleSubmit()} />
         </View>
       </BottomSheetScrollView>
     </BottomSheet>
