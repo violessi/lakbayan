@@ -159,6 +159,7 @@ async function appendWalkingSegments(
         newTrip.startCoords = endpoints.startCoords;
         newTrip.segments.unshift(start);
         newTrip.preSegment = cleanStart;
+        newTrip.duration += start.duration;
       }
       if (end) {
         const { id, createdAt, updatedAt, ...cleanEnd } = end;
@@ -166,6 +167,7 @@ async function appendWalkingSegments(
         newTrip.endCoords = endpoints.endCoords;
         newTrip.segments.push(end);
         newTrip.postSegment = cleanEnd;
+        newTrip.duration += end.duration;
       }
 
       return newTrip;
