@@ -1,5 +1,5 @@
 import * as ExpoLocation from "expo-location";
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { AppState } from "react-native";
 import { Alert } from "react-native";
 
@@ -77,7 +77,9 @@ export const LocationProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, [permissionGranted]);
 
   return (
-    <LocationContext.Provider value={{ userLocation, permissionGranted, requestLocationPermission }}>
+    <LocationContext.Provider
+      value={{ userLocation, permissionGranted, requestLocationPermission }}
+    >
       {children}
     </LocationContext.Provider>
   );
@@ -88,16 +90,22 @@ export const useUserLocation = (): LocationContextType => {
   if (!context) {
     throw new Error("useLocation must be used within a LocationProvider");
   }
-  if (!context.permissionGranted){
-    Alert.alert(
-      "Location Permission Required",
-      "Lakbayan needs access to your location to function properly. Please go to your device's settings to enable it.",
-      [
-        {
-          text: "OK",
-        },
-      ],
-    );
-  }
+
+  // Show alert only the first time permission is seen as denied
+  const alertedRef = React.useRef(false);
+  useEffect(() => {
+    if (!context.permissionGranted && !alertedRef.current) {
+      Alert.alert(
+        "Location Permission Required",
+        "Lakbayan needs access to your location to function properly. Please enable it in Settings.",
+        [{ text: "OK" }],
+      );
+      alertedRef.current = true;
+    }
+    if (context.permissionGranted) {
+      alertedRef.current = false; // reset so we can alert again if user revokes later
+    }
+  }, [context.permissionGranted]);
+
   return context;
 };
