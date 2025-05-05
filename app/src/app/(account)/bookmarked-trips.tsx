@@ -6,7 +6,7 @@ import {
   ActivityIndicator,
   Text,
   TouchableOpacity,
-  BackHandler
+  BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
@@ -33,7 +33,7 @@ export default function BookmarkedTrips() {
       postSegment: null,
     };
 
-    router.push({
+    router.replace({
       pathname: "/(search)/3-trip-overview",
       params: { tripData: JSON.stringify(tripSearch), from: "bookmarked-trips" },
     });
@@ -51,10 +51,7 @@ export default function BookmarkedTrips() {
         return true;
       };
 
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        backAction,
-      );
+      const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
       return () => backHandler.remove();
     }, []),

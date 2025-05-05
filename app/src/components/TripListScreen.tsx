@@ -28,7 +28,7 @@ export default function TripListScreen({
   const router = useRouter();
 
   function handleTripPress(trip: TripSearch) {
-    router.push({
+    router.replace({
       pathname: "/(search)/3-trip-overview",
       params: { tripData: JSON.stringify(trip) },
     });
