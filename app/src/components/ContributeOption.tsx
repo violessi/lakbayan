@@ -14,7 +14,7 @@ interface OptionProps {
 const Option = ({ title, description, link, icon }: OptionProps) => {
   return (
     <TouchableOpacity
-      onPress={() => router.push(link)}
+      onPress={() => router.replace(link)}
       className="flex-row items-center justify-between mx-4 border-b border-gray-200 py-6"
     >
       <View className="flex-row justify-between items-center w-full">

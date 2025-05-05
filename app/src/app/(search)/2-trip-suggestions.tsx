@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "expo-router";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Text, SafeAreaView, View, Pressable } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 
 import Header from "@components/ui/Header";
 import TripPreview from "@components/ui/TripPreview";
@@ -47,9 +46,10 @@ export default function SuggestedTrips() {
     }
   }, []);
 
-  const handleSelectTrip = (trip: TripSearch) => {
+  const handleSelectTrip = (trip: TripSearch, index: number) => {
     setTrip(trip);
-    router.push("/(search)/3-trip-overview");
+    console.log(`Selected trip: ${trip.id} with index ${index}`);
+    router.replace("/(search)/3-trip-overview");
   };
 
   const handleOpenFilters = () => filterSheetRef.current?.snapToIndex(1);
@@ -70,10 +70,11 @@ export default function SuggestedTrips() {
         </View>
       ) : (
         <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
-          {filteredTrips.map((trip) => (
+          {filteredTrips.map((trip, index) => (
             <Pressable
               key={`${trip.id}-${filters.timeToLeave}`}
-              onPress={() => handleSelectTrip(trip)}
+              onPress={() => handleSelectTrip(trip, index)}
+              android_ripple={{ color: "#ccc" }}
             >
               <TripPreview trip={trip} timeToLeave={filters.timeToLeave} />
             </Pressable>
