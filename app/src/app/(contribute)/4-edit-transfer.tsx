@@ -40,6 +40,9 @@ export default function RouteInput() {
   const [isEditingWaypoint, setIsEditingWaypoints] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  console.log("Trip name", trip.name);
+  console.log("Route name", route.segmentName);
+
   // Calculate route on initial load for better UX
   useEffect(() => {
     if (!isEditingWaypoint && customWaypoints.length === 0) {
@@ -90,6 +93,7 @@ export default function RouteInput() {
       setSubmitting(false);
       return;
     }
+    console.log("Submitted route name: ", route.segmentName);
     try {
       await addSegment();
       clearRouteData();
@@ -169,6 +173,7 @@ export default function RouteInput() {
         sheetRef={bottomSheetRef}
         handleSubmit={handleSubmit}
         setIsEditingWaypoints={setIsEditingWaypoints}
+        isEditing={editingIndex !== -1}
       />
     </SafeAreaView>
   );

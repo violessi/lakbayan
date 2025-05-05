@@ -39,6 +39,8 @@ export default function TripReview() {
     submitTrip,
   } = useTripCreator();
   if (!user) throw new Error("User must be logged in to create a trip!");
+  console.log("Trips", trip);
+  console.log("Segments: ", segments);
 
   const handleCreateSegment = async () => {
     clearRouteData();

@@ -14,29 +14,25 @@ interface RouteInformationProps {
   sheetRef: React.RefObject<BottomSheet>;
   handleSubmit: () => void;
   setIsEditingWaypoints: React.Dispatch<React.SetStateAction<boolean>>;
+  isEditing: boolean;
 }
 
 export default function RouteInformation({
   sheetRef,
   handleSubmit,
   setIsEditingWaypoints,
+  isEditing = false,
 }: RouteInformationProps) {
   const { route, updateRoute } = useTripCreator();
 
   React.useEffect(() => {
-    console.log(
-      "[RouteInformation] route.segmentMode route.segmentName",
-      route.segmentMode,
-      route.segmentName,
-    );
-    if (route.segmentMode === "Walk") {
-      updateRoute({ segmentName: `Walk from ${route.startLocation} to ${route.endLocation}` });
-    } else if (route.segmentName.toLowerCase().includes("walk")) {
-      updateRoute({ segmentName: "" });
-    } else {
-      updateRoute({ segmentName: route.segmentName });
+    if (route.segmentMode === "Walk" && !isEditing) {
+      const defaultWalkName = `Walk from ${route.startLocation} to ${route.endLocation}`;
+      if (!route.segmentName || route.segmentName.startsWith("Walk from")) {
+        updateRoute({ segmentName: defaultWalkName });
+      }
     }
-  }, [route.segmentMode]);
+  }, [route.segmentMode, route.startLocation, route.endLocation]);
 
   const handleEditRoute = () => {
     setIsEditingWaypoints(true);
