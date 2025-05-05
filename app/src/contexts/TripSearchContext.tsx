@@ -1,4 +1,4 @@
-import React, { createContext, useState, ReactNode } from "react";
+import React, { createContext, useState, useCallback, ReactNode } from "react";
 import { getDirections, paraphraseStep } from "@services/mapbox-service";
 
 import { isNearLocation } from "@utils/map-utils";
@@ -54,31 +54,23 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const applyFilters = (
-    { timeToLeave, sortBy, transportModes }: FilterState,
-    fullTrips?: TripSearch[],
-  ) => {
-    console.debug("[TripSearch] applyFilters ⇢", sortBy);
-    const currTrip = fullTrips ?? suggestedTrips;
+  const applyFilters = useCallback(
+    ({ timeToLeave, sortBy, transportModes }: FilterState, fullTrips?: TripSearch[]) => {
+      console.debug("[TripSearch] applyFilters ⇢", sortBy);
+      const currTrip = fullTrips ?? suggestedTrips;
 
-    const filtered = currTrip
-      .filter((trip) =>
-        trip.segments.every(
-          ({ segmentMode }) => segmentMode === "Walk" || transportModes.includes(segmentMode),
-        ),
-      )
-      .sort(getSortFunction(sortBy));
+      const filtered = [...currTrip]
+        .filter((trip) =>
+          trip.segments.every(
+            ({ segmentMode }) => segmentMode === "Walk" || transportModes.includes(segmentMode),
+          ),
+        )
+        .sort(getSortFunction(sortBy));
 
-    // Only update global filters state if array is changed
-    if (
-      timeToLeave !== filters.timeToLeave ||
-      sortBy !== filters.sortBy ||
-      !arrayEqual(transportModes, filters.transportModes)
-    ) {
-      setFilters({ timeToLeave, sortBy, transportModes });
-    }
-    setFilteredTrips(filtered);
-  };
+      setFilteredTrips(filtered);
+    },
+    [suggestedTrips, filters],
+  );
 
   const value = {
     tripEndpoints,
@@ -105,6 +97,8 @@ export const useTripSearch = (): TripSearchContextType => {
 
 const arrayEqual = (a: any[], b: any[]) =>
   a.length === b.length && a.every((item, idx) => item === b[idx]);
+
+const dateEqual = (a: Date, b: Date) => a.getTime() === b.getTime();
 
 // Sorting function
 const getSortFunction = (sortBy: string) => {
