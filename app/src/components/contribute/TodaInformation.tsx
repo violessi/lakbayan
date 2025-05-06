@@ -41,9 +41,17 @@ interface TodaStopsProps {
   coordinates: Coordinates | null;
   onNewStopAdded: () => void;
   onFormChange?: (form: { todaName: string; color: string; landmark: string }) => void;
+  setIsSubmitting?: React.Dispatch<React.SetStateAction<boolean>>;
+  isSubmitting?: boolean;
 }
 
-export default function TodaStops({ coordinates, onNewStopAdded, onFormChange }: TodaStopsProps) {
+export default function TodaStops({
+  coordinates,
+  onNewStopAdded,
+  onFormChange,
+  setIsSubmitting,
+  isSubmitting,
+}: TodaStopsProps) {
   const { user } = useSession();
   const [form, setForm] = useState({ todaName: "", color: "", landmark: "" });
   const [dialogVisible, setDialogVisible] = useState(false);
@@ -60,8 +68,10 @@ export default function TodaStops({ coordinates, onNewStopAdded, onFormChange }:
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting?.(true);
     if (!coordinates) {
       Alert.alert("No pins set!", "Please select a location on the map.");
+      setIsSubmitting?.(false);
       return;
     }
 
@@ -97,8 +107,10 @@ export default function TodaStops({ coordinates, onNewStopAdded, onFormChange }:
       Alert.alert("Success!", "TODA stop information submitted successfully!");
       resetForm();
       onNewStopAdded();
+      setIsSubmitting?.(false);
     } catch (error: any) {
       console.error("Error submitting TODA stop:", error);
+      setIsSubmitting?.(false);
       Alert.alert("Submission failed", "Something went wrong. Please try again.");
     }
   };
@@ -132,7 +144,7 @@ export default function TodaStops({ coordinates, onNewStopAdded, onFormChange }:
               />
             </View>
           </View>
-          <PrimaryButton label="Submit" onPress={handleSubmit} />
+          <PrimaryButton label="Submit" onPress={handleSubmit} disabled={isSubmitting} />
         </View>
         <Portal>
           <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)}>
