@@ -59,7 +59,7 @@ export default function SearchTrip() {
     }
     try {
       await fetchSuggestedTrips();
-      router.push("/(search)/2-trip-suggestions");
+      router.replace("/(search)/2-trip-suggestions");
     } catch (error) {
       Alert.alert("Error fetching trips. Please try again.");
     }

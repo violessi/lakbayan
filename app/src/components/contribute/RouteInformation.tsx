@@ -14,24 +14,25 @@ interface RouteInformationProps {
   sheetRef: React.RefObject<BottomSheet>;
   handleSubmit: () => void;
   setIsEditingWaypoints: React.Dispatch<React.SetStateAction<boolean>>;
+  isEditing: boolean;
 }
 
 export default function RouteInformation({
   sheetRef,
   handleSubmit,
   setIsEditingWaypoints,
+  isEditing = false,
 }: RouteInformationProps) {
   const { route, updateRoute } = useTripCreator();
 
   React.useEffect(() => {
-    if (route.segmentMode === "Walk" && !route.segmentName.toLowerCase().includes("walk")) {
-      updateRoute({ segmentName: `Walk from ${route.startLocation} to ${route.endLocation}` });
-    } else if (route.segmentName.toLowerCase().includes("walk")) {
-      updateRoute({ segmentName: "" });
-    } else {
-      updateRoute({ segmentName: route.segmentName });
+    if (route.segmentMode === "Walk" && !isEditing) {
+      const defaultWalkName = `Walk from ${route.startLocation} to ${route.endLocation}`;
+      if (!route.segmentName || route.segmentName.startsWith("Walk from")) {
+        updateRoute({ segmentName: defaultWalkName });
+      }
     }
-  }, [route.segmentMode]);
+  }, [route.segmentMode, route.startLocation, route.endLocation]);
 
   const handleEditRoute = () => {
     setIsEditingWaypoints(true);
@@ -88,7 +89,7 @@ export default function RouteInformation({
         </View>
         <View className="flex flex-row gap-2 p-5 mb-5 w-full justify-center">
           <PrimaryButtonOutline onPress={() => handleEditRoute()}>Edit Route</PrimaryButtonOutline>
-          <PrimaryButton label={"Submit Route"} onPress={() => handleSubmit()} />
+          <PrimaryButton label={"Submit Transfer"} onPress={() => handleSubmit()} />
         </View>
       </BottomSheetScrollView>
     </BottomSheet>

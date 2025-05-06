@@ -27,7 +27,7 @@ export default function RecentTrips() {
       postSegment: null,
     };
 
-    router.push({
+    router.replace({
       pathname: "/(search)/3-trip-overview",
       params: { tripData: JSON.stringify(tripSearch), from: "recent-trips" },
     });
@@ -49,7 +49,7 @@ export default function RecentTrips() {
                 trip={trip}
                 onPress={() => {
                   if (journal.status === "ongoing") {
-                    router.push("/(journal)/transit-journal");
+                    router.replace("/(journal)/transit-journal");
                   } else if (trip) {
                     handleTripPress(trip);
                   }

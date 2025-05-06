@@ -42,7 +42,7 @@ export function TodaMarkerModal({
         <Pressable style={styles.modalContent} onPress={() => {}}>
           <View className="flex items-center gap-2">
             <View className="flex flex-row items-center justify-between w-full">
-              <Text className="text-lg font-bold">{stop.name} TODA</Text>
+              <Text className="text-lg font-bold">{stop.name}</Text>
               <View className="flex flex-row items-center gap-1">
                 <Image source={modVerificationIcon} style={{ width: 15, height: 15 }} />
                 <Text className="text-md text-gray-600">{modVerifications} </Text>

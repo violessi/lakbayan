@@ -18,7 +18,7 @@ export default function Index() {
   const { symbolRef, updateLiveStatus } = useLiveUpdates("box", 10);
 
   const handleTextInputFocus = () => {
-    router.push("/(search)/1-search-trip");
+    router.replace("/(search)/1-search-trip");
   };
 
   const handleCameraChange = (state: MapBoxMapState) => {

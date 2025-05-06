@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { router } from "expo-router";
 import { SafeAreaView, View, Alert, BackHandler } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
@@ -54,13 +55,18 @@ export default function RouteSelectInfo() {
     return () => backHandler.remove();
   });
 
+  const memoizedEnd: [string | null, [number, number] | null] = useMemo(
+    () => [route.endLocation ?? null, route.endCoords ?? null],
+    [route.endLocation, route.endCoords],
+  );
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Header prevCallback={prevCallback} title="Route Information" />
       <StartEndSearchBar
         isStartActive={false}
         start={[route.startLocation, route.endCoords]}
-        end={[route.endLocation, route.endCoords]}
+        end={memoizedEnd}
         onEndChange={(l, c) => handleEndChange(c, l)}
       />
       <MapShell

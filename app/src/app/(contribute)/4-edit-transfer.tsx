@@ -90,6 +90,7 @@ export default function RouteInput() {
       setSubmitting(false);
       return;
     }
+    console.log("Submitted route name: ", route.segmentName);
     try {
       await addSegment();
       clearRouteData();
@@ -169,6 +170,7 @@ export default function RouteInput() {
         sheetRef={bottomSheetRef}
         handleSubmit={handleSubmit}
         setIsEditingWaypoints={setIsEditingWaypoints}
+        isEditing={editingIndex !== -1}
       />
     </SafeAreaView>
   );

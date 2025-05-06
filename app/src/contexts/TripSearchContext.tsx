@@ -1,4 +1,4 @@
-import React, { createContext, useState, ReactNode } from "react";
+import React, { createContext, useState, useCallback, ReactNode } from "react";
 import { getDirections, paraphraseStep } from "@services/mapbox-service";
 
 import { isNearLocation } from "@utils/map-utils";
@@ -33,9 +33,25 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
 
   const [trip, setTrip] = useState<TripSearch | null>(null);
   const [filters, setFilters] = useState(FILTER_INITIAL_STATE);
-  const [filteredTrips, setFilteredTrips] = useState<TripSearch[]>([]);
   const [suggestedTrips, setSuggestedTrips] = useState<TripSearch[]>([]);
   const [tripEndpoints, setTripEndpoints] = useState<Partial<TripEndpoints>>({});
+
+  const filteredTrips = React.useMemo(() => {
+    const { timeToLeave, sortBy, transportModes } = filters;
+    console.debug(
+      "[TripSearch] recompute filteredTrips ⇒ sortBy:",
+      sortBy,
+      "count:",
+      suggestedTrips.length,
+    );
+    return [...suggestedTrips]
+      .filter((trip) =>
+        trip.segments.every(
+          ({ segmentMode }) => segmentMode === "Walk" || transportModes.includes(segmentMode),
+        ),
+      )
+      .sort(getSortFunction(sortBy));
+  }, [suggestedTrips, filters]);
 
   const updateTripEndpoints = (details: Partial<TripEndpoints>) => {
     setTripEndpoints((prev) => ({ ...prev, ...details }));
@@ -47,30 +63,26 @@ export function TripSearchProvider({ children }: { children: ReactNode }) {
       const existingTrips = await fetchTripData(trip, 1500);
       const fullTrips = await appendWalkingSegments(user.id, existingTrips, trip);
       setSuggestedTrips(fullTrips);
-      applyFilters(filters, fullTrips);
     } catch (error) {
       console.error("[ERROR] Fetching suggester trips: ", error);
       throw new Error("Failed to fetch trips");
     }
   };
 
-  const applyFilters = (
-    { timeToLeave, sortBy, transportModes }: FilterState,
-    fullTrips?: TripSearch[],
-  ) => {
-    const currTrip = fullTrips ?? suggestedTrips;
-
-    const filtered = currTrip
-      .filter((trip) =>
-        trip.segments.every(
-          ({ segmentMode }) => segmentMode === "Walk" || transportModes.includes(segmentMode),
-        ),
-      )
-      .sort(getSortFunction(sortBy));
-
-    setFilters({ timeToLeave, sortBy, transportModes });
-    setFilteredTrips(filtered);
-  };
+  const applyFilters = useCallback(
+    ({ timeToLeave, sortBy, transportModes }: FilterState) => {
+      // Only update if something actually changed
+      if (
+        !dateEqual(timeToLeave, filters.timeToLeave) ||
+        sortBy !== filters.sortBy ||
+        !arrayEqual(transportModes, filters.transportModes)
+      ) {
+        console.debug("[TripSearch] setFilters", { timeToLeave, sortBy, transportModes });
+        setFilters({ timeToLeave, sortBy, transportModes });
+      }
+    },
+    [filters],
+  );
 
   const value = {
     tripEndpoints,
@@ -93,7 +105,12 @@ export const useTripSearch = (): TripSearchContextType => {
   return context;
 };
 
-// =================== Helper Functions ===================
+// Helper
+
+const arrayEqual = (a: any[], b: any[]) =>
+  a.length === b.length && a.every((item, idx) => item === b[idx]);
+
+const dateEqual = (a: Date, b: Date) => a.getTime() === b.getTime();
 
 // Sorting function
 const getSortFunction = (sortBy: string) => {
@@ -142,6 +159,7 @@ async function appendWalkingSegments(
         newTrip.startCoords = endpoints.startCoords;
         newTrip.segments.unshift(start);
         newTrip.preSegment = cleanStart;
+        newTrip.duration += start.duration;
       }
       if (end) {
         const { id, createdAt, updatedAt, ...cleanEnd } = end;
@@ -149,6 +167,7 @@ async function appendWalkingSegments(
         newTrip.endCoords = endpoints.endCoords;
         newTrip.segments.push(end);
         newTrip.postSegment = cleanEnd;
+        newTrip.duration += end.duration;
       }
 
       return newTrip;

@@ -33,6 +33,7 @@ export default function TodaStops() {
   const [stops, setStops] = useState<StopData[]>([]);
   const [loadingStops, setLoadingStops] = useState(false);
   const [formSnapshot, setFormSnapshot] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadStops = async () => {
     setLoadingStops(true);
@@ -114,7 +115,15 @@ export default function TodaStops() {
         coordinates={coordinates}
         onNewStopAdded={loadStops}
         onFormChange={(form) => setFormSnapshot(JSON.stringify(form))}
+        setIsSubmitting={setIsSubmitting}
+        isSubmitting={isSubmitting}
       />
+      {isSubmitting && (
+        <View className="absolute inset-0 bg-black/50 justify-center items-center z-50">
+          <ActivityIndicator size="large" color="#fff" />
+          <Text className="text-lg text-white">Submitting TODA stop, please wait...</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }

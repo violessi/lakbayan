@@ -8,6 +8,7 @@ import { getComments, addComment } from "@services/socials-service";
 import Header from "@components/ui/Header";
 import CommentItem from "@components/ui/CommentItem";
 import PrimaryButton from "@components/ui/PrimaryButton";
+import { set } from "lodash";
 
 export default function CommentsList() {
   const { user } = useSession();
@@ -18,6 +19,7 @@ export default function CommentsList() {
   const [comments, setComments] = useState<CommentData[]>([]);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchComments() {
@@ -36,14 +38,19 @@ export default function CommentsList() {
   }, [tripId]);
 
   const handleCommentSubmit = async () => {
-    if (!content.trim()) return;
-
+    setIsSubmitting(true);
+    if (!content.trim()) {
+      setIsSubmitting(false);
+      return;
+    }
     try {
       await addComment(tripId, user?.id || "", content, isGpsVerified);
       const updatedComments = await getComments(tripId);
       setComments(updatedComments || []);
       setContent("");
+      setIsSubmitting(false);
     } catch (error) {
+      setIsSubmitting(false);
       console.error("Error adding comment:", error);
     }
   };
@@ -84,7 +91,11 @@ export default function CommentsList() {
             className="flex-1 border border-gray-200 rounded-lg px-3"
             testID="comment-input"
           />
-          <PrimaryButton label="Post" onPress={handleCommentSubmit} />
+          <PrimaryButton
+            label="Post"
+            onPress={handleCommentSubmit}
+            disabled={isSubmitting || !content}
+          />
         </View>
       </View>
     </SafeAreaView>

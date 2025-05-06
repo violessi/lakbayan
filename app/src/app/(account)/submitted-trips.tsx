@@ -25,7 +25,7 @@ export default function SubmittedTrips() {
   const { submittedTrips, loading } = useSubmittedTrips(user?.id || null);
 
   function handleTripPress(trip: TripSearch) {
-    router.push({
+    router.replace({
       pathname: "/(search)/3-trip-overview",
       params: { tripData: JSON.stringify(trip), from: "submitted-trips" },
     });
@@ -43,10 +43,7 @@ export default function SubmittedTrips() {
         return true;
       };
 
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        backAction,
-      );
+      const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
       return () => backHandler.remove();
     }, []),
@@ -54,7 +51,7 @@ export default function SubmittedTrips() {
 
   return (
     <SafeAreaView className="flex-1">
-      <Header title="Submitted Trips" prevCallback={prevCallback}/>
+      <Header title="Submitted Trips" prevCallback={prevCallback} />
       <View className="flex-1 px-4">
         {loading ? (
           <ActivityIndicator size="small" testID="activity-indicator" />

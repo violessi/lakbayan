@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useState, useCallback } from "react";
-import { SafeAreaView, Alert, BackHandler } from "react-native";
+import { SafeAreaView, Alert, BackHandler, View, ActivityIndicator, Text } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 
 import Header from "@components/ui/Header";
@@ -26,7 +26,8 @@ export default function JournalReview() {
   const router = useRouter();
   const { user } = useSession();
   const { cameraRef } = useMapView();
-  const { trip, segments, transitJournal, rating, hasDeviated, setRating, setHasDeviated } = useTransitJournal();
+  const { trip, segments, transitJournal, rating, hasDeviated, setRating, setHasDeviated } =
+    useTransitJournal();
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,8 +40,14 @@ export default function JournalReview() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    if (!newComment.trim()) { setIsSubmitting(false); return; }
-    if (!trip || !segments || !user) { setIsSubmitting(false); return; }
+    if (!newComment.trim()) {
+      setIsSubmitting(false);
+      return;
+    }
+    if (!trip || !segments || !user) {
+      setIsSubmitting(false);
+      return;
+    }
 
     const journalPayload: Partial<TransitJournal> = {
       id: transitJournal.id,
@@ -56,7 +63,10 @@ export default function JournalReview() {
 
       // // if did not deviate, increment GPS count
       if (!Boolean(hasDeviated)) {
-        await incrementSegmentGPSCount(trip.segments.map(({ id }) => id), !Boolean(hasDeviated));
+        await incrementSegmentGPSCount(
+          trip.segments.map(({ id }) => id),
+          !Boolean(hasDeviated),
+        );
       }
       await updateTransitJournal(journalPayload);
       await updateProfile({ id: user.id, transitJournalId: null });
@@ -65,6 +75,7 @@ export default function JournalReview() {
       setIsSubmitting(false);
       router.replace("/(tabs)");
     } catch (error) {
+      setIsSubmitting(false);
       Alert.alert("Error", "Failed to submit your transit journal. Please try again.");
     }
   };
@@ -88,10 +99,7 @@ export default function JournalReview() {
         return true;
       };
 
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        backAction,
-      );
+      const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
       return () => backHandler.remove();
     }, []),
@@ -122,6 +130,13 @@ export default function JournalReview() {
         setHasDeviated={setHasDeviated}
         isSubmitting={isSubmitting}
       />
+
+      {isSubmitting && (
+        <View className="absolute inset-0 bg-black/50 justify-center items-center z-50">
+          <ActivityIndicator size="large" color="#fff" />
+          <Text className="text-lg text-white">Submitting trip, please wait...</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
