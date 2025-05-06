@@ -142,7 +142,7 @@ export default function TripReview() {
         <PrimaryButton
           label={isSegmentComplete ? "Submit" : "Add Transfers"}
           onPress={isSegmentComplete ? handleSubmitTrip : handleCreateSegment}
-          disabled={!isSubmitting}
+          disabled={isSubmitting}
         />
       </View>
 

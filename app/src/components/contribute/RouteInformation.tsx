@@ -26,11 +26,17 @@ export default function RouteInformation({
   const { route, updateRoute } = useTripCreator();
 
   React.useEffect(() => {
-    if (route.segmentMode === "Walk" && !isEditing) {
-      const defaultWalkName = `Walk from ${route.startLocation} to ${route.endLocation}`;
-      if (!route.segmentName || route.segmentName.startsWith("Walk from")) {
-        updateRoute({ segmentName: defaultWalkName });
-      }
+    console.log(
+      "[RouteInformation] route.segmentMode route.segmentName",
+      route.segmentMode,
+      route.segmentName,
+    );
+    if (route.segmentMode === "Walk") {
+      updateRoute({ segmentName: `Walk from ${route.startLocation} to ${route.endLocation}` });
+    } else if (route.segmentName.toLowerCase().includes("walk")) {
+      updateRoute({ segmentName: "" });
+    } else {
+      updateRoute({ segmentName: route.segmentName });
     }
   }, [route.segmentMode, route.startLocation, route.endLocation]);
 
