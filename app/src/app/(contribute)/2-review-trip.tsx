@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { router } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
-import { SafeAreaView, View, Alert, BackHandler } from "react-native";
+import { ActivityIndicator, SafeAreaView, View, Alert, Text, BackHandler } from "react-native";
 
 import Header from "@components/ui/Header";
 import LineSource from "@components/map/LineSource";
@@ -22,6 +22,7 @@ import {
   fetchSubmitLogId,
   deleteSubmitLog,
 } from "@services/logs-service";
+import { set } from "lodash";
 
 export default function TripReview() {
   const { user } = useSession();
@@ -38,9 +39,10 @@ export default function TripReview() {
     clearRouteData,
     submitTrip,
   } = useTripCreator();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   if (!user) throw new Error("User must be logged in to create a trip!");
-  console.log("Trips", trip);
-  console.log("Segments: ", segments);
 
   const handleCreateSegment = async () => {
     clearRouteData();
@@ -61,18 +63,20 @@ export default function TripReview() {
   };
 
   const handleSubmitTrip = async () => {
+    setIsSubmitting(true);
     try {
       await submitTrip();
-      Alert.alert("Trip Submitted", "Your trip has been submitted successfully!");
       const id = await fetchSubmitLogId({ userId: user.id });
       if (!id) {
         console.error("No submit log ID found.");
         return;
       }
-
       await updateSubmitLog({ id, status: "completed" });
+      Alert.alert("Trip Submitted", "Your trip has been submitted successfully!");
+      setIsSubmitting(false);
       router.replace("/(tabs)");
     } catch (error) {
+      setIsSubmitting(false);
       Alert.alert("Error", "Failed to submit your trip. Please try again.");
     }
   };
@@ -115,7 +119,7 @@ export default function TripReview() {
   });
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView className="flex-1 relative">
       <Header prevCallback={prevCallback} title="Trip Review" />
 
       <View className="flex justify-center items-center">
@@ -134,12 +138,20 @@ export default function TripReview() {
         deleteSegment={handleDeleteSegment}
       />
 
-      <View className="absolute bottom-0 z-50 p-5 w-full justify-center">
+      <View className="absolute bottom-0 p-5 w-full justify-center">
         <PrimaryButton
           label={isSegmentComplete ? "Submit" : "Add Transfers"}
           onPress={isSegmentComplete ? handleSubmitTrip : handleCreateSegment}
+          disabled={!isSubmitting}
         />
       </View>
+
+      {isSubmitting && (
+        <View className="absolute inset-0 bg-black/50 justify-center items-center z-50">
+          <ActivityIndicator size="large" color="#fff" />
+          <Text className="text-lg text-white">Submitting trip, please wait...</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }

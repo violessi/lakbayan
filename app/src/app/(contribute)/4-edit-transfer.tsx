@@ -40,9 +40,6 @@ export default function RouteInput() {
   const [isEditingWaypoint, setIsEditingWaypoints] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  console.log("Trip name", trip.name);
-  console.log("Route name", route.segmentName);
-
   // Calculate route on initial load for better UX
   useEffect(() => {
     if (!isEditingWaypoint && customWaypoints.length === 0) {
