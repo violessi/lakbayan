@@ -1,4 +1,5 @@
 # Lakbayan
+This is the repository for the mobile application developed as part of the thesis paper entitled **"Lakbayan: Developing a Crowdsourced Public Transportation Mobile Application"**.
 
 ## Get started
 
